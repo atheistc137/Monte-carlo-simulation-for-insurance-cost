@@ -1,0 +1,100 @@
+INFO: Calibrated GBM: mu=0.2866, sigma=0.4653
+INFO: Building surface lookup cache …
+WARNING: Tier 1 skipping 2022-04-04: No surface data on or before 2022-04-04 00:00:00
+WARNING: Tier 1 skipping 2022-04-11: No surface data on or before 2022-04-11 00:00:00
+WARNING: Tier 1 skipping 2022-04-18: No surface data on or before 2022-04-18 00:00:00
+WARNING: Tier 1 skipping 2022-04-25: No surface data on or before 2022-04-25 00:00:00
+WARNING: Tier 1 skipping 2022-05-02: No surface data on or before 2022-05-02 00:00:00
+WARNING: Tier 1 skipping 2022-05-09: No surface data on or before 2022-05-09 00:00:00
+WARNING: Tier 1 skipping 2022-05-16: No surface data on or before 2022-05-16 00:00:00
+WARNING: Tier 1 skipping 2022-05-23: No surface data on or before 2022-05-23 00:00:00
+WARNING: Tier 1 skipping 2022-05-30: No surface data on or before 2022-05-30 00:00:00
+WARNING: Tier 1 skipping 2022-06-06: No surface data on or before 2022-06-06 00:00:00
+WARNING: Tier 1 skipping 2022-06-13: No surface data on or before 2022-06-13 00:00:00
+WARNING: Tier 1 skipping 2022-06-20: No surface data on or before 2022-06-20 00:00:00
+WARNING: Tier 1 skipping 2022-06-27: No surface data on or before 2022-06-27 00:00:00
+WARNING: Tier 1 skipping 2022-07-04: No surface data on or before 2022-07-04 00:00:00
+WARNING: Tier 1 skipping 2022-07-11: No surface data on or before 2022-07-11 00:00:00
+WARNING: Tier 1 skipping 2022-07-18: No surface data on or before 2022-07-18 00:00:00
+WARNING: Tier 1 skipping 2022-07-25: No surface data on or before 2022-07-25 00:00:00
+WARNING: Tier 1 skipping 2022-08-01: No surface data on or before 2022-08-01 00:00:00
+WARNING: Tier 1 skipping 2022-08-08: No surface data on or before 2022-08-08 00:00:00
+WARNING: Tier 1 skipping 2022-08-15: No surface data on or before 2022-08-15 00:00:00
+WARNING: Tier 1 skipping 2022-08-22: No surface data on or before 2022-08-22 00:00:00
+WARNING: Tier 1 skipping 2022-08-29: No surface data on or before 2022-08-29 00:00:00
+WARNING: Tier 1 skipping 2022-09-05: No surface data on or before 2022-09-05 00:00:00
+WARNING: Tier 1 skipping 2022-09-12: No surface data on or before 2022-09-12 00:00:00
+WARNING: Tier 1 skipping 2022-09-19: No surface data on or before 2022-09-19 00:00:00
+WARNING: Tier 1 skipping 2022-09-26: No surface data on or before 2022-09-26 00:00:00
+WARNING: Tier 1 skipping 2022-10-03: No surface data on or before 2022-10-03 00:00:00
+WARNING: Tier 1 skipping 2022-10-10: No surface data on or before 2022-10-10 00:00:00
+WARNING: Tier 1 skipping 2022-10-17: No surface data on or before 2022-10-17 00:00:00
+WARNING: Tier 1 skipping 2022-10-24: No surface data on or before 2022-10-24 00:00:00
+WARNING: Tier 1 skipping 2022-10-31: No surface data on or before 2022-10-31 00:00:00
+WARNING: Tier 1 skipping 2022-11-07: No surface data on or before 2022-11-07 00:00:00
+WARNING: Tier 1 skipping 2022-11-14: No surface data on or before 2022-11-14 00:00:00
+WARNING: Tier 1 skipping 2022-11-21: No surface data on or before 2022-11-21 00:00:00
+WARNING: Tier 1 skipping 2022-11-28: No surface data on or before 2022-11-28 00:00:00
+WARNING: Tier 1 skipping 2022-12-05: No surface data on or before 2022-12-05 00:00:00
+WARNING: Tier 1 skipping 2022-12-12: No surface data on or before 2022-12-12 00:00:00
+WARNING: Tier 1 skipping 2022-12-19: No surface data on or before 2022-12-19 00:00:00
+WARNING: Tier 1 skipping 2022-12-26: No surface data on or before 2022-12-26 00:00:00
+WARNING: Tier 1 skipping 2023-01-02: No surface data on or before 2023-01-02 00:00:00
+WARNING: Tier 1 skipping 2023-01-09: No surface data on or before 2023-01-09 00:00:00
+WARNING: Tier 1 skipping 2023-01-16: No surface data on or before 2023-01-16 00:00:00
+WARNING: Tier 1 skipping 2023-01-23: No surface data on or before 2023-01-23 00:00:00
+WARNING: Tier 1 skipping 2023-01-30: No surface data on or before 2023-01-30 00:00:00
+WARNING: Tier 1 skipping 2023-02-06: No surface data on or before 2023-02-06 00:00:00
+WARNING: Tier 1 skipping 2023-02-13: No surface data on or before 2023-02-13 00:00:00
+WARNING: Tier 1 skipping 2023-02-20: No surface data on or before 2023-02-20 00:00:00
+WARNING: Tier 1 skipping 2023-02-27: No surface data on or before 2023-02-27 00:00:00
+WARNING: Tier 1 skipping 2023-03-06: No surface data on or before 2023-03-06 00:00:00
+WARNING: Tier 1 skipping 2023-03-13: No surface data on or before 2023-03-13 00:00:00
+WARNING: Tier 1 skipping 2023-03-20: No surface data on or before 2023-03-20 00:00:00
+WARNING: Tier 1 skipping 2023-03-27: No surface data on or before 2023-03-27 00:00:00
+INFO: Tier 1: 104 loans evaluated
+INFO: Saved 104 rows to result/rolldown_tier1_20260331.csv
+INFO: Tier 2: 53 start dates evaluated (100 paths each)
+INFO: Saved 53 rows to result/rolldown_tier2_20260331.csv
+INFO: Tier 3: 100 forward paths evaluated
+INFO: Saved 100 rows to result/rolldown_tier3_20260331.csv
+
+=== Tier 1: Pure Historical (104 loans, 2023-04-03 to 2025-03-24) ===
+  Avg initial PUT premium        : $4,341.59
+  Avg roll savings (cost reduct.): $2,398.46 (55.2% of premium)
+  Median roll savings            : $1,782.02
+  Range                          : $406.68 to $6,680.95
+  Avg rolls per loan             : 3.6
+  % loans where rolling helped   : 100.0%
+  ---
+  Avg terminal payoff (static)   : $0.28
+  Avg terminal payoff (rolling)  : $0.00
+  Avg terminal delta             : $-0.28
+  Avg full economic delta        : $2,398.18 (55.2% of premium)
+
+=== Tier 2: Recent + Simulated (53 loans, 2025-03-31 to 2026-03-30) ===
+  Avg initial PUT premium        : $5,380.92
+  Avg roll savings (cost reduct.): $6,370.35 (118.4% of premium)
+  Median roll savings            : $6,025.52
+  Range                          : $1,944.10 to $15,647.68
+  Avg rolls per loan             : 6.7
+  % loans where rolling helped   : 100.0%
+  ---
+  Avg terminal payoff (static)   : $6,797.60
+  Avg terminal payoff (rolling)  : $0.00
+  Avg terminal delta             : $-6,797.60
+  Avg full economic delta        : $-427.25 (-7.9% of premium)
+
+=== Tier 3: Forward MC from Today (100 paths, spot = $66,280.25) (100 loans, 2026-03-30 to 2026-03-30) ===
+  Avg initial PUT premium        : $5,338.06
+  Avg roll savings (cost reduct.): $3,649.18 (68.4% of premium)
+  Median roll savings            : $3,444.18
+  Range                          : $1,039.04 to $9,331.89
+  Avg rolls per loan             : 5.0
+  % loans where rolling helped   : 100.0%
+  ---
+  Avg terminal payoff (static)   : $1,155.30
+  Avg terminal payoff (rolling)  : $0.00
+  Avg terminal delta             : $-1,155.30
+  Avg full economic delta        : $2,493.88 (46.7% of premium)
+  Percentiles (5/25/50/75/95)    : $1,649.66 / $2,422.23 / $3,404.57 / $4,151.71 / $7,618.25

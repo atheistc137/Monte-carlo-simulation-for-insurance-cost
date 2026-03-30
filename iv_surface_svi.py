@@ -22,9 +22,29 @@ from scipy.optimize import minimize
 
 # ───────────────────────── configuration defaults ──────────────────────────
 MNY_GRID = np.arange(0.4, 3.00, 0.1)
-TTM_GRID = np.arange(15, 61)  # calendar days
+TTM_GRID = np.sort(np.concatenate([np.arange(15, 61), [90, 180, 270, 365]]))
 DEFAULT_MIN_QUOTES = 6
 DEFAULT_MAX_FF_DAYS = 60
+
+# ───────────────────────── tenor bucketing ────────────────────────────────
+TENOR_BUCKETS = [
+    ("short", 3,   60),
+    ("90d",   61,  135),
+    ("180d",  136, 225),
+    ("270d",  226, 315),
+    ("365d",  316, 400),
+]
+
+
+def assign_tenor_bucket(ttm_days: float) -> str:
+    """Assign a TTM value to its tenor bucket label."""
+    for label, lo, hi in TENOR_BUCKETS:
+        if lo <= ttm_days <= hi:
+            return label
+    if ttm_days < 3:
+        return "short"
+    return "365d"
+
 
 # ───────────────────────── regex helpers ────────────────────────────────────
 _DATE_RX = re.compile(r"^\d{4}-\d{2}-\d{2}$")     # yyyy-mm-dd
@@ -99,23 +119,26 @@ def calibrate_svi(
     return a, b, rho, m, sigma, res.fun
 
 
-def calibrate_one_day(d: pd.Timestamp, grp: pd.DataFrame) -> Dict[str, float] | None:
+def calibrate_one_day(d: pd.Timestamp, tenor_bucket: str,
+                      grp: pd.DataFrame) -> Dict[str, float] | None:
     if len(grp) < calibrate_one_day.min_quotes:
-        logging.debug("%s skipped (< %d quotes)", d.date(), calibrate_one_day.min_quotes)
+        logging.debug("%s/%s skipped (< %d quotes)", d.date(), tenor_bucket,
+                      calibrate_one_day.min_quotes)
         return None
     k  = np.log(grp["strike"].values / grp["spot"].values)
     t  = grp["ttm_days"].values / 365.0
     iv = grp["iv"].values
     a, b, rho, m, sigma, err = calibrate_svi(k, t, iv)
     return {
-        "date":           d,
-        "a":              a,
-        "b":              b,
-        "rho":            rho,
-        "m":              m,
-        "sigma":         sigma,
-        "error":         err,
-        "quotes":        len(grp),
+        "date":         d,
+        "tenor_bucket": tenor_bucket,
+        "a":            a,
+        "b":            b,
+        "rho":          rho,
+        "m":            m,
+        "sigma":        sigma,
+        "error":        err,
+        "quotes":       len(grp),
     }
 
 
@@ -164,23 +187,54 @@ def main():
     if opt.empty:
         raise RuntimeError("No overlapping dates between option data and spot prices.")
 
-    # Calibrate SVI in parallel for each day
+    # Assign tenor buckets
+    opt["tenor_bucket"] = opt["ttm_days"].apply(assign_tenor_bucket)
+
+    # Calibrate SVI per (date, tenor_bucket) in parallel
     calibrate_one_day.min_quotes = cfg.min_quotes
     results = Parallel(n_jobs=cfg.n_jobs)(
-        delayed(calibrate_one_day)(d, grp)
-        for d, grp in opt.groupby("date")
+        delayed(calibrate_one_day)(d, tb, grp)
+        for (d, tb), grp in opt.groupby(["date", "tenor_bucket"])
     )
     params = pd.DataFrame([r for r in results if r is not None])
-    params.to_csv(cfg.out_param, index=False)
-    logging.info("Saved SVI parameters → %s (%d days)", cfg.out_param, len(params))
 
-    # Build synthetic IV surface
+    # Forward-fill sparse tenor buckets (with staleness cap)
+    if not params.empty:
+        params = params.sort_values(["tenor_bucket", "date"])
+        filled_parts = []
+        for tb, grp in params.groupby("tenor_bucket"):
+            grp = grp.set_index("date").asfreq("D")
+            grp["tenor_bucket"] = tb
+            # Forward-fill SVI params, cap at max_ff_days
+            svi_cols = ["a", "b", "rho", "m", "sigma", "error", "quotes"]
+            grp[svi_cols] = grp[svi_cols].ffill(limit=cfg.max_ff_days)
+            grp = grp.dropna(subset=["a"])  # drop rows beyond staleness cap
+            filled_parts.append(grp.reset_index())
+        params = pd.concat(filled_parts, ignore_index=True)
+
+    params.to_csv(cfg.out_param, index=False)
+    logging.info("Saved SVI parameters → %s (%d rows)", cfg.out_param, len(params))
+
+    # Map tenor buckets to their TTM grid ranges
+    BUCKET_TTM = {
+        "short": [T for T in TTM_GRID if T <= 60],
+        "90d":   [90],
+        "180d":  [180],
+        "270d":  [270],
+        "365d":  [365],
+    }
+
+    # Build synthetic IV surface using per-bucket params
     surf_rows: List[Dict[str, float]] = []
     for _, row in params.iterrows():
         trade_date = row["date"]
+        tb = row["tenor_bucket"]
         a, b, rho, m, sigma = row[["a", "b", "rho", "m", "sigma"]]
-        spot_price = spot.loc[trade_date]
-        for T in TTM_GRID:
+        try:
+            spot_price = spot.loc[trade_date]
+        except KeyError:
+            continue
+        for T in BUCKET_TTM.get(tb, []):
             t = T / 365.0
             for mny in MNY_GRID:
                 K = mny * spot_price
