@@ -1,388 +1,1039 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bitmor — Options Roll-Down Backtest & Simulator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
-  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bitmor — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg: #030916;
-      --bg2: #080f1f;
-      --bg3: #0d1628;
-      --accent: #F25E13;
-      --accent2: #ff8547;
-      --text: #e8eaf0;
-      --muted: #6b7a96;
-      --border: #1a2540;
-      --green: #22d3a6;
-      --red: #f25e6a;
-      --font: 'Bricolage Grotesque', sans-serif;
-      --mono: 'IBM Plex Mono', monospace;
-    }
+  :root {
+    --bg: #030916;
+    --bg2: #080f1f;
+    --bg3: #0d1628;
+    --accent: #F25E13;
+    --accent2: #ff8547;
+    --text: #e8eaf0;
+    --muted: #6b7a96;
+    --border: #1a2540;
+    --green: #22d3a6;
+    --red: #f25e6a;
+    --font: 'Bricolage Grotesque', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
 
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font);
-      min-height: 100vh;
-      overflow-x: hidden;
-      line-height: 1.6;
-    }
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(242,94,19,0.03) 59px, rgba(242,94,19,0.03) 60px),
-        repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(242,94,19,0.03) 59px, rgba(242,94,19,0.03) 60px);
-      pointer-events: none; z-index: 0;
-    }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(242,94,19,0.03) 59px, rgba(242,94,19,0.03) 60px),
+      repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(242,94,19,0.03) 59px, rgba(242,94,19,0.03) 60px);
+    pointer-events: none; z-index: 0;
+  }
 
-    .container {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 0 32px 80px;
-      position: relative;
-      z-index: 1;
-    }
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; position: relative; z-index: 1; }
 
-    /* HEADER */
-    header {
-      padding: 28px 0 20px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 24px;
-    }
-    .header-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 6px;
-    }
-    .logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .logo-mark {
-      width: 28px; height: 28px; background: var(--accent); border-radius: 5px;
-      display: grid; place-items: center; font-weight: 800; font-size: 14px;
-      color: #fff; letter-spacing: -1px; flex-shrink: 0;
-    }
-    .logo-text { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
-    .logo-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.5px; }
-    .header-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
-    header h1 {
-      font-size: clamp(22px, 3vw, 30px);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -1px;
-      margin: 0;
-    }
-    header h1 span { color: var(--accent); }
-    header p {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
+  /* HEADER */
+  header { padding: 56px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; }
+  .logo-mark {
+    width: 32px; height: 32px; background: var(--accent); border-radius: 6px;
+    display: grid; place-items: center; font-weight: 800; font-size: 16px;
+    color: #fff; letter-spacing: -1px; flex-shrink: 0;
+  }
+  .logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .logo-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
+  h1 { font-size: clamp(36px, 6vw, 64px); font-weight: 800; line-height: 1.0; letter-spacing: -2px; margin-bottom: 16px; }
+  h1 span { color: var(--accent); }
+  .subtitle { font-size: 16px; color: var(--muted); max-width: 540px; line-height: 1.6; }
 
-    /* TABS */
-    .tabs {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .tab-btn {
-      padding: 9px 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--bg3);
-      color: var(--muted);
-      font-family: var(--font);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.18s;
-      white-space: nowrap;
-    }
-    .tab-btn:hover { color: var(--text); border-color: var(--accent); }
-    .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  /* SECTIONS */
+  .section { margin-bottom: 48px; }
+  .section-label { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+  .section h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .section .desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; max-width: 620px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
-    .tier-content { display: none; }
+  /* GRIDS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .four-col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  @media (max-width: 640px) {
+    .two-col, .three-col, .four-col { grid-template-columns: 1fr 1fr; }
+  }
 
-    .tier-desc {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-      margin-bottom: 16px;
-      max-width: 800px;
-    }
+  /* CARDS */
+  .card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .card h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
+  .dark-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
 
-    /* STATS */
-    .stats-card {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-    .stat {
-      flex: 1 1 130px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      min-width: 120px;
-    }
-    .stat-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-      min-height: 28px;
-      display: flex;
-      align-items: flex-end;
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      line-height: 1;
-      color: var(--text);
-    }
+  /* FIELDS */
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); margin-bottom: 8px; font-family: var(--mono); }
+  .field label span { font-size: 13px; color: var(--text); font-weight: 500; }
+  input[type="range"] { width: 100%; height: 4px; -webkit-appearance: none; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); cursor: pointer; transition: transform 0.15s; }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
-    /* CHARTS */
-    .chart-container {
-      width: 100%;
-      height: 500px;
-      margin-bottom: 24px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-    }
+  /* METRICS */
+  .metric { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .metric-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .metric-value { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+  .metric-value.accent { color: var(--accent); }
+  .metric-value.green { color: var(--green); }
+  .metric-value.red { color: var(--red); }
 
-    /* METHODOLOGY */
-    details {
-      margin-top: 40px;
-      border-top: 1px solid var(--border);
-      padding-top: 24px;
-    }
-    details summary {
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--muted);
-      font-family: var(--mono);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-    details summary:hover { color: var(--text); }
-    .methodology {
-      max-width: 800px;
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.7;
-      margin-top: 16px;
-    }
-    .methodology h4 {
-      color: var(--accent);
-      font-family: var(--mono);
-      font-size: 12px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-top: 24px;
-      margin-bottom: 6px;
-    }
-    .methodology p { margin-bottom: 8px; }
-    .methodology ul { padding-left: 20px; margin-bottom: 8px; }
-    .methodology li { margin-bottom: 4px; }
-    .methodology strong { color: var(--text); }
+  /* FORMULA */
+  .formula-block { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 18px 22px; font-family: var(--mono); font-size: 13px; line-height: 2; color: var(--text); }
+  .formula-block .var { color: var(--accent2); }
+  .formula-block .comment { color: var(--muted); font-size: 11px; }
+  .formula-block .result { color: var(--green); font-weight: 600; }
 
-    /* FOOTER */
-    footer {
-      margin-top: 64px;
-      padding: 28px 0;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    footer p { font-size: 12px; color: var(--muted); font-family: var(--mono); }
-    footer a { color: var(--accent); text-decoration: none; }
+  /* PUT PILLS */
+  .payout-pill { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .payout-pill .label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .payout-pill .val { font-size: 18px; font-weight: 800; }
+  .payout-pill .val.green { color: var(--green); }
+  .payout-pill .val.red { color: var(--red); }
+  .payout-pill .val.neutral { color: var(--text); }
+  .payout-pill .sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
 
-    /* SECTION LABEL */
-    .section-label {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 2px;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
+  /* SCENARIO BADGE */
+  .scenario-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 100px; font-family: var(--mono); font-size: 11px; font-weight: 600; border: 1px solid; }
+  .scenario-badge.safe { color: var(--green); border-color: rgba(34,211,166,0.3); background: rgba(34,211,166,0.07); }
+  .scenario-badge.danger { color: var(--red); border-color: rgba(242,94,106,0.3); background: rgba(242,94,106,0.07); }
 
-    @media (max-width: 640px) {
-      .stats-card { gap: 6px; }
-      .stat { flex: 1 1 calc(50% - 6px); min-width: 0; }
-    }
-  </style>
+  /* AMORT TABLE */
+  .amort-wrap { max-height: 320px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--border); }
+  .amort-wrap::-webkit-scrollbar { width: 4px; }
+  .amort-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+  thead { position: sticky; top: 0; background: var(--bg3); z-index: 1; }
+  th { padding: 10px 14px; text-align: right; color: var(--muted); font-weight: 500; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); font-size: 10px; text-transform: uppercase; }
+  th:first-child { text-align: left; }
+  td { padding: 9px 14px; text-align: right; color: var(--text); border-bottom: 1px solid rgba(26,37,64,0.5); }
+  td:first-child { text-align: left; color: var(--muted); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(242,94,19,0.04); }
+
+  /* BUTTONS */
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .dp-btn { padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--muted); font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
+  .dp-btn:hover { color: var(--text); border-color: var(--accent); }
+  .dp-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* CHART WRAPS */
+  .chart-wrap { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .chart-wrap h4 { font-size: 12px; font-weight: 700; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+
+  /* CASH FLOW TIMELINE */
+  .cf-timeline { display: flex; flex-direction: column; }
+  .cf-event { display: grid; grid-template-columns: 64px 1fr auto auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(26,37,64,0.6); font-size: 13px; }
+  .cf-event:last-child { border-bottom: none; }
+  .cf-month { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .cf-desc { color: var(--text); font-size: 12px; line-height: 1.4; }
+  .cf-flow { font-family: var(--mono); font-size: 13px; font-weight: 600; text-align: right; min-width: 90px; }
+  .cf-running { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; min-width: 90px; }
+  .cf-flow.pos { color: var(--green); }
+  .cf-flow.neg { color: var(--red); }
+
+  /* STATS (from rolldown dashboard) */
+  .stats-card { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  .stat { flex: 1 1 130px; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; min-width: 120px; }
+  .stat-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; min-height: 28px; display: flex; align-items: flex-end; }
+  .stat-value { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; color: var(--text); }
+
+  /* CHART CONTAINERS */
+  .chart-container { width: 100%; height: 500px; margin-bottom: 24px; background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+
+  /* FOOTER */
+  footer { margin-top: 64px; padding: 28px 0; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  footer p { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* STICKY TAB BAR */
+  .sticky-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+  .main-tab-btn {
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .main-tab-btn:hover { color: var(--text); border-color: var(--accent); }
+  .main-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .tab-content { display: none; }
+
+  /* PATH INFO BADGE */
+  .path-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    cursor: pointer;
+    transition: all 0.18s;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .path-badge:hover { border-color: var(--accent); }
+  .path-badge .badge-tier {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .path-badge .badge-tier.tier-1 { color: var(--green); background: rgba(34,211,166,0.1); }
+  .path-badge .badge-tier.tier-2 { color: var(--accent); background: rgba(242,94,19,0.1); }
+  .path-badge .badge-tier.tier-3 { color: #7c8cf5; background: rgba(124,140,245,0.1); }
+
+  /* DISCLAIMER */
+  .disclaimer-box {
+    background: rgba(107,122,150,0.06);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 32px 0;
+    font-family: var(--mono);
+  }
+
+  /* HIGHLIGHT FLASH */
+  @keyframes highlightFlash {
+    0% { border-color: var(--accent); box-shadow: 0 0 12px rgba(242,94,19,0.3); }
+    100% { border-color: var(--border); box-shadow: none; }
+  }
+  .highlight-flash {
+    animation: highlightFlash 1s ease-out;
+  }
+
+  /* RESHUFFLE BUTTON */
+  .reshuffle-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: rgba(242,94,19,0.08);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.5px;
+  }
+  .reshuffle-btn:hover { background: var(--accent); color: #fff; }
+
+  /* CROSS-LINK */
+  .cross-link {
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: none;
+    border-bottom: 1px dashed var(--accent);
+  }
+  .cross-link:hover { border-bottom-style: solid; }
+
+  /* TIER NARRATIVE */
+  .tier-narrative {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+    max-width: 800px;
+  }
+  .tier-narrative strong { color: var(--text); }
+
+  /* METHODOLOGY SECTIONS */
+  .method-section {
+    margin-bottom: 32px;
+    padding: 24px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .method-section h4 {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .method-section p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 8px; }
+  .method-section ul { padding-left: 20px; margin-bottom: 8px; }
+  .method-section li { font-size: 14px; color: var(--muted); margin-bottom: 4px; line-height: 1.6; }
+  .method-section strong { color: var(--text); }
+  .method-section .formula {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    margin: 12px 0;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .method-section .formula .var { color: var(--accent2); }
+  .method-section .formula .comment { color: var(--muted); font-size: 11px; }
+
+  /* FLOW DIAGRAM */
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 16px 0;
+    overflow-x: auto;
+    padding: 8px 0;
+  }
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+  .flow-box {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+  .flow-box.action { background: rgba(242,94,19,0.12); border: 1px solid rgba(242,94,19,0.3); color: var(--accent); }
+  .flow-box.asset { background: rgba(34,211,166,0.1); border: 1px solid rgba(34,211,166,0.25); color: var(--green); }
+  .flow-box.protocol { background: rgba(124,140,245,0.1); border: 1px solid rgba(124,140,245,0.25); color: #7c8cf5; }
+  .flow-box.danger { background: rgba(242,94,106,0.1); border: 1px solid rgba(242,94,106,0.25); color: var(--red); }
+  .flow-sub { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+  .flow-arrow {
+    font-size: 16px;
+    color: var(--muted);
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+
+  /* IRM CURVE (CSS) */
+  .irm-curve {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    margin: 16px 0;
+    border-left: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+  }
+  .irm-curve .irm-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .irm-curve .irm-label {
+    position: absolute;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .irm-curve .irm-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translate(-50%, 50%);
+  }
+
+  /* LIQUIDATION CASCADE */
+  .cascade-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    align-items: center;
+    margin: 16px 0;
+  }
+  .cascade-box {
+    padding: 12px;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .cascade-arrow {
+    font-size: 18px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* BACKTEST INTRO */
+  .tab-intro {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-intro h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .tab-intro p { font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 800px; }
+
+  @media (max-width: 640px) {
+    .stats-card { gap: 6px; }
+    .stat { flex: 1 1 calc(50% - 6px); min-width: 0; }
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="header-row">
-        <div class="logo">
-          <div class="logo-mark">B</div>
-          <div>
-            <div class="logo-text">Bitmor</div>
-            <div class="logo-sub">bitmor.xyz</div>
-          </div>
-        </div>
-        <div class="header-divider"></div>
-        <h1>Options <span>roll-down</span> backtest & simulator</h1>
-      </div>
-      <p>Can rolling PUT options recover the upfront hedging premium? Backtested across 1,000+ loans and Monte Carlo paths.</p>
-    </header>
+<div class="container">
 
-    <div class="section-label">Analysis Tiers</div>
+  <header>
+    <div class="logo">
+      <div class="logo-mark">B</div>
+      <div>
+        <div class="logo-text">Bitmor</div>
+        <div class="logo-sub">bitmor.xyz</div>
+      </div>
+    </div>
+    <h1>The <span>math</span> behind<br>Bitcoin mortgages.</h1>
+    <p class="subtitle">Configure a loan, see the amortization schedule, and explore PUT option protection — backtested across 2,000+ historical and simulated outcomes.</p>
+  </header>
+
+  <!-- ── TAB BAR ── -->
+  <div class="sticky-tabs">
     <div class="tabs">
-      <button class="tab-btn active" data-tier="1" onclick="switchTier(1)">Historical Backtest</button>
-      <button class="tab-btn" data-tier="2" onclick="switchTier(2)">Recent Loans</button>
-      <button class="tab-btn" data-tier="3" onclick="switchTier(3)">Forward Simulation</button>
+      <button class="main-tab-btn active" data-tab="1" onclick="Nav.switchTab(1)">General Explainer</button>
+      <button class="main-tab-btn" data-tab="2" onclick="Nav.switchTab(2)">Backtest &amp; Simulations</button>
+      <button class="main-tab-btn" data-tab="3" onclick="Nav.switchTab(3)">Bitmor Math</button>
+      <button class="main-tab-btn" data-tab="4" onclick="Nav.switchTab(4)">Backtest Methodology</button>
     </div>
-
-    <div id="tier-1" class="tier-content" style="display: block;">
-      <p class="tier-desc">731 loans starting daily from March 2023 to March 2025. BTC rose from ~$28k to ~$87k. Every data point uses actual historical prices and actual IV surface — no simulation. Shows strategy performance across a sustained rally.</p>
-      <div class="stats-card" id="stats-1"></div>
-      <div class="chart-container" id="chart-1-1"></div>
-    </div>
-
-    <div id="tier-2" class="tier-content">
-      <p class="tier-desc">366 loans starting daily from March 2025 to March 2026. BTC declined from ~$87k to ~$66k. Loans not yet expired are extended with 1,000 simulated price paths each, averaged per start date. Tests whether the strategy holds when markets move against the borrower.</p>
-      <div class="stats-card" id="stats-2"></div>
-      <div class="chart-container" id="chart-2-1"></div>
-    </div>
-
-    <div id="tier-3" class="tier-content">
-      <p class="tier-desc">1,000 independent Monte Carlo paths from today's spot ($66,280). Full 12-month GBM simulation. Each path is an individual result, not averaged. Shows the full distribution of possible outcomes starting today.</p>
-      <div class="stats-card" id="stats-3"></div>
-      <div class="chart-container" id="chart-3-1"></div>
-      <div class="chart-container" id="chart-3-2"></div>
-    </div>
-
-    <details>
-      <summary>Methodology</summary>
-      <div class="methodology">
-        <h4>Strategy</h4>
-        <p>Each BTC-collateralized loan is hedged with a 12-month PUT option struck at
-        the initial debt level. As monthly payments reduce the outstanding debt, the
-        existing PUT (with a now-too-high strike) can be sold and replaced with a cheaper
-        PUT at the lower strike. The difference is captured as roll savings. A roll is
-        only executed when the profit exceeds $200.</p>
-
-        <h4>Roll Decision Mechanics</h4>
-        <p>At each monthly payment checkpoint (months 1–11), the simulation reprices the
-        currently held PUT using the IV surface and compares it against a replacement PUT
-        struck at the current outstanding debt. The new strike is always lower than the
-        previous one because amortisation reduces the loan balance each month. A roll
-        executes only when the difference (held PUT value minus replacement cost) exceeds
-        $200 — filtering out micro-rolls that would not be economically meaningful after
-        real-world transaction costs. On roll, the held PUT is sold, the replacement is
-        purchased, and the profit is accumulated as roll savings.</p>
-
-        <h4>Premium Recovery</h4>
-        <p>Roll savings represent the portion of the initial PUT premium that can be
-        recovered through the rolling strategy. The recovery percentage is calculated as
-        cumulative roll savings divided by the initial premium cost. Higher recovery
-        means the hedging cost is substantially offset.</p>
-
-        <h4>Option Pricing</h4>
-        <p>All PUT options are priced using the Black-Scholes model for European
-        cash-settled options. This is appropriate because BTC options (e.g. on Deribit)
-        are European-style with no early exercise. Inputs are the current spot price,
-        strike (outstanding debt), time to expiration, and implied volatility from
-        the SVI surface. Risk-free rate is set to zero.</p>
-
-        <h4>IV Surface</h4>
-        <p>Implied volatility is sourced from Deribit historical option trades spanning
-        700+ trading days. For each day, option quotes are grouped into five tenor
-        buckets (short/90d/180d/270d/365d) and fitted using the Stochastic Volatility
-        Inspired (SVI) parameterisation, which models total variance as a function of
-        log-moneyness. The SVI fit is calibrated via L-BFGS-B optimisation with bounds
-        to prevent arbitrage violations. The result is a smooth, arbitrage-free IV
-        surface across 26 moneyness points and 5 tenors for each trading day. A minimum
-        of 6 quotes per day-tenor is required for calibration; sparse tenor buckets are
-        forward-filled up to 60 days.</p>
-
-        <h4>GBM Calibration (Tier 2 & 3)</h4>
-        <p>Simulated price paths use Geometric Brownian Motion with constant drift and
-        volatility. Both parameters are calibrated from approximately 3 years of hourly
-        BTC spot prices (Binance BTCUSDT), resampled to daily log returns. Drift (&#956;)
-        is the annualised mean of daily log returns; volatility (&#963;) is the annualised
-        standard deviation. Paths are generated at daily resolution (dt = 1/365) with
-        i.i.d. standard normal shocks. The IV surface is frozen at the latest available
-        snapshot for all forward months — it does not evolve with the simulated price
-        path.</p>
-
-        <h4>Simulation Tiers</h4>
-        <p><strong>Tier 1 (Historical Backtest)</strong> uses only actual historical BTC
-        prices and actual IV surface data — no simulation whatsoever. Every roll decision
-        uses real market conditions as they existed on that date.</p>
-        <p><strong>Tier 2 (Recent Loans)</strong> uses real prices and IV up to today,
-        then extends each loan with 1,000 GBM-simulated price paths for the remaining
-        months. Each start date reports the average across all 1,000 paths. This grounds
-        the analysis in real entry conditions while incorporating forward uncertainty.</p>
-        <p><strong>Tier 3 (Forward Simulation)</strong> generates 1,000 independent
-        12-month GBM paths from today's spot price. Each path is reported individually
-        (not averaged), showing the full distribution of possible outcomes for a loan
-        originated today.</p>
-
-        <h4>Loan Parameters</h4>
-        <p>LTV: 70% · Loan tenor: 12 months · Annual rate: 10% · Fixed monthly
-        payment (standard amortisation) · Option tenors: 3/6/9/12 months (smallest
-        tenor &#8805; remaining loan life is selected) · Min roll profit: $200</p>
-
-        <h4>Key Assumptions</h4>
-        <ul>
-          <li><strong>Frozen IV surface:</strong> For Tier 2/3 forward months, the IV
-          surface is held constant at today's snapshot rather than evolving with the
-          simulated spot. This avoids a circular dependency between realised volatility
-          and implied volatility, and is conservative (may slightly overstate option
-          values in extreme scenarios).</li>
-          <li><strong>No transaction costs:</strong> Roll profits are not adjusted for
-          exchange fees (typically 0.1–0.5% on Deribit). Real-world recovery will be
-          modestly lower.</li>
-          <li><strong>Monthly checkpoints only:</strong> Roll decisions are evaluated
-          11 times per loan, matching the monthly payment schedule. More frequent
-          evaluation could capture additional opportunities but would not match the
-          natural cadence of debt reduction.</li>
-          <li><strong>Constant GBM parameters:</strong> Drift and volatility do not
-          change across the simulation horizon. Real markets exhibit regime shifts,
-          so this is a simplification.</li>
-        </ul>
-
-        <h4>Data Sources</h4>
-        <p><strong>BTC spot prices:</strong> Binance BTCUSDT hourly candles, ~3 years
-        of history (resampled to daily for GBM calibration, used at hourly resolution
-        for historical backtest).<br>
-        <strong>Options data:</strong> Deribit historical option trades API, covering
-        month-end and quarterly BTC option contracts across all strikes and expiries.
-        ~1.4 million data points spanning 700+ trading days.</p>
-      </div>
-    </details>
-
-    <footer>
-      <p>Bitmor &mdash; Bitcoin Acquisition Financing Protocol</p>
-      <p><a href="https://bitmor.xyz" target="_blank" rel="noopener">bitmor.xyz</a></p>
-    </footer>
   </div>
 
-  <script>
-    const TIER1_CSV = `
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- TAB 1: GENERAL EXPLAINER                                  -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-explainer" style="display:block;">
+
+    <!-- ── SECTION 1: LOAN + PUT COST ── -->
+    <div class="section">
+      <div class="section-label">01 — Loan Configuration</div>
+      <h2>Structure your loan</h2>
+      <p class="desc">Put ~30% down in USDC, finance the rest through a lending pool, and repay in fixed monthly installments. The PUT option cost is computed via Black-Scholes from your loan parameters.</p>
+
+      <div class="two-col" style="margin-bottom:16px;">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h3 style="margin-bottom:0;">Parameters</h3>
+            <div style="text-align:right;">
+              <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">BTC Spot</div>
+              <div id="live-spot-price" style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--green);">Fetching...</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>BTC Price <span id="lbl-btcprice">$100,000</span></label>
+            <input type="range" id="btcprice" min="30000" max="200000" step="1000" value="100000" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>Annual Interest Rate <span id="lbl-apr">9%</span></label>
+            <input type="range" id="apr" min="5" max="20" step="0.5" value="9" oninput="calc()">
+          </div>
+          <div class="field">
+            <label>BTC Amount <span id="lbl-btcamt">1.0 BTC</span></label>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button class="dp-btn" onclick="selectBTCAmt(0.01, this)">0.01 BTC</button>
+              <button class="dp-btn" onclick="selectBTCAmt(0.1, this)">0.1 BTC</button>
+              <button class="dp-btn active" onclick="selectBTCAmt(1, this)">1 BTC</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Down Payment % <span id="lbl-dp">30%</span></label>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button class="dp-btn" onclick="selectDP2(20, this)">20%</button>
+              <button class="dp-btn active" onclick="selectDP2(30, this)">30%</button>
+              <button class="dp-btn" onclick="selectDP2(40, this)">40%</button>
+              <button class="dp-btn" onclick="selectDP2(50, this)">50%</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Loan Term <span id="lbl-term">12 months</span></label>
+            <div id="term-btn-group" style="display:flex;gap:8px;margin-top:4px;">
+              <button class="dp-btn" onclick="selectTerm(3, this)" style="flex:1;min-width:0;">3mo</button>
+              <button class="dp-btn" onclick="selectTerm(6, this)" style="flex:1;min-width:0;">6mo</button>
+              <button class="dp-btn" onclick="selectTerm(9, this)" style="flex:1;min-width:0;">9mo</button>
+              <button class="dp-btn active" onclick="selectTerm(12, this)" style="flex:1;min-width:0;">12mo</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="formula-block" id="loan-formula">—</div>
+          <div class="three-col">
+            <div class="metric">
+              <div class="metric-label">BTC Value</div>
+              <div class="metric-value" id="out-total">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Down Payment</div>
+              <div class="metric-value accent" id="out-down">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Financed</div>
+              <div class="metric-value" id="out-financed">—</div>
+            </div>
+          </div>
+          <div class="three-col">
+            <div class="metric">
+              <div class="metric-label">Monthly Payment</div>
+              <div class="metric-value accent" id="out-monthly">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Total Interest</div>
+              <div class="metric-value red" id="out-totalint">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Total Cost</div>
+              <div class="metric-value" id="out-totalcost">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PUT option cost block -->
+      <div class="dark-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+          <div>
+            <div class="section-label" style="margin-bottom:4px;">PUT Option Cost</div>
+            <div style="font-size:13px;color:var(--muted);max-width:500px;line-height:1.5;">Strike = financed principal. Purchased at origination. Eliminates price-based liquidation for the full loan term.</div>
+          </div>
+          <div id="scenario-badge" class="scenario-badge safe">● BTC above strike — PUT expires worthless</div>
+        </div>
+
+        <!-- BS MODEL SECTION -->
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">Black-Scholes Model — Vol Stress Test</div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <span style="font-family:var(--mono);font-size:11px;color:var(--muted);">Deribit IV (nearest strike): <span id="deribit-iv-inline" style="color:var(--text);font-weight:600;">—</span></span>
+              <div class="field" style="margin:0;display:flex;align-items:center;gap:10px;">
+                <span style="font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;">σ stress test</span>
+                <input type="range" id="iv" min="30" max="150" step="5" value="55" style="width:120px;" oninput="this.dataset.userSet='1';calc()">
+                <span id="lbl-iv" style="font-family:var(--mono);font-size:12px;color:var(--text);font-weight:600;min-width:36px;">55%</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+            <div class="payout-pill">
+              <div class="label">Strike (Principal)</div>
+              <div class="val neutral" id="put-strike">—</div>
+            </div>
+            <div class="payout-pill">
+              <div class="label">BS PUT Price</div>
+              <div class="val red" id="put-premium-pct">—</div>
+              <div class="sub" id="put-premium-usd">—</div>
+            </div>
+            <div class="payout-pill">
+              <div class="label">Total Upfront (BS)</div>
+              <div class="val red" id="put-total-upfront">—</div>
+              <div class="sub">down + BS PUT</div>
+            </div>
+            <div class="payout-pill">
+              <div class="label">Effective Entry</div>
+              <div class="val neutral" id="put-entry-pct">—</div>
+              <div class="sub">% of BTC value</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DERIBIT LIVE SECTION -->
+        <div style="background:rgba(34,211,166,0.04);border:1px solid rgba(34,211,166,0.18);border-radius:10px;padding:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+            <div style="font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);">Deribit Market Price — 26 MAR 27</div>
+            <div id="put-data-source" style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.5px;">● Loading...</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            <div class="payout-pill" style="background:transparent;border-color:rgba(34,211,166,0.2);">
+              <div class="label" style="color:var(--green);">Nearest Strike · IV</div>
+              <div class="val neutral" id="deribit-nearest-strike">—</div>
+              <div class="sub" id="deribit-iv-sub">—</div>
+            </div>
+            <div class="payout-pill" style="background:transparent;border-color:rgba(34,211,166,0.2);">
+              <div class="label" style="color:var(--green);">Deribit Mark Price</div>
+              <div class="val neutral" id="deribit-mark">—</div>
+              <div class="sub" id="deribit-mark-pct">—</div>
+            </div>
+            <div class="payout-pill" style="background:transparent;border-color:rgba(34,211,166,0.2);">
+              <div class="label" style="color:var(--green);">Expiry</div>
+              <div class="val neutral" style="font-size:14px;" id="deribit-expiry">26 MAR 27</div>
+              <div class="sub" id="deribit-snap-date">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ── SECTION 2: AMORTIZATION ── -->
+    <div class="section">
+      <div class="section-label">02 — Repayment Schedule</div>
+      <h2>Full amortization</h2>
+      <p class="desc">Each payment covers accrued interest first, then reduces principal. Balance reaches zero at the end of the term — collateral is released at that point.</p>
+      <div class="amort-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mo.</th>
+              <th>Payment</th>
+              <th>Principal</th>
+              <th>Interest</th>
+              <th>Balance</th>
+              <th>% Paid</th>
+            </tr>
+          </thead>
+          <tbody id="amort-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ── DISCLAIMER ── -->
+    <div class="disclaimer-box">
+      Sections 1-2 above are interactive and illustrative — configure any loan to see its amortization.
+      Section 3 below uses actual backtest and simulation data with fixed parameters (70% LTV, 12-month term, 10% APR).
+      The path shown is randomly selected from 2,000+ historical and simulated loan outcomes.
+    </div>
+
+    <!-- ── SECTION 3: PUT ROLL-DOWN (REAL DATA) ── -->
+    <div class="section" id="section-rolldown">
+      <div class="section-label">03 — PUT Roll-Down Strategy</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div id="path-badge" class="path-badge" onclick="Tab1.onBadgeClick()">
+          <span class="badge-tier tier-1">TIER 1</span>
+          <span id="path-badge-text">Loading...</span>
+        </div>
+        <button class="reshuffle-btn" onclick="Tab1.reshuffle()">Reshuffle Path</button>
+      </div>
+
+      <div class="chart-wrap" style="margin-bottom:16px;">
+        <h4>Debt balance vs PUT strike over loan term</h4>
+        <div id="rolldown-chart" style="width:100%;height:360px;"></div>
+      </div>
+
+      <div class="two-col" style="margin-bottom:16px;align-items:start;">
+        <div class="card" style="padding:20px;">
+          <h3 style="margin-bottom:16px;">Roll-down cash flows</h3>
+          <div class="cf-timeline" id="path-cf-timeline"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div id="path-metrics"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- TAB 2: BACKTEST & SIMULATIONS                             -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-backtests">
+
+    <div class="tab-intro">
+      <h2>PUT Roll-Down: Does It Work?</h2>
+      <p>Every Bitmor loan is hedged with a PUT option. As monthly payments reduce the debt, the PUT strike becomes too high — so we sell it and buy a cheaper one at the lower strike, pocketing the difference as <strong style="color:var(--text)">roll savings</strong>. These backtests measure how much of the initial PUT premium can be recovered through this strategy across <strong style="color:var(--text)">2,000+ historical and simulated loans</strong>.</p>
+      <p style="margin-top:8px;">Higher recovery = lower effective hedging cost. <span class="cross-link" onclick="Nav.goTo(4,'strategy')">How the roll-down works →</span></p>
+    </div>
+
+    <!-- Tier 1 -->
+    <div class="section" id="tier-section-1">
+      <div class="section-label">Tier 1 — Historical Backtest</div>
+      <div class="tier-narrative" id="narrative-1"></div>
+      <div class="stats-card" id="stats-1"></div>
+      <div class="chart-container" id="chart-1"></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Tier 2 -->
+    <div class="section" id="tier-section-2">
+      <div class="section-label">Tier 2 — Historical Entry + Simulated Forward</div>
+      <div class="tier-narrative" id="narrative-2"></div>
+      <div class="stats-card" id="stats-2"></div>
+      <div class="chart-container" id="chart-2"></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Tier 3 -->
+    <div class="section" id="tier-section-3">
+      <div class="section-label">Tier 3 — Forward Simulation</div>
+      <div class="tier-narrative" id="narrative-3"></div>
+      <div class="stats-card" id="stats-3"></div>
+      <div class="chart-container" id="chart-3-scatter"></div>
+      <div class="chart-container" id="chart-3-hist"></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- TAB 3: BITMOR MATH                                        -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-math">
+
+    <div class="section">
+      <div class="section-label">Protocol Reference</div>
+      <h2>Bitmor Math</h2>
+      <p class="desc">Key formulas and mechanics behind BTC-backed lending. <span class="cross-link" onclick="Nav.switchTab(1)">Configure a loan above →</span></p>
+
+      <!-- LOAN ORIGINATION FLOW -->
+      <div class="method-section" id="loan-flow">
+        <h4>Loan Origination Flow</h4>
+        <p>A single atomic transaction acquires BTC with a USDC down payment:</p>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box asset">USDC<br>Down Payment</div>
+            <div class="flow-sub">30% of BTC value</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box action">Flash Loan<br>USDC</div>
+            <div class="flow-sub">remaining 70%</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box protocol">Buy BTC<br>on DEX</div>
+            <div class="flow-sub">atomic swap</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box asset">Deposit BTC<br>in Vault</div>
+            <div class="flow-sub">earns yield</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box action">Borrow USDC<br>vs Collateral</div>
+            <div class="flow-sub">repay flash loan</div>
+          </div>
+        </div>
+        <p>The BTC is locked per-loan and can be deposited into whitelisted yield protocols. Collateral is released only after full repayment.</p>
+      </div>
+
+      <!-- MONTHLY PAYMENT -->
+      <div class="method-section" id="annuity-formula">
+        <h4>Monthly Payment (Annuity)</h4>
+        <p>Each loan has a fixed monthly payment sized conservatively at origination using the maximum possible borrow APR:</p>
+        <div class="formula">
+          <span class="var">A</span> = <span class="var">P</span> × <span class="var">r</span>(1 + <span class="var">r</span>)<sup>n</sup> / ((1 + <span class="var">r</span>)<sup>n</sup> − 1) <span class="comment">// standard annuity</span><br>
+          <span class="comment">where P = principal, r = r_max / 12, n = months</span><br>
+          <span class="var">pay_one</span> = min(<span class="var">A</span>, <span class="var">debt_remaining</span>) <span class="comment">// never overpay</span>
+        </div>
+        <p>Actual interest accrues at the live variable rate via Aave-style indices; the schedule provides predictable cash-flow and a conservative bound. <span class="cross-link" onclick="Nav.switchTab(1)">Try different terms above →</span></p>
+
+        <!-- Amortization mini-diagram -->
+        <div style="margin-top:16px;">
+          <div style="display:flex;gap:4px;align-items:flex-end;height:80px;">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
+              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:70px;opacity:0.15;"></div>
+              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:8px;"></div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
+              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:60px;opacity:0.25;"></div>
+              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:18px;"></div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
+              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:48px;opacity:0.35;"></div>
+              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:30px;"></div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
+              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:36px;opacity:0.45;"></div>
+              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:42px;"></div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
+              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:22px;opacity:0.55;"></div>
+              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:56px;"></div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
+              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:8px;opacity:0.65;"></div>
+              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:70px;"></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">Mo.1</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">Mo.12</span>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:8px;">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">■ <span style="color:var(--accent);opacity:0.6">Interest portion</span></span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">■ <span style="color:var(--green)">Principal portion</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTEREST RATE MODEL -->
+      <div class="method-section" id="interest-rate-model">
+        <h4>Interest Rate Model</h4>
+        <p>Bitmor uses a two-slope utilization curve, similar to Aave. Low utilization keeps rates affordable; high utilization incentivizes new deposits:</p>
+
+        <!-- IRM Curve SVG -->
+        <div style="margin:16px 0;">
+          <svg viewBox="0 0 400 160" style="width:100%;max-width:500px;height:auto;" xmlns="http://www.w3.org/2000/svg">
+            <!-- Axes -->
+            <line x1="50" y1="10" x2="50" y2="130" stroke="#6b7a96" stroke-width="1.5"/>
+            <line x1="50" y1="130" x2="380" y2="130" stroke="#6b7a96" stroke-width="1.5"/>
+            <!-- Grid lines -->
+            <line x1="50" y1="90" x2="380" y2="90" stroke="#1a2540" stroke-width="1" stroke-dasharray="4"/>
+            <line x1="50" y1="50" x2="380" y2="50" stroke="#1a2540" stroke-width="1" stroke-dasharray="4"/>
+            <line x1="314" y1="10" x2="314" y2="130" stroke="#1a2540" stroke-width="1" stroke-dasharray="4"/>
+            <!-- Slope 1: 0% → 80% util, 5% → 10% rate -->
+            <line x1="50" y1="90" x2="314" y2="50" stroke="#F25E13" stroke-width="2.5"/>
+            <!-- Slope 2: 80% → 100% util, 10% → 15% rate -->
+            <line x1="314" y1="50" x2="380" y2="10" stroke="#f25e6a" stroke-width="2.5"/>
+            <!-- Kink point -->
+            <circle cx="314" cy="50" r="5" fill="#F25E13"/>
+            <!-- Labels -->
+            <text x="45" y="95" text-anchor="end" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">5%</text>
+            <text x="45" y="55" text-anchor="end" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">10%</text>
+            <text x="45" y="15" text-anchor="end" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">15%</text>
+            <text x="50" y="148" text-anchor="middle" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">0%</text>
+            <text x="314" y="148" text-anchor="middle" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">80%</text>
+            <text x="380" y="148" text-anchor="middle" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">100%</text>
+            <!-- Axis labels -->
+            <text x="215" y="158" text-anchor="middle" fill="#6b7a96" font-family="IBM Plex Mono" font-size="9">UTILIZATION</text>
+            <text x="12" y="70" text-anchor="middle" fill="#6b7a96" font-family="IBM Plex Mono" font-size="9" transform="rotate(-90 12 70)">APR</text>
+            <!-- Kink label -->
+            <text x="314" y="42" text-anchor="middle" fill="#F25E13" font-family="IBM Plex Mono" font-size="9" font-weight="600">KINK</text>
+          </svg>
+        </div>
+
+        <div class="formula">
+          <span class="var">Virtual Utilization</span> = Total Borrowed / (Bitmor Balance + Aave Position) <span class="comment">// includes idle funds in Aave</span>
+        </div>
+        <p>Idle USDC is deployed to Aave V3 for yield, but utilization is calculated on the full pool — borrowers aren't penalized for idle liquidity sitting in Aave.</p>
+      </div>
+
+      <!-- LIQUIDATION -->
+      <div class="method-section" id="liquidation-math">
+        <h4>Liquidation Triggers</h4>
+        <p>Two paths to liquidation — price-based (uninsured loans only) and non-payment:</p>
+
+        <!-- Liquidation decision flow -->
+        <div class="flow-diagram" style="flex-wrap:wrap;justify-content:center;">
+          <div class="flow-step">
+            <div class="flow-box protocol">BTC Price<br>Drops</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box action">Insured?</div>
+          </div>
+          <div class="flow-arrow" style="display:flex;flex-direction:column;gap:2px;padding:0 12px;">
+            <span style="font-size:10px;color:var(--green);font-family:var(--mono);">YES ↓</span>
+            <span style="font-size:10px;color:var(--red);font-family:var(--mono);">NO →</span>
+          </div>
+          <div class="flow-step" style="display:flex;flex-direction:column;gap:8px;">
+            <div class="flow-box asset" style="font-size:10px;">Protected<br>No price liq.</div>
+            <div class="flow-box danger" style="font-size:10px;">Check<br>Trigger</div>
+          </div>
+        </div>
+
+        <div class="formula">
+          <span class="comment">// Price-based trigger (uninsured only):</span><br>
+          <span class="var">allocated_BTC</span> × <span class="var">price</span> &lt; <span class="var">debt_now</span> × (1 + <span class="var">buf</span>) <span class="comment">// buf ≈ 3%</span>
+        </div>
+
+        <p><strong>Non-payment</strong> triggers a micro-liquidation first — selling just enough BTC to cover one missed payment, preserving the rest of the position.</p>
+      </div>
+
+      <!-- MICRO-LIQUIDATION -->
+      <div class="method-section" id="micro-liquidation">
+        <h4>Micro-Liquidation</h4>
+        <p>Instead of liquidating the entire position for a missed payment, Bitmor sells the minimum BTC required:</p>
+
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box danger">Missed<br>Payment</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box action">Sell min<br>BTC needed</div>
+            <div class="flow-sub">+ liquidator fee</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box asset">Cover 1<br>month</div>
+            <div class="flow-sub">pay_one + buf</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box protocol">Post-sale<br>guard check</div>
+            <div class="flow-sub">remaining ≥ debt</div>
+          </div>
+        </div>
+
+        <div class="formula">
+          <span class="var">cash_needed</span> = <span class="var">pay_one</span> + <span class="var">buf</span> × <span class="var">pay_one</span><br>
+          <span class="var">sold_btc</span> = <span class="var">cash_needed</span> / <span class="var">price</span><br>
+          <span class="comment">// Guard: remaining BTC value ≥ D_after + buf × debt_now</span>
+        </div>
+        <p>If the guard fails (insufficient collateral), it escalates to full liquidation.</p>
+      </div>
+
+      <!-- INSURANCE -->
+      <div class="method-section" id="insurance-math">
+        <h4>Insurance (PUT Option)</h4>
+        <p>Optional per-loan PUT cover sized to the purchased BTC. While active, price-based liquidation is <strong>disabled</strong>.</p>
+
+        <!-- Insurance flow -->
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div class="flow-box action">Buy PUT<br>at strike K</div>
+            <div class="flow-sub">110% of breakeven</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box asset">Price Liq.<br>Blocked</div>
+            <div class="flow-sub">while cover active</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box protocol">Roll Down<br>as debt falls</div>
+            <div class="flow-sub">recover premium</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box asset">Savings<br>Captured</div>
+            <div class="flow-sub">sell high / buy low</div>
+          </div>
+        </div>
+
+        <div class="formula">
+          <span class="var">K</span> = <span class="var">price</span> × loan / (loan + deposit) × 110% <span class="comment">// strike above breakeven</span><br>
+          <span class="var">Q</span> = (loan + deposit) / <span class="var">BTC_price</span> <span class="comment">// quantity = total BTC bought</span>
+        </div>
+        <p>Coverage is trimmed FIFO whenever BTC is sold. On non-payment liquidation, the PUT is sold alongside BTC to cover lender principal + interest + liquidator fee. <span class="cross-link" onclick="Nav.goTo(2,'tier-section-1')">See backtest results →</span></p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- TAB 4: BACKTEST METHODOLOGY                               -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="tab-content" id="tab-methodology">
+
+    <div class="section">
+      <div class="section-label">Reference</div>
+      <h2>Backtest Methodology</h2>
+      <p class="desc">How the roll-down backtest and simulation work, from strategy mechanics to data sources.</p>
+
+      <div class="method-section" id="strategy">
+        <h4>Strategy Overview</h4>
+        <p>PUT struck at debt level. As payments reduce debt, sell the old PUT (strike too high), buy cheaper one at new lower strike. Difference = roll savings. Only rolls when profit &gt; $200.</p>
+        <p><span class="cross-link" onclick="Tab1.reshuffleFromTier(null)">See a live example →</span></p>
+      </div>
+
+      <div class="method-section" id="roll-mechanics">
+        <h4>Roll Decision</h4>
+        <p>Monthly checkpoints (months 1–11). Reprice held PUT via IV surface, compare to replacement at current debt. Roll only if net gain &gt; $200. Accumulated as roll savings.</p>
+      </div>
+
+      <div class="method-section" id="premium-recovery">
+        <h4>Premium Recovery</h4>
+        <p>Recovery % = cumulative roll savings / initial premium. Higher = cheaper hedge. <span class="cross-link" onclick="Nav.goTo(2,'tier-section-1')">See results →</span></p>
+      </div>
+
+      <div class="method-section" id="option-pricing">
+        <h4>Option Pricing</h4>
+        <p>Black-Scholes for European cash-settled PUTs. Inputs: spot, strike (= outstanding debt), time to expiry, IV from SVI surface. Risk-free rate = 0.</p>
+      </div>
+
+      <div class="method-section" id="iv-surface">
+        <h4>IV Surface</h4>
+        <p>Deribit historical trades, 700+ days. SVI parameterization per day across 5 tenor buckets (short/90d/180d/270d/365d). Arbitrage-free, 26 moneyness points. Min 6 quotes per day-tenor; sparse buckets forward-filled up to 60 days.</p>
+      </div>
+
+      <div class="method-section" id="gbm-calibration">
+        <h4>GBM Calibration</h4>
+        <p>Geometric Brownian Motion. Drift &amp; vol from ~3 years Binance BTCUSDT hourly data, resampled to daily log returns. Daily resolution (dt = 1/365). IV surface frozen at latest snapshot for forward months.</p>
+      </div>
+
+      <div class="method-section" id="simulation-tiers">
+        <h4>Simulation Tiers</h4>
+        <p><strong>Tier 1:</strong> Pure historical — real prices, real IV. <span class="cross-link" onclick="Nav.goTo(2,'tier-section-1')">Results →</span></p>
+        <p><strong>Tier 2:</strong> Real entry + 1,000 GBM paths forward. Averaged per start date. <span class="cross-link" onclick="Nav.goTo(2,'tier-section-2')">Results →</span></p>
+        <p><strong>Tier 3:</strong> 1,000 independent paths from today's spot. Individual outcomes. <span class="cross-link" onclick="Nav.goTo(2,'tier-section-3')">Results →</span></p>
+      </div>
+
+      <div class="method-section" id="loan-parameters">
+        <h4>Loan Parameters</h4>
+        <p><strong>LTV:</strong> 70% · <strong>Term:</strong> 12mo · <strong>APR:</strong> 10% · <strong>Payment:</strong> Fixed monthly · <strong>Option tenors:</strong> 3/6/9/12mo · <strong>Min roll:</strong> $200</p>
+      </div>
+
+      <div class="method-section" id="assumptions">
+        <h4>Key Assumptions</h4>
+        <ul>
+          <li><strong>Frozen IV:</strong> Forward months use today's IV snapshot (conservative).</li>
+          <li><strong>No fees:</strong> No exchange fees applied. Real recovery slightly lower.</li>
+          <li><strong>Monthly only:</strong> 11 roll checkpoints per loan.</li>
+          <li><strong>Constant GBM:</strong> No regime shifts modeled.</li>
+        </ul>
+      </div>
+
+      <div class="method-section" id="data-sources">
+        <h4>Data Sources</h4>
+        <p><strong>Spot:</strong> Binance BTCUSDT hourly, ~3 years. <strong>Options:</strong> Deribit historical trades, ~1.4M data points, 700+ days.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>bitmor.xyz &nbsp;·&nbsp; <a href="https://bitmor.xyz/loans">Loan Waitlist</a></p>
+    <p>Educational tool. Not financial advice.</p>
+  </footer>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CSV DATA (embedded from rolldown simulation results)
+// ══════════════════════════════════════════════════════════════
+        const TIER1_CSV = `
 start_date,spot,initial_premium,roll_savings,roll_savings_pct,effective_put_cost_pct,rolling_net_cost_pct,terminal_payoff_static,terminal_payoff_rolling,terminal_delta,full_economic_delta,num_rolls,final_spot,debt_at_expiry
 2023-03-31,28465.36,2505.14,1668.17,66.59,8.8,2.94,0.0,0.0,0.0,1668.17,4,71280.01,0.0
 2023-04-01,28452.73,2325.98,1169.95,50.3,8.17,4.06,0.0,0.0,0.0,1169.95,3,69649.8,0.0
@@ -2491,285 +3142,976 @@ start_date,spot,initial_premium,roll_savings,roll_savings_pct,effective_put_cost
 2026-03-30,66280.25,5338.06,3637.99,68.15,8.05,2.56,0.0,0.0,0.0,3637.99,6,78083.98,0.0
 `;
 
-    function parseCSV(csvText) {
-      const lines = csvText.trim().split('\n');
-      const headers = lines[0].split(',');
-      return lines.slice(1).map(line => {
-        const vals = line.split(',');
-        const row = {};
-        headers.forEach((h, i) => {
-          row[h] = h === 'start_date' ? vals[i] : parseFloat(vals[i]);
-        });
-        return row;
+// ══════════════════════════════════════════════════════════════
+// DATASTORE MODULE
+// ══════════════════════════════════════════════════════════════
+const DataStore = (() => {
+  function parseCSV(raw) {
+    const lines = raw.trim().split('\n');
+    const headers = lines[0].split(',');
+    return lines.slice(1).map(line => {
+      const vals = line.split(',');
+      const row = {};
+      headers.forEach((h, i) => {
+        row[h] = h === 'start_date' ? vals[i] : parseFloat(vals[i]);
       });
+      return row;
+    });
+  }
+
+  const tiers = {
+    1: parseCSV(TIER1_CSV),
+    2: parseCSV(TIER2_CSV),
+    3: parseCSV(TIER3_CSV),
+  };
+
+  function getTierRows(tier) { return tiers[tier]; }
+
+  function getTierStats(tier) {
+    const data = tiers[tier];
+    const n = data.length;
+    const sorted = arr => [...arr].sort((a, b) => a - b);
+    const percentile = (arr, p) => arr[Math.floor(arr.length * p / 100)];
+
+    const recoveryPcts = data.map(r => r.roll_savings / r.initial_premium * 100);
+    const sortedPct = sorted(recoveryPcts);
+    const putCostPcts = sorted(data.map(r => r.initial_premium / r.spot * 100));
+    const rollingNetPcts = sorted(data.map(r => (r.initial_premium - r.roll_savings) / r.spot * 100));
+
+    return {
+      count: n,
+      avgPremium: data.reduce((s, r) => s + r.initial_premium, 0) / n,
+      avgRecoveryPct: recoveryPcts.reduce((s, v) => s + v, 0) / n,
+      medianRecoveryPct: percentile(sortedPct, 50),
+      avgRollSavings: data.reduce((s, r) => s + r.roll_savings, 0) / n,
+      medianRollSavings: percentile(sorted(data.map(r => r.roll_savings)), 50),
+      avgRolls: data.reduce((s, r) => s + r.num_rolls, 0) / n,
+      p25Pct: percentile(sortedPct, 25),
+      p75Pct: percentile(sortedPct, 75),
+      avgPutCostPct: data.reduce((s, r) => s + r.initial_premium / r.spot * 100, 0) / n,
+      medianPutCostPct: percentile(putCostPcts, 50),
+      avgRollingNetCostPct: data.reduce((s, r) => s + (r.initial_premium - r.roll_savings) / r.spot * 100, 0) / n,
+      medianRollingNetCostPct: percentile(rollingNetPcts, 50),
+      pathsWithPayoff: data.filter(r => r.terminal_payoff_rolling > 0).length,
+      payoffPct: (data.filter(r => r.terminal_payoff_rolling > 0).length / n * 100),
+    };
+  }
+
+  function getRandomPath(forceTier) {
+    const tier = forceTier || [1, 2, 3][Math.floor(Math.random() * 3)];
+    const rows = tiers[tier];
+    const row = rows[Math.floor(Math.random() * rows.length)];
+    return { tier, ...row };
+  }
+
+  return { getTierRows, getTierStats, getRandomPath };
+})();
+
+// ══════════════════════════════════════════════════════════════
+// NAV MODULE
+// ══════════════════════════════════════════════════════════════
+const Nav = (() => {
+  const tabs = { explainer: 1, backtests: 2, math: 3, methodology: 4 };
+  const tabIds = { 1: 'tab-explainer', 2: 'tab-backtests', 3: 'tab-math', 4: 'tab-methodology' };
+  const hashMap = { 1: '#explainer', 2: '#backtests', 3: '#math', 4: '#methodology' };
+  let currentTab = 1;
+  const initCallbacks = { 1: null, 2: null, 3: null, 4: null };
+
+  function registerInit(tabNum, fn) { initCallbacks[tabNum] = fn; }
+
+  function switchTab(tabNum) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.main-tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabIds[tabNum]).style.display = 'block';
+    document.querySelector(`[data-tab="${tabNum}"]`).classList.add('active');
+    currentTab = tabNum;
+    history.replaceState(null, '', hashMap[tabNum]);
+
+    // Lazy init
+    if (initCallbacks[tabNum]) {
+      initCallbacks[tabNum]();
+      initCallbacks[tabNum] = null; // only once
+    }
+  }
+
+  function goTo(tabNum, anchorId) {
+    switchTab(tabNum);
+    if (anchorId) {
+      setTimeout(() => {
+        const el = document.getElementById(anchorId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          el.classList.add('highlight-flash');
+          setTimeout(() => el.classList.remove('highlight-flash'), 1200);
+        }
+      }, 100);
+    }
+  }
+
+  function initFromHash() {
+    const hash = location.hash.replace('#', '');
+    if (tabs[hash]) switchTab(tabs[hash]);
+  }
+
+  return { switchTab, goTo, registerInit, initFromHash };
+})();
+
+// ══════════════════════════════════════════════════════════════
+// SECTION 1-2: LOAN CONFIGURATION & AMORTIZATION (from math explainer)
+// ══════════════════════════════════════════════════════════════
+const usd = (n, d = 0) => '$' + Math.abs(n).toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+let _btcAmt = 1.0;
+let _dpPct  = 0.30;
+let _term   = 12;
+
+function normCDF(x) {
+  const a = 0.2316419, b1 = 0.319381530, b2 = -0.356563782,
+        b3 = 1.781477937, b4 = -1.821255978, b5 = 1.330274429;
+  const t = 1 / (1 + a * Math.abs(x));
+  const poly = t*(b1+t*(b2+t*(b3+t*(b4+t*b5))));
+  const pdf = Math.exp(-0.5*x*x) / Math.sqrt(2*Math.PI);
+  const cdf = 1 - pdf * poly;
+  return x >= 0 ? cdf : 1 - cdf;
+}
+
+function bsPut(S, K, r, T, sigma) {
+  if (T <= 0 || sigma <= 0) return Math.max(0, K * Math.exp(-r*T) - S);
+  const d1 = (Math.log(S/K) + (r + sigma*sigma/2)*T) / (sigma*Math.sqrt(T));
+  const d2 = d1 - sigma*Math.sqrt(T);
+  return K*Math.exp(-r*T)*normCDF(-d2) - S*normCDF(-d1);
+}
+
+function calc() {
+  const S       = +document.getElementById('btcprice').value;
+  const amt     = _btcAmt;
+  const dpPct   = _dpPct;
+  const n       = _term;
+  const annRate = +document.getElementById('apr').value / 100;
+  const sigma   = +document.getElementById('iv').value / 100;
+  const r       = annRate / 12;
+  const rfr     = 0.05;
+  const T       = n / 12;
+
+  document.getElementById('lbl-btcprice').textContent = usd(S);
+  document.getElementById('lbl-apr').textContent      = (annRate*100).toFixed(1) + '%';
+  document.getElementById('lbl-iv').textContent       = Math.round(sigma*100) + '%';
+
+  const total     = S * amt;
+  const down      = total * dpPct;
+  const principal = total - down;
+  const M         = principal * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
+  const totalCost = M * n;
+  const totalInt  = totalCost - principal;
+  const putPrice  = bsPut(total, principal, rfr, T, sigma);
+  const putPct    = (putPrice / principal) * 100;
+  const upfront   = down + putPrice;
+  const entryPct  = (upfront / total) * 100;
+
+  document.getElementById('out-total').textContent     = usd(total);
+  document.getElementById('out-down').textContent      = usd(down);
+  document.getElementById('out-financed').textContent  = usd(principal);
+  document.getElementById('out-monthly').textContent   = usd(M);
+  document.getElementById('out-totalint').textContent  = usd(totalInt);
+  document.getElementById('out-totalcost').textContent = usd(totalCost);
+
+  document.getElementById('loan-formula').innerHTML = `
+    <span class="var">${amt.toFixed(1)} BTC</span> × <span class="var">${usd(S)}</span> = <span class="result">${usd(total)}</span><span class="comment"> (total value)</span><br>
+    <span class="result">${usd(total)}</span> × ${Math.round(dpPct*100)}% = <span class="var">${usd(down)}</span><span class="comment"> (down payment)</span><br>
+    <span class="result">${usd(total)}</span> − <span class="var">${usd(down)}</span> = <span class="result">${usd(principal)}</span><span class="comment"> (financed / strike)</span>
+  `;
+
+  document.getElementById('put-strike').textContent       = usd(principal);
+  document.getElementById('put-premium-pct').textContent  = putPct.toFixed(2) + '%';
+  document.getElementById('put-premium-usd').textContent  = usd(putPrice);
+  document.getElementById('put-total-upfront').textContent = usd(upfront);
+  document.getElementById('put-entry-pct').textContent    = entryPct.toFixed(1) + '%';
+
+  const badge = document.getElementById('scenario-badge');
+  if (total >= principal) {
+    badge.className   = 'scenario-badge safe';
+    badge.textContent = '● BTC above strike — PUT expires worthless';
+  } else {
+    badge.className   = 'scenario-badge danger';
+    badge.textContent = '● BTC below strike — PUT pays out';
+  }
+
+  // Deribit row
+  if (typeof interpolateMark === 'undefined') {
+    ['deribit-nearest-strike','deribit-mark','deribit-mark-pct','deribit-iv-sub','deribit-snap-date','put-data-source','deribit-iv-inline']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = id === 'put-data-source' ? '● Loading...' : '—'; });
+  } else {
+    const table    = livePrices || DERIBIT_SNAPSHOT.puts;
+    const snapSpot = livePrices ? window._liveSpot : DERIBIT_SNAPSHOT.spot;
+    const isLive   = !!livePrices;
+
+    const listedStrikes = Object.keys(table).map(Number).sort((a, b) => a - b);
+    const nearest   = listedStrikes.reduce((p, c) => Math.abs(c - principal) < Math.abs(p - principal) ? c : p);
+    const chainIV   = table[nearest]?.iv ?? null;
+    const chainSigma = chainIV !== null ? chainIV / 100 : sigma;
+
+    const ivSlider = document.getElementById('iv');
+    if (!ivSlider.dataset.userSet && chainIV !== null) {
+      const snapped = Math.round(chainIV / 5) * 5;
+      ivSlider.value = snapped;
+      document.getElementById('lbl-iv').textContent = snapped + '%';
     }
 
-    const tier1 = parseCSV(TIER1_CSV);
-    const tier2 = parseCSV(TIER2_CSV);
-    const tier3 = parseCSV(TIER3_CSV);
-
-    function computeStats(data) {
-      const n = data.length;
-      const sorted_savings = data.map(r => r.roll_savings).sort((a, b) => a - b);
-      const sorted_pct = data.map(r => r.roll_savings / r.initial_premium * 100)
-                             .sort((a, b) => a - b);
-      const percentile = (arr, p) => arr[Math.floor(arr.length * p / 100)];
-
-      const putCostPcts = data.map(r => r.initial_premium / r.spot * 100).sort((a, b) => a - b);
-      const rollingNetCostPcts = data.map(r => (r.initial_premium - r.roll_savings) / r.spot * 100).sort((a, b) => a - b);
-
-      return {
-        count: n,
-        avgPremium: data.reduce((s, r) => s + r.initial_premium, 0) / n,
-        avgRecoveryPct: data.reduce((s, r) => s + r.roll_savings / r.initial_premium * 100, 0) / n,
-        medianRecoveryPct: percentile(sorted_pct, 50),
-        avgRollSavings: data.reduce((s, r) => s + r.roll_savings, 0) / n,
-        medianRollSavings: percentile(sorted_savings, 50),
-        avgRolls: data.reduce((s, r) => s + r.num_rolls, 0) / n,
-        p25Pct: percentile(sorted_pct, 25),
-        p75Pct: percentile(sorted_pct, 75),
-        avgPutCostPct: data.reduce((s, r) => s + r.initial_premium / r.spot * 100, 0) / n,
-        medianPutCostPct: percentile(putCostPcts, 50),
-        avgRollingNetCostPct: data.reduce((s, r) => s + (r.initial_premium - r.roll_savings) / r.spot * 100, 0) / n,
-        medianRollingNetCostPct: percentile(rollingNetCostPcts, 50),
-      };
-    }
-
-    function renderStats(containerId, stats, isTier3) {
-      const fmt = (v, dec=0) => v.toLocaleString('en-US', {
-        minimumFractionDigits: dec, maximumFractionDigits: dec
-      });
-
-      let html = `
-        <div class="stat"><span class="stat-label">${isTier3 ? 'Paths' : 'Loans'}</span>
-          <span class="stat-value">${stats.count}</span></div>
-        <div class="stat"><span class="stat-label">Avg Premium</span>
-          <span class="stat-value">$${fmt(stats.avgPremium)}</span></div>
-        <div class="stat"><span class="stat-label">Avg Roll Savings</span>
-          <span class="stat-value" style="color:#22d3a6">$${fmt(stats.avgRollSavings)}</span></div>
-        <div class="stat"><span class="stat-label">Avg Recovery</span>
-          <span class="stat-value" style="color:#F25E13">${fmt(stats.avgRecoveryPct, 1)}%</span></div>
-        <div class="stat"><span class="stat-label">PUT Cost % of BTC</span>
-          <span class="stat-value">${fmt(stats.avgPutCostPct, 2)}%</span></div>
-        <div class="stat"><span class="stat-label">Net Cost % of BTC</span>
-          <span class="stat-value" style="color:#22d3a6">${fmt(stats.avgRollingNetCostPct, 2)}%</span></div>
-      `;
-      document.getElementById(containerId).innerHTML = html;
-    }
-
-    function renderTimeSeries(divId, data, title) {
-      const dates = data.map(r => r.start_date);
-      const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
-      const spots = data.map(r => r.spot);
-      const avgRecovery = recoveryPct.reduce((s, v) => s + v, 0) / recoveryPct.length;
-      const hoverText = data.map(r =>
-        `Date: ${r.start_date}<br>` +
-        `Entry Spot: $${r.spot.toLocaleString()}<br>` +
-        `Premium: $${r.initial_premium.toLocaleString()}<br>` +
-        `PUT Cost (% of BTC): ${(r.initial_premium / r.spot * 100).toFixed(2)}%<br>` +
-        `Roll Savings: $${r.roll_savings.toLocaleString()}<br>` +
-        `Recovery: ${(r.roll_savings / r.initial_premium * 100).toFixed(1)}%<br>` +
-        `Net Cost After Rolling (% of BTC): ${((r.initial_premium - r.roll_savings) / r.spot * 100).toFixed(2)}%`
-      );
-
-      const trace1 = {
-        x: dates, y: recoveryPct,
-        type: 'scatter', mode: 'markers',
-        name: '% of Premium Recovered',
-        marker: { size: 5, color: '#F25E13', opacity: 0.7 },
-        text: hoverText, hoverinfo: 'text',
-        yaxis: 'y1',
-      };
-
-      const trace2 = {
-        x: dates, y: spots,
-        type: 'scatter', mode: 'lines',
-        name: 'BTC Spot Price',
-        line: { color: 'rgba(107,122,150,0.5)', width: 1.5 },
-        yaxis: 'y2',
-        hoverinfo: 'skip',
-      };
-
-      const traceAvg = {
-        x: [dates[0], dates[dates.length - 1]],
-        y: [avgRecovery, avgRecovery],
-        type: 'scatter', mode: 'lines',
-        name: `Average (${avgRecovery.toFixed(1)}%)`,
-        line: { color: '#22d3a6', width: 2, dash: 'dot' },
-        hoverinfo: 'skip',
-        yaxis: 'y1',
-      };
-
-      const layout = {
-        title: { text: title, font: { size: 14, color: '#6b7a96', family: 'IBM Plex Mono' } },
-        xaxis: { title: 'Loan Start Date', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-        yaxis: {
-          title: '% of Premium Recovered',
-          zeroline: false,
-          color: '#6b7a96', gridcolor: '#1a2540',
-          tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 },
-          titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 },
-        },
-        yaxis2: {
-          title: { text: 'BTC Spot ($)', standoff: 15 },
-          overlaying: 'y', side: 'right',
-          showgrid: false,
-          tickformat: '$,.0f',
-          color: '#6b7a96',
-          tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 },
-          titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 },
-        },
-        legend: { x: 0, y: -0.22, orientation: 'h', font: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, traceorder: 'normal', itemwidth: 30 },
-        margin: { t: 50, b: 100, l: 60, r: 100 },
-        hovermode: 'closest',
-        plot_bgcolor: 'rgba(0,0,0,0)',
-        paper_bgcolor: 'rgba(0,0,0,0)',
-      };
-
-      Plotly.newPlot(divId, [trace2, traceAvg, trace1], layout,
-        { responsive: true, displayModeBar: false });
-    }
-
-    function renderHistogram(divId, data) {
-      const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
-      const avgPct = recoveryPct.reduce((s, v) => s + v, 0) / recoveryPct.length;
-
-      const trace = {
-        x: recoveryPct, type: 'histogram',
-        xbins: { size: 5 },
-        marker: { color: 'rgba(242, 94, 19, 0.6)', line: { color: 'rgba(242, 94, 19, 0.9)', width: 1 } },
-        name: '% of Premium Recovered',
-      };
-
-      const sorted = [...recoveryPct].sort((a, b) => a - b);
-      const pctl = (p) => sorted[Math.floor(sorted.length * p / 100)];
-      const pctiles = [
-        { p: 25, v: pctl(25) },
-        { p: 50, v: pctl(50) },
-        { p: 75, v: pctl(75) },
-      ];
-
-      const shapes = [
-        ...pctiles.map(({ v }) => ({
-          type: 'line', x0: v, x1: v, y0: 0, y1: 1, yref: 'paper',
-          line: { color: '#6b7a96', width: 1.5, dash: 'dash' },
-        })),
-        {
-          type: 'line', x0: avgPct, x1: avgPct, y0: 0, y1: 1, yref: 'paper',
-          line: { color: '#22d3a6', width: 2, dash: 'dot' },
-        },
-      ];
-
-      const annotations = [
-        ...pctiles.map(({ p, v }, i) => ({
-          x: v, y: 1.0 - i * 0.06, yref: 'paper', xanchor: 'left', xshift: 6,
-          text: `P${p}: ${v.toFixed(1)}%`,
-          showarrow: false, font: { size: 11, color: '#e8eaf0', family: 'IBM Plex Mono' },
-        })),
-        {
-          x: avgPct, y: 1.0 - pctiles.length * 0.06, yref: 'paper',
-          xanchor: 'left', xshift: 6,
-          text: `Avg: ${avgPct.toFixed(1)}%`,
-          showarrow: false, font: { size: 11, color: '#22d3a6', family: 'IBM Plex Mono' },
-        },
-      ];
-
-      const layout = {
-        title: { text: 'Distribution of Premium Recovery (%)', font: { size: 14, color: '#6b7a96', family: 'IBM Plex Mono' } },
-        xaxis: { title: '% of Premium Recovered', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-        yaxis: { title: 'Count', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-        shapes, annotations,
-        margin: { t: 50, b: 80, l: 60, r: 40 },
-        plot_bgcolor: 'rgba(0,0,0,0)',
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        showlegend: false,
-      };
-
-      Plotly.newPlot(divId, [trace], layout,
-        { responsive: true, displayModeBar: false });
-    }
-
-    function renderScatter(divId, data) {
-      const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
-      const avgPct = recoveryPct.reduce((s, v) => s + v, 0) / recoveryPct.length;
-      const hoverText = data.map((r, i) =>
-        `Final Spot: $${r.final_spot.toLocaleString()}<br>` +
-        `PUT Cost (% of BTC): ${(r.initial_premium / r.spot * 100).toFixed(2)}%<br>` +
-        `Roll Savings: $${r.roll_savings.toLocaleString()}<br>` +
-        `Recovery: ${recoveryPct[i].toFixed(1)}%<br>` +
-        `Net Cost (% of BTC): ${((r.initial_premium - r.roll_savings) / r.spot * 100).toFixed(2)}%<br>` +
-        `Rolls: ${r.num_rolls}`
-      );
-
-      const trace = {
-        x: data.map(r => r.final_spot),
-        y: recoveryPct,
-        type: 'scatter', mode: 'markers',
-        marker: {
-          size: 5, opacity: 0.6,
-          color: recoveryPct,
-          colorscale: [[0, 'rgba(242,94,19,0.3)'], [1, 'rgba(242,94,19,1)']],
-          showscale: true,
-          colorbar: { title: 'Recovery %', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, outlinecolor: '#1a2540', bordercolor: '#1a2540' },
-        },
-        text: hoverText, hoverinfo: 'text',
-      };
-
-      const spots = data.map(r => r.final_spot);
-      const avgLine = {
-        x: [Math.min(...spots), Math.max(...spots)],
-        y: [avgPct, avgPct],
-        type: 'scatter', mode: 'lines',
-        name: `Average (${avgPct.toFixed(1)}%)`,
-        line: { color: '#22d3a6', width: 2, dash: 'dot' },
-        hoverinfo: 'skip',
-      };
-
-      const layout = {
-        title: { text: 'Premium Recovery vs Final BTC Price', font: { size: 14, color: '#6b7a96', family: 'IBM Plex Mono' } },
-        xaxis: { title: 'Final BTC Spot Price ($)', tickformat: '$,.0f', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-        yaxis: { title: '% of Premium Recovered', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-        margin: { t: 50, b: 100, l: 60, r: 40 },
-        hovermode: 'closest',
-        plot_bgcolor: 'rgba(0,0,0,0)',
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        legend: { x: 0, y: -0.22, orientation: 'h', font: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, traceorder: 'normal', itemwidth: 30 },
-      };
-
-      Plotly.newPlot(divId, [avgLine, trace], layout,
-        { responsive: true, displayModeBar: false });
-    }
-
-    const rendered = { 1: false, 2: false, 3: false };
-
-    function switchTier(tier) {
-      document.querySelectorAll('.tier-content').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById('tier-' + tier).style.display = 'block';
-      document.querySelector('[data-tier="' + tier + '"]').classList.add('active');
-
-      if (!rendered[tier]) {
-        renderTier(tier);
-        rendered[tier] = true;
-      }
-    }
-
-    function renderTier(tier) {
-      if (tier === 1) {
-        renderStats('stats-1', computeStats(tier1), false);
-        renderTimeSeries('chart-1-1', tier1, 'Historical Backtest — Premium Recovery by Start Date');
-      } else if (tier === 2) {
-        renderStats('stats-2', computeStats(tier2), false);
-        renderTimeSeries('chart-2-1', tier2, 'Recent Loans — Premium Recovery by Start Date');
+    const rawMark = interpolateMark(table, principal);
+    const fullT = _term / 12;
+    let deribitMark = null;
+    if (rawMark !== null) {
+      const spotRatio = snapSpot > 0 ? total / snapSpot : 1;
+      const adjStrike = principal / Math.max(0.1, spotRatio);
+      const adjMark   = interpolateMark(table, adjStrike);
+      if (adjMark !== null) {
+        const factor = Math.min(Math.max(adjMark / Math.max(1, rawMark), 0.1), 3);
+        deribitMark = Math.max(0, rawMark * factor);
       } else {
-        renderStats('stats-3', computeStats(tier3), true);
-        renderHistogram('chart-3-1', tier3);
-        renderScatter('chart-3-2', tier3);
+        deribitMark = rawMark;
       }
     }
+    const deribitMarkPct = deribitMark !== null ? (deribitMark / principal * 100) : null;
 
-    // Render Tier 1 on page load
-    switchTier(1);
-  </script>
+    if (chainIV !== null) {
+      document.getElementById('deribit-iv-inline').textContent     = chainIV.toFixed(1) + '%';
+      document.getElementById('deribit-nearest-strike').textContent = '$' + nearest.toLocaleString() + ' · IV ' + chainIV.toFixed(1) + '%';
+      document.getElementById('deribit-iv-sub').textContent         = 'implied vol from chain';
+    } else {
+      document.getElementById('deribit-iv-inline').textContent     = '—';
+      document.getElementById('deribit-nearest-strike').textContent = '$' + nearest.toLocaleString();
+      document.getElementById('deribit-iv-sub').textContent         = 'IV not available';
+    }
+
+    if (deribitMark !== null) {
+      document.getElementById('deribit-mark').textContent     = usd(deribitMark);
+      document.getElementById('deribit-mark-pct').textContent = (deribitMark / total * 100).toFixed(2) + '% of spot';
+    } else {
+      document.getElementById('deribit-mark').textContent     = '—';
+      document.getElementById('deribit-mark-pct').textContent = '';
+    }
+
+    const snapLabel = isLive ? 'Live' : 'Snapshot ' + DERIBIT_SNAPSHOT.capturedAt;
+    document.getElementById('deribit-snap-date').textContent = snapLabel;
+    document.getElementById('put-data-source').textContent   = isLive ? '● Live Deribit data' : '● Snapshot: ' + DERIBIT_SNAPSHOT.capturedAt;
+    document.getElementById('put-data-source').style.color   = isLive ? 'var(--green)' : 'var(--muted)';
+
+    window._deribitMark = deribitMark;
+    window._chainIV     = chainSigma;
+  }
+
+  // Amortization table
+  let bal = principal;
+  const tbody = document.getElementById('amort-body');
+  tbody.innerHTML = '';
+  for (let t = 1; t <= n; t++) {
+    const int   = bal * r;
+    const princ = M - int;
+    bal -= princ;
+    const paidPct = ((1 - Math.max(0, bal) / principal) * 100).toFixed(1);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t}</td><td>${usd(M)}</td><td>${usd(princ)}</td><td>${usd(int)}</td><td>${usd(Math.max(0, bal))}</td><td style="color:var(--green)">${paidPct}%</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// ── DERIBIT PRICING ENGINE ──
+const DERIBIT_SNAPSHOT = {
+  expiry: 'BTC-26MAR27',
+  spot: 68247,
+  capturedAt: '2026-03-27',
+  puts: {
+    40000: { bid: 3163.27, mark: 3229.17, ask: 3295.07, iv: 61.3 },
+    50000: { bid: 5700.59, mark: 5782.97, ask: 5865.34, iv: 56.6 },
+    55000: { bid: 7446.86, mark: 7545.72, ask: 7644.57, iv: 55.1 },
+    56000: { bid: 7809.47, mark: 7924.80, ask: 8040.13, iv: 54.7 },
+    58000: { bid: 8666.21, mark: 8765.07, ask: 8863.92, iv: 54.4 },
+    60000: { bid: 9522.94, mark: 9621.80, ask: 9720.65, iv: 53.9 },
+    62000: { bid: 10445.58, mark: 10544.44, ask: 10643.29, iv: 53.6 },
+    64000: { bid: 11335.57, mark: 11467.38, ask: 11599.19, iv: 52.9 },
+    66000: { bid: 12390.05, mark: 12505.38, ask: 12620.71, iv: 52.7 },
+    68000: { bid: 13444.09, mark: 13559.42, ask: 13674.75, iv: 52.4 },
+    70000: { bid: 14564.43, mark: 14679.76, ask: 14795.09, iv: 52.1 },
+    72000: { bid: 15684.77, mark: 15816.58, ask: 15948.38, iv: 51.8 },
+    74000: { bid: 16871.01, mark: 17002.82, ask: 17134.62, iv: 51.5 },
+    76000: { bid: 18057.26, mark: 18254.97, ask: 18452.67, iv: 51.1 },
+    78000: { bid: 19375.87, mark: 19557.11, ask: 19738.34, iv: 51.0 },
+    80000: { bid: 20627.15, mark: 20841.33, ask: 21055.51, iv: 50.6 },
+    82000: { bid: 22044.35, mark: 22225.59, ask: 22406.82, iv: 50.7 },
+    84000: { bid: 23329.11, mark: 23526.82, ask: 23724.52, iv: 50.1 },
+    86000: { bid: 24745.99, mark: 24993.12, ask: 25240.25, iv: 50.0 },
+    88000: { bid: 26195.82, mark: 26426.48, ask: 26657.13, iv: 49.8 },
+    90000: { bid: 27645.65, mark: 27876.31, ask: 28106.96, iv: 49.6 },
+    92000: { bid: 29161.39, mark: 29441.30, ask: 29721.21, iv: 49.5 },
+  }
+};
+
+let livePrices = null;
+let priceSource = 'bs';
+
+function interpolateMark(priceTable, strike) {
+  const strikes = Object.keys(priceTable).map(Number).sort((a, b) => a - b);
+  if (strike <= strikes[0]) return priceTable[strikes[0]].mark;
+  if (strike >= strikes[strikes.length - 1]) return priceTable[strikes[strikes.length - 1]].mark;
+  for (let i = 0; i < strikes.length - 1; i++) {
+    const lo = strikes[i], hi = strikes[i + 1];
+    if (strike >= lo && strike <= hi) {
+      const t = (strike - lo) / (hi - lo);
+      return priceTable[lo].mark + t * (priceTable[hi].mark - priceTable[lo].mark);
+    }
+  }
+  return null;
+}
+
+function scaleByTime(fullMark, fullT, remainingT, sf) {
+  return fullMark * Math.sqrt(remainingT / fullT) * sf;
+}
+
+function getPutPrice(strike, T, spot, sigma, rfr, sf = 1.0) {
+  const table      = livePrices || DERIBIT_SNAPSHOT.puts;
+  const snapSpot   = livePrices ? window._liveSpot : DERIBIT_SNAPSHOT.spot;
+  const chainSigma = window._chainIV || sigma;
+  if (priceSource !== 'bs' && table) {
+    const rawMark = interpolateMark(table, strike);
+    if (rawMark !== null) {
+      const spotRatio = snapSpot > 0 ? spot / snapSpot : 1;
+      const adjStrike = strike / Math.max(0.1, spotRatio);
+      const adjMark   = interpolateMark(table, adjStrike);
+      let mark = rawMark;
+      if (adjMark !== null) {
+        const factor = Math.min(Math.max(adjMark / Math.max(1, rawMark), 0.1), 3);
+        mark = rawMark * factor;
+      }
+      return Math.max(0, mark) * sf;
+    }
+  }
+  return bsPut(spot, strike, rfr, T, sigma) * sf;
+}
+
+const EXPIRY_MAP = {
+  inverse: { 3: 'BTC-27JUN26', 6: 'BTC-25SEP26', 9: 'BTC-25DEC26', 12: 'BTC-26MAR27' },
+  linear:  { 3: 'BTC_USDC-26JUN26' },
+};
+
+function getContractType() { return _btcAmt < 0.1 ? 'linear' : 'inverse'; }
+function getExpiry() {
+  const map = EXPIRY_MAP[getContractType()];
+  return map[_term] || null;
+}
+
+async function fetchDeribitPrices() {
+  const expiry = getExpiry();
+  const isLinear = getContractType() === 'linear';
+  if (!expiry) return;
+  try {
+    const strikes = isLinear
+      ? [30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,100000]
+      : [40000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000];
+    const probe = await fetch(
+      `https://www.deribit.com/api/v2/public/get_order_book?instrument_name=${expiry}-${isLinear ? 60000 : 70000}-P`,
+      { signal: AbortSignal.timeout(4000) }
+    );
+    if (!probe.ok) throw new Error('API unreachable');
+    const results = await Promise.allSettled(
+      strikes.map(k =>
+        fetch(`https://www.deribit.com/api/v2/public/get_order_book?instrument_name=${expiry}-${k}-P`, {
+          signal: AbortSignal.timeout(4000)
+        }).then(r => r.json())
+      )
+    );
+    const table = {};
+    let spot = null;
+    results.forEach((r, i) => {
+      if (r.status === 'fulfilled' && r.value?.result) {
+        const d = r.value.result;
+        const k = strikes[i];
+        const indexPrice = d.index_price || d.underlying_price || DERIBIT_SNAPSHOT.spot;
+        if (!spot) spot = indexPrice;
+        const markUSD = isLinear ? (d.mark_price || 0) : (d.mark_price || 0) * indexPrice;
+        table[k] = {
+          bid:  isLinear ? (d.best_bid_price || 0) : (d.best_bid_price || 0) * indexPrice,
+          mark: markUSD,
+          ask:  isLinear ? (d.best_ask_price || 0) : (d.best_ask_price || 0) * indexPrice,
+          iv:   d.mark_iv || 0,
+        };
+      }
+    });
+    if (Object.keys(table).length > 3) {
+      livePrices = table;
+      window._liveSpot = spot || DERIBIT_SNAPSHOT.spot;
+      priceSource = 'live';
+      calc();
+    } else {
+      throw new Error('Insufficient data');
+    }
+  } catch (e) {
+    livePrices = null;
+    priceSource = 'snapshot';
+  }
+}
+
+function selectBTCAmt(amt, btn) {
+  _btcAmt = amt;
+  document.querySelectorAll('[onclick^="selectBTCAmt"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('lbl-btcamt').textContent = amt + ' BTC';
+  if (amt <= 0.01) {
+    _term = 3;
+    updateTermButtons([3]);
+  } else {
+    updateTermButtons([3, 6, 9, 12]);
+    if (_term === 3) {
+      _term = 12;
+      document.querySelectorAll('[onclick^="selectTerm"]').forEach(b => {
+        b.classList.toggle('active', parseInt(b.textContent) === 12);
+      });
+      document.getElementById('lbl-term').textContent = '12 months';
+    }
+  }
+  livePrices = null;
+  fetchDeribitPrices();
+  calc();
+}
+
+function selectDP2(pct, btn) {
+  _dpPct = pct / 100;
+  document.querySelectorAll('[onclick^="selectDP2"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('lbl-dp').textContent = pct + '%';
+  calc();
+}
+
+function selectTerm(mo, btn) {
+  _term = mo;
+  document.querySelectorAll('[onclick^="selectTerm"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('lbl-term').textContent = mo + ' months';
+  fetchDeribitPrices();
+  calc();
+}
+
+function updateTermButtons(available) {
+  document.querySelectorAll('[onclick^="selectTerm"]').forEach(btn => {
+    const mo = parseInt(btn.textContent);
+    const enabled = available.includes(mo);
+    btn.disabled = !enabled;
+    btn.style.opacity = enabled ? '1' : '0.3';
+    btn.style.cursor  = enabled ? 'pointer' : 'not-allowed';
+    if (!enabled) btn.classList.remove('active');
+  });
+  if (!available.includes(_term)) {
+    _term = available[available.length - 1];
+    const activeBtn = [...document.querySelectorAll('[onclick^="selectTerm"]')]
+      .find(b => parseInt(b.textContent) === _term);
+    if (activeBtn) activeBtn.classList.add('active');
+  }
+  document.getElementById('lbl-term').textContent = _term + ' months';
+}
+
+async function fetchBTCSpot() {
+  const el = document.getElementById('live-spot-price');
+  try {
+    const res = await fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot', { signal: AbortSignal.timeout(4000) });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const price = parseFloat(data.data.amount);
+    if (!isNaN(price)) {
+      el.textContent = '$' + Math.round(price).toLocaleString();
+      el.style.color = 'var(--green)';
+      const slider = document.getElementById('btcprice');
+      const clamped = Math.min(Math.max(Math.round(price / 1000) * 1000, +slider.min), +slider.max);
+      slider.value = clamped;
+      document.getElementById('lbl-btcprice').textContent = '$' + clamped.toLocaleString();
+      calc(); return;
+    }
+  } catch(e) {}
+  try {
+    const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', { signal: AbortSignal.timeout(4000) });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const price = parseFloat(data.price);
+    if (!isNaN(price)) {
+      el.textContent = '$' + Math.round(price).toLocaleString();
+      el.style.color = 'var(--green)';
+      const slider = document.getElementById('btcprice');
+      const clamped = Math.min(Math.max(Math.round(price / 1000) * 1000, +slider.min), +slider.max);
+      slider.value = clamped;
+      document.getElementById('lbl-btcprice').textContent = '$' + clamped.toLocaleString();
+      calc(); return;
+    }
+  } catch(e) {}
+  el.textContent = 'Unavailable';
+  el.style.color = 'var(--muted)';
+}
+
+// ══════════════════════════════════════════════════════════════
+// TAB 1 CONTROLLER — Section 3: PUT Roll-Down with Real Data
+// ══════════════════════════════════════════════════════════════
+const Tab1 = (() => {
+  let currentPath = null;
+  const LTV = 0.70, TERM = 12, APR = 0.10;
+
+  function computeAmortization(spot) {
+    const principal = spot * LTV;
+    const r = APR / 12;
+    const n = TERM;
+    const M = principal * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    const balances = [principal];
+    let bal = principal;
+    for (let t = 1; t <= n; t++) {
+      const interest = bal * r;
+      bal -= (M - interest);
+      balances.push(Math.max(0, bal));
+    }
+    return { principal, M, balances, totalInterest: M * n - principal };
+  }
+
+  function reconstructRollSchedule(numRolls, balances) {
+    const n = TERM;
+    const rollMonths = [];
+    if (numRolls >= 1) {
+      const spacing = Math.floor(n / (numRolls + 1));
+      for (let i = 1; i <= numRolls; i++) {
+        const m = Math.min(i * spacing, n - 1);
+        if (m > 0 && m < n) rollMonths.push(m);
+      }
+    }
+    const strikes = new Array(n + 1).fill(null);
+    let prevMonth = 0;
+    let currentStrike = balances[0];
+    for (const rm of rollMonths) {
+      for (let m = prevMonth; m < rm; m++) strikes[m] = currentStrike;
+      currentStrike = balances[rm];
+      prevMonth = rm;
+    }
+    for (let m = prevMonth; m <= n; m++) strikes[m] = currentStrike;
+    return { rollMonths, strikes };
+  }
+
+  function reconstructCashFlows(path, amort, rollSchedule) {
+    const { initial_premium, roll_savings, num_rolls } = path;
+    const { principal } = amort;
+    const { rollMonths } = rollSchedule;
+    const n = TERM;
+    const savingsPerRoll = num_rolls > 0 ? roll_savings / num_rolls : 0;
+
+    const flows = [];
+    let running = -initial_premium;
+    flows.push({ month: 0, label: `Buy $${fmtK(principal)} PUT (12mo)`, flow: -initial_premium, running });
+
+    let currentStrike = principal;
+    for (let i = 0; i < rollMonths.length; i++) {
+      const rm = rollMonths[i];
+      const moLeft = n - rm;
+      const newStrike = amort.balances[rm];
+      const sellValue = savingsPerRoll;
+      running += sellValue;
+      flows.push({ month: rm, label: `Sell ${fmtK(currentStrike)} PUT (${moLeft}mo left)`, flow: +sellValue, running });
+      currentStrike = newStrike;
+    }
+
+    flows.push({ month: n, label: `${fmtK(currentStrike)} PUT expires`, flow: 0, running });
+    return flows;
+  }
+
+  function fmtK(v) { return '$' + Math.round(v / 1000) + 'K'; }
+  function fmtUSD(v) { return '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+  function renderPath(path) {
+    currentPath = path;
+    const spot = path.spot;
+    const amort = computeAmortization(spot);
+    const rollSchedule = reconstructRollSchedule(path.num_rolls, amort.balances);
+
+    // Badge
+    const tierLabels = {
+      1: 'Full Historical Backtest',
+      2: 'Historical Entry + Simulated Forward',
+      3: 'Full Monte Carlo Simulation',
+    };
+    const tierEl = document.querySelector('#path-badge .badge-tier');
+    tierEl.className = `badge-tier tier-${path.tier}`;
+    tierEl.textContent = `TIER ${path.tier}`;
+    const dateStr = path.start_date || 'Today';
+    document.getElementById('path-badge-text').textContent =
+      `${tierLabels[path.tier]} — ${path.tier === 3 ? "Starting from today's" : 'Loan started ' + dateStr + ','} BTC at $${Math.round(spot).toLocaleString()}`;
+
+    // Debt vs Strike chart (Plotly)
+    const months = Array.from({ length: TERM + 1 }, (_, i) => i === 0 ? 'Start' : `Mo.${i}`);
+    const debtTrace = {
+      x: months, y: amort.balances,
+      type: 'scatter', mode: 'lines+markers',
+      name: 'Debt Balance',
+      line: { color: '#F25E13', width: 2.5 },
+      marker: { size: 5, color: '#F25E13' },
+      fill: 'tozeroy',
+      fillcolor: 'rgba(242,94,19,0.08)',
+    };
+    const strikeTrace = {
+      x: months, y: rollSchedule.strikes,
+      type: 'scatter', mode: 'lines+markers',
+      name: 'PUT Strike',
+      line: { color: '#22d3a6', width: 2, dash: 'dash' },
+      marker: { size: 6, color: '#22d3a6' },
+    };
+    const chartLayout = {
+      margin: { t: 10, b: 50, l: 80, r: 20 },
+      xaxis: { tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, gridcolor: 'rgba(26,37,64,0.6)' },
+      yaxis: {
+        tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 },
+        gridcolor: 'rgba(26,37,64,0.6)',
+        tickformat: '$,.0f',
+      },
+      legend: { x: 0, y: 1.15, orientation: 'h', font: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
+      hovermode: 'x unified',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      paper_bgcolor: 'rgba(0,0,0,0)',
+    };
+    Plotly.newPlot('rolldown-chart', [debtTrace, strikeTrace], chartLayout, { responsive: true, displayModeBar: false });
+
+    // Cash flow timeline
+    const flows = reconstructCashFlows(path, amort, rollSchedule);
+    const timeline = document.getElementById('path-cf-timeline');
+    timeline.innerHTML = '';
+    flows.forEach(ev => {
+      const isPos = ev.flow > 0;
+      const isZero = ev.flow === 0;
+      const flowStr = isZero ? '—' : (isPos ? '+' : '') + fmtUSD(ev.flow);
+      const runStr = '∑ ' + (ev.running >= 0 ? '+' : '−') + fmtUSD(Math.abs(ev.running));
+      timeline.innerHTML += `
+        <div class="cf-event">
+          <div class="cf-month">Mo.${ev.month}</div>
+          <div class="cf-desc">${ev.label}</div>
+          <div class="cf-flow ${isPos ? 'pos' : isZero ? '' : 'neg'}">${flowStr}</div>
+          <div class="cf-running">${runStr}</div>
+        </div>`;
+    });
+
+    // Summary metrics
+    const metricsHtml = `
+      <div class="three-col" style="grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="metric">
+          <div class="metric-label">Initial Premium</div>
+          <div class="metric-value red">${fmtUSD(path.initial_premium)}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Roll Savings</div>
+          <div class="metric-value green">${fmtUSD(path.roll_savings)}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Recovery</div>
+          <div class="metric-value accent">${path.roll_savings_pct.toFixed(1)}%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Num Rolls</div>
+          <div class="metric-value">${path.num_rolls}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Final BTC Spot</div>
+          <div class="metric-value">${'$' + Math.round(path.final_spot).toLocaleString()}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Terminal Payoff</div>
+          <div class="metric-value ${path.terminal_payoff_rolling > 0 ? 'green' : ''}">${fmtUSD(path.terminal_payoff_rolling)}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">PUT Cost % of BTC</div>
+          <div class="metric-value">${path.effective_put_cost_pct.toFixed(2)}%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Net Cost After Roll</div>
+          <div class="metric-value green">${path.rolling_net_cost_pct.toFixed(2)}%</div>
+        </div>
+      </div>
+    `;
+    document.getElementById('path-metrics').innerHTML = metricsHtml;
+  }
+
+  function reshuffle(forceTier) {
+    renderPath(DataStore.getRandomPath(forceTier));
+  }
+
+  function reshuffleFromTier(tier) {
+    renderPath(DataStore.getRandomPath(tier || undefined));
+    Nav.switchTab(1);
+    setTimeout(() => {
+      document.getElementById('section-rolldown').scrollIntoView({ behavior: 'smooth' });
+    }, 150);
+  }
+
+  function onBadgeClick() {
+    if (currentPath) Nav.goTo(2, 'tier-section-' + currentPath.tier);
+  }
+
+  function init() {
+    reshuffle();
+  }
+
+  return { init, reshuffle, reshuffleFromTier, onBadgeClick };
+})();
+
+// ══════════════════════════════════════════════════════════════
+// TAB 2 CONTROLLER — Backtest & Simulations
+// ══════════════════════════════════════════════════════════════
+const Tab2 = (() => {
+  const fmt = (v, dec = 0) => v.toLocaleString('en-US', {
+    minimumFractionDigits: dec, maximumFractionDigits: dec
+  });
+
+  function renderStats(containerId, stats, isTier3) {
+    let html = `
+      <div class="stat"><span class="stat-label">${isTier3 ? 'Paths' : 'Loans'}</span>
+        <span class="stat-value">${stats.count}</span></div>
+      <div class="stat"><span class="stat-label">Avg Premium</span>
+        <span class="stat-value">$${fmt(stats.avgPremium)}</span></div>
+      <div class="stat"><span class="stat-label">Avg Roll Savings</span>
+        <span class="stat-value" style="color:#22d3a6">$${fmt(stats.avgRollSavings)}</span></div>
+      <div class="stat"><span class="stat-label">Avg Recovery</span>
+        <span class="stat-value" style="color:#F25E13">${fmt(stats.avgRecoveryPct, 1)}%</span></div>
+      <div class="stat"><span class="stat-label">PUT Cost % of BTC</span>
+        <span class="stat-value">${fmt(stats.avgPutCostPct, 2)}%</span></div>
+      <div class="stat"><span class="stat-label">Net Cost % of BTC</span>
+        <span class="stat-value" style="color:#22d3a6">${fmt(stats.avgRollingNetCostPct, 2)}%</span></div>
+    `;
+    if (isTier3) {
+      html += `
+        <div class="stat"><span class="stat-label">Median Recovery</span>
+          <span class="stat-value" style="color:#F25E13">${fmt(stats.medianRecoveryPct, 1)}%</span></div>
+        <div class="stat"><span class="stat-label">Paths with Payoff</span>
+          <span class="stat-value" style="color:#22d3a6">${fmt(stats.payoffPct, 1)}%</span></div>
+      `;
+    }
+    document.getElementById(containerId).innerHTML = html;
+  }
+
+  function renderTimeSeries(divId, data, title) {
+    const dates = data.map(r => r.start_date);
+    const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
+    const spots = data.map(r => r.spot);
+    const avgRecovery = recoveryPct.reduce((s, v) => s + v, 0) / recoveryPct.length;
+    const hoverText = data.map(r =>
+      `Date: ${r.start_date}<br>` +
+      `Entry Spot: $${r.spot.toLocaleString()}<br>` +
+      `Premium: $${r.initial_premium.toLocaleString()}<br>` +
+      `PUT Cost (% of BTC): ${(r.initial_premium / r.spot * 100).toFixed(2)}%<br>` +
+      `Roll Savings: $${r.roll_savings.toLocaleString()}<br>` +
+      `Recovery: ${(r.roll_savings / r.initial_premium * 100).toFixed(1)}%<br>` +
+      `Net Cost After Rolling (% of BTC): ${((r.initial_premium - r.roll_savings) / r.spot * 100).toFixed(2)}%`
+    );
+
+    const trace1 = {
+      x: dates, y: recoveryPct,
+      type: 'scatter', mode: 'markers',
+      name: '% of Premium Recovered',
+      marker: { size: 5, color: '#F25E13', opacity: 0.7 },
+      text: hoverText, hoverinfo: 'text', yaxis: 'y1',
+    };
+    const trace2 = {
+      x: dates, y: spots,
+      type: 'scatter', mode: 'lines',
+      name: 'BTC Spot Price',
+      line: { color: 'rgba(107,122,150,0.5)', width: 1.5 },
+      yaxis: 'y2', hoverinfo: 'skip',
+    };
+    const traceAvg = {
+      x: [dates[0], dates[dates.length - 1]],
+      y: [avgRecovery, avgRecovery],
+      type: 'scatter', mode: 'lines',
+      name: `Average (${avgRecovery.toFixed(1)}%)`,
+      line: { color: '#22d3a6', width: 2, dash: 'dot' },
+      hoverinfo: 'skip', yaxis: 'y1',
+    };
+    const layout = {
+      title: { text: title, font: { size: 14, color: '#6b7a96', family: 'IBM Plex Mono' } },
+      xaxis: { title: 'Loan Start Date', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
+      yaxis: { title: '% of Premium Recovered', zeroline: false, color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
+      yaxis2: { title: { text: 'BTC Spot ($)', standoff: 15 }, overlaying: 'y', side: 'right', showgrid: false, tickformat: '$,.0f', color: '#6b7a96', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
+      legend: { x: 0, y: -0.22, orientation: 'h', font: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, traceorder: 'normal', itemwidth: 30 },
+      margin: { t: 50, b: 100, l: 60, r: 100 },
+      hovermode: 'closest',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      paper_bgcolor: 'rgba(0,0,0,0)',
+    };
+    Plotly.newPlot(divId, [trace2, traceAvg, trace1], layout, { responsive: true, displayModeBar: false });
+  }
+
+  function renderHistogram(divId, data) {
+    const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
+    const avgPct = recoveryPct.reduce((s, v) => s + v, 0) / recoveryPct.length;
+
+    const trace = {
+      x: recoveryPct, type: 'histogram',
+      xbins: { size: 5 },
+      marker: { color: 'rgba(242, 94, 19, 0.6)', line: { color: 'rgba(242, 94, 19, 0.9)', width: 1 } },
+      name: '% of Premium Recovered',
+    };
+
+    const sorted = [...recoveryPct].sort((a, b) => a - b);
+    const pctl = (p) => sorted[Math.floor(sorted.length * p / 100)];
+    const pctiles = [
+      { p: 25, v: pctl(25) },
+      { p: 50, v: pctl(50) },
+      { p: 75, v: pctl(75) },
+    ];
+
+    const shapes = [
+      ...pctiles.map(({ v }) => ({
+        type: 'line', x0: v, x1: v, y0: 0, y1: 1, yref: 'paper',
+        line: { color: '#6b7a96', width: 1.5, dash: 'dash' },
+      })),
+      {
+        type: 'line', x0: avgPct, x1: avgPct, y0: 0, y1: 1, yref: 'paper',
+        line: { color: '#22d3a6', width: 2, dash: 'dot' },
+      },
+    ];
+
+    const annotations = [
+      ...pctiles.map(({ p, v }, i) => ({
+        x: v, y: 1.0 - i * 0.06, yref: 'paper', xanchor: 'left', xshift: 6,
+        text: `P${p}: ${v.toFixed(1)}%`,
+        showarrow: false, font: { size: 11, color: '#e8eaf0', family: 'IBM Plex Mono' },
+      })),
+      {
+        x: avgPct, y: 1.0 - pctiles.length * 0.06, yref: 'paper',
+        xanchor: 'left', xshift: 6,
+        text: `Avg: ${avgPct.toFixed(1)}%`,
+        showarrow: false, font: { size: 11, color: '#22d3a6', family: 'IBM Plex Mono' },
+      },
+    ];
+
+    const layout = {
+      title: { text: 'Distribution of Premium Recovery (%)', font: { size: 14, color: '#6b7a96', family: 'IBM Plex Mono' } },
+      xaxis: { title: '% of Premium Recovered', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
+      yaxis: { title: 'Count', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
+      shapes, annotations,
+      margin: { t: 50, b: 80, l: 60, r: 40 },
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      showlegend: false,
+    };
+
+    Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
+  }
+
+  function renderScatter(divId, data) {
+    const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
+    const avgPct = recoveryPct.reduce((s, v) => s + v, 0) / recoveryPct.length;
+    const hoverText = data.map((r, i) =>
+      `Final Spot: $${r.final_spot.toLocaleString()}<br>` +
+      `PUT Cost (% of BTC): ${(r.initial_premium / r.spot * 100).toFixed(2)}%<br>` +
+      `Roll Savings: $${r.roll_savings.toLocaleString()}<br>` +
+      `Recovery: ${recoveryPct[i].toFixed(1)}%<br>` +
+      `Net Cost (% of BTC): ${((r.initial_premium - r.roll_savings) / r.spot * 100).toFixed(2)}%<br>` +
+      `Rolls: ${r.num_rolls}`
+    );
+
+    const trace = {
+      x: data.map(r => r.final_spot),
+      y: recoveryPct,
+      type: 'scatter', mode: 'markers',
+      marker: {
+        size: 5, opacity: 0.6,
+        color: recoveryPct,
+        colorscale: [[0, 'rgba(242,94,19,0.3)'], [1, 'rgba(242,94,19,1)']],
+        showscale: true,
+        colorbar: { title: 'Recovery %', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, outlinecolor: '#1a2540', bordercolor: '#1a2540' },
+      },
+      text: hoverText, hoverinfo: 'text',
+    };
+
+    const spots = data.map(r => r.final_spot);
+    const avgLine = {
+      x: [Math.min(...spots), Math.max(...spots)],
+      y: [avgPct, avgPct],
+      type: 'scatter', mode: 'lines',
+      name: `Average (${avgPct.toFixed(1)}%)`,
+      line: { color: '#22d3a6', width: 2, dash: 'dot' },
+      hoverinfo: 'skip',
+    };
+
+    const layout = {
+      title: { text: 'Premium Recovery vs Final BTC Price', font: { size: 14, color: '#6b7a96', family: 'IBM Plex Mono' } },
+      xaxis: { title: 'Final BTC Spot Price ($)', tickformat: '$,.0f', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
+      yaxis: { title: '% of Premium Recovered', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
+      margin: { t: 50, b: 100, l: 60, r: 40 },
+      hovermode: 'closest',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      legend: { x: 0, y: -0.22, orientation: 'h', font: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, traceorder: 'normal', itemwidth: 30 },
+    };
+
+    Plotly.newPlot(divId, [avgLine, trace], layout, { responsive: true, displayModeBar: false });
+  }
+
+  function renderNarratives(stats1, stats2, stats3) {
+    const tier1Data = DataStore.getTierRows(1);
+    const tier2Data = DataStore.getTierRows(2);
+    const firstSpot1 = tier1Data[0].spot;
+    const lastSpot1 = tier1Data[tier1Data.length - 1].final_spot;
+
+    document.getElementById('narrative-1').innerHTML = `
+      <p>Pure historical backtest during a bull market — BTC rallied from ~$${Math.round(firstSpot1/1000)}k to ~$${Math.round(lastSpot1/1000)}k across <strong>${stats1.count} loans</strong> (March 2023–2025).</p>
+      <p>Average <span class="cross-link" onclick="Nav.goTo(4,'roll-mechanics')">premium recovery</span>: <strong>${stats1.avgRecoveryPct.toFixed(1)}%</strong> — roll savings offset most of the hedging cost.
+      <span class="cross-link" onclick="Tab1.reshuffleFromTier(1)">See example →</span></p>
+    `;
+
+    const firstSpot2 = tier2Data[0].spot;
+    document.getElementById('narrative-2').innerHTML = `
+      <p>Bear market regime — BTC declined from ~$${Math.round(firstSpot2/1000)}k to ~$${Math.round(tier2Data[tier2Data.length-1].spot/1000)}k across <strong>${stats2.count} loans</strong> (March 2025–2026). Incomplete loans extended with 1,000 <span class="cross-link" onclick="Nav.goTo(4,'gbm-calibration')">simulated paths</span> each.</p>
+      <p>Average premium recovery: <strong>${stats2.avgRecoveryPct.toFixed(1)}%</strong> — in downturns the PUTs gain intrinsic value, pushing recovery above 100%.
+      <span class="cross-link" onclick="Tab1.reshuffleFromTier(2)">See example →</span></p>
+    `;
+
+    const tier3Data = DataStore.getTierRows(3);
+    const bullish3 = tier3Data.filter(r => r.final_spot > r.spot).length;
+    const bearish3 = tier3Data.length - bullish3;
+    const bullPct3 = (bullish3 / tier3Data.length * 100).toFixed(0);
+    const bearPct3 = (bearish3 / tier3Data.length * 100).toFixed(0);
+    document.getElementById('narrative-3').innerHTML = `
+      <p><strong>${stats3.count}</strong> <span class="cross-link" onclick="Nav.goTo(4,'gbm-calibration')">Monte Carlo</span> paths from today's spot (~$${Math.round(tier3Data[0].spot).toLocaleString()}) — <strong>${bullPct3}%</strong> bullish, <strong>${bearPct3}%</strong> bearish, reflecting BTC's historical drift and volatility.</p>
+      <p>Average premium recovery: <strong>${stats3.avgRecoveryPct.toFixed(1)}%</strong>.
+      <span class="cross-link" onclick="Tab1.reshuffleFromTier(3)">See example →</span></p>
+    `;
+  }
+
+  function init() {
+    const stats1 = DataStore.getTierStats(1);
+    const stats2 = DataStore.getTierStats(2);
+    const stats3 = DataStore.getTierStats(3);
+
+    renderNarratives(stats1, stats2, stats3);
+
+    renderStats('stats-1', stats1, false);
+    renderTimeSeries('chart-1', DataStore.getTierRows(1), 'Historical Backtest — Premium Recovery by Start Date');
+
+    renderStats('stats-2', stats2, false);
+    renderTimeSeries('chart-2', DataStore.getTierRows(2), 'Recent Loans — Premium Recovery by Start Date');
+
+    renderStats('stats-3', stats3, true);
+    renderScatter('chart-3-scatter', DataStore.getTierRows(3));
+    renderHistogram('chart-3-hist', DataStore.getTierRows(3));
+  }
+
+  return { init };
+})();
+
+// ══════════════════════════════════════════════════════════════
+// REGISTER LAZY INITS & STARTUP
+// ══════════════════════════════════════════════════════════════
+Nav.registerInit(2, Tab2.init);
+Nav.registerInit(3, () => {}); // Tab 3 (Bitmor Math) is static
+Nav.registerInit(4, () => {}); // Tab 4 (Backtest Methodology) is static
+
+// Initialize Tab 1 immediately
+priceSource = 'snapshot';
+calc();
+Tab1.init();
+fetchBTCSpot();
+fetchDeribitPrices();
+
+// Handle initial URL hash and browser back/forward
+Nav.initFromHash();
+window.addEventListener('popstate', Nav.initFromHash);
+</script>
 </body>
 </html>

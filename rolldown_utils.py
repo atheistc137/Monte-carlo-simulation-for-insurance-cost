@@ -156,6 +156,53 @@ def build_iv_tables(surface: pd.DataFrame, price: pd.Series,
     return tables
 
 
+def snap_to_strike(raw_strike: float, spot: float,
+                   min_moneyness: float = 0.50) -> float:
+    """Snap a raw strike price to the nearest Deribit-style listed strike.
+
+    Strike intervals mirror real BTC option exchanges:
+      - Within 20% of spot  → $1,000 intervals
+      - 20–40% from spot    → $2,000 intervals
+      - Beyond 40% from spot → $5,000 intervals
+
+    Enforces a minimum strike floor at max($10,000, min_moneyness * spot),
+    snapped to the $5,000 grid.
+    """
+    # Determine interval based on distance from spot
+    distance_pct = abs(raw_strike - spot) / spot
+    if distance_pct <= 0.20:
+        interval = 1_000
+    elif distance_pct <= 0.40:
+        interval = 2_000
+    else:
+        interval = 5_000
+
+    snapped = round(raw_strike / interval) * interval
+
+    # Enforce minimum strike floor
+    min_floor = max(10_000, min_moneyness * spot)
+    min_floor = round(min_floor / 5_000) * 5_000  # snap floor to $5K grid
+
+    return max(snapped, min_floor)
+
+
+def apply_slippage(price: float, moneyness: float,
+                   max_slippage_pct: float = 5.0,
+                   otm_threshold: float = 0.50) -> float:
+    """Compute slippage-adjusted price as a one-sided cost.
+
+    Slippage scales linearly from 0% at ATM (moneyness=1.0) to
+    max_slippage_pct at deep OTM (moneyness = 1 - otm_threshold).
+
+    Returns the absolute slippage amount (always >= 0).
+    Caller decides sign: subtract from sell price, add to buy price.
+    """
+    otm_distance = max(0.0, 1.0 - moneyness)  # 0 at ATM, grows as OTM
+    slippage_pct = min(max_slippage_pct,
+                       otm_distance / otm_threshold * max_slippage_pct)
+    return price * slippage_pct / 100.0
+
+
 def evaluate_roll(spot: float, K_held: float,
                   held_time_remaining: float,
                   debt_outstanding: float,

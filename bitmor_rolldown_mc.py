@@ -23,10 +23,12 @@ from liquidation_utils import (
     load_surface,
 )
 from rolldown_utils import (
+    apply_slippage,
     generate_gbm_path,
     lookup_iv,
     map_tenor_bucket,
     nearest_price,
+    snap_to_strike,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -50,6 +52,7 @@ class LoanResult:
     num_rolls: float             # float to support averaged results
     final_spot: float
     debt_at_expiry: float
+    total_slippage_cost: float = 0.0  # cumulative slippage across all rolls
     month_details: list[dict] = field(default_factory=list)
 
 
@@ -78,14 +81,18 @@ def simulate_single_loan(
     d0 = ltv * s0
     amort = build_amortisation_schedule(d0, loan_rate, 1, payments_per_year)
 
-    iv0 = lookup_iv(surface, start_date, 365, d0 / s0)
-    initial_premium = bs_price(s0, d0, 1.0, r, iv0, call=False)
+    # Snap initial strike to exchange-listed grid
+    K_initial = snap_to_strike(d0, s0)
 
-    K_held = d0
+    iv0 = lookup_iv(surface, start_date, 365, K_initial / s0)
+    initial_premium = bs_price(s0, K_initial, 1.0, r, iv0, call=False)
+
+    K_held = K_initial
     held_expiry_date = start_date + pd.Timedelta(days=365)
-    K_static = d0
+    K_static = K_initial
     roll_profits: list[float] = []
     month_details: list[dict] = []
+    total_slippage = 0.0
 
     # -- Months 1-11: Evaluate rolls --
     for month in range(1, loan_tenor_months):
@@ -96,23 +103,30 @@ def simulate_single_loan(
 
         tenor_days = map_tenor_bucket(remaining_months)
 
+        # Snap replacement strike to exchange-listed grid
+        K_replacement = snap_to_strike(dt, st)
+
         # -- Held PUT remaining TTM --
         held_days_left = max((held_expiry_date - current_date).days, 1)
 
         # -- IV lookup: always use surface (frozen at latest available date) --
-        # For future (simulated) dates, lookup_iv automatically uses the
-        # latest surface snapshot, avoiding RV→IV circularity.
         iv_held = lookup_iv(surface, current_date, held_days_left, K_held / st)
-        iv_repl = lookup_iv(surface, current_date, tenor_days, dt / st)
+        iv_repl = lookup_iv(surface, current_date, tenor_days, K_replacement / st)
 
         # Price held PUT (held_days_left already computed above)
-        held_value = bs_price(st, K_held, held_days_left / 365.0, r, iv_held,
-                              call=False)
+        held_value_raw = bs_price(st, K_held, held_days_left / 365.0, r,
+                                  iv_held, call=False)
 
         # Price replacement PUT
         replacement_tenor = tenor_days / 365.0
-        replacement_cost = bs_price(st, dt, replacement_tenor, r, iv_repl,
-                                    call=False)
+        replacement_cost_raw = bs_price(st, K_replacement, replacement_tenor,
+                                        r, iv_repl, call=False)
+
+        # Apply slippage: selling held put (bid side) and buying replacement (ask side)
+        slip_sell = apply_slippage(held_value_raw, K_held / st)
+        slip_buy = apply_slippage(replacement_cost_raw, K_replacement / st)
+        held_value = held_value_raw - slip_sell
+        replacement_cost = replacement_cost_raw + slip_buy
 
         profit = held_value - replacement_cost
         rolled = profit >= min_roll_profit
@@ -123,15 +137,21 @@ def simulate_single_loan(
             "spot": round(st, 2),
             "debt": round(dt, 2),
             "K_held": round(K_held, 2),
+            "K_replacement": round(K_replacement, 2),
+            "held_value_raw": round(held_value_raw, 2),
             "held_value": round(held_value, 2),
+            "replacement_cost_raw": round(replacement_cost_raw, 2),
             "replacement_cost": round(replacement_cost, 2),
+            "slippage_sell": round(slip_sell, 2),
+            "slippage_buy": round(slip_buy, 2),
             "roll_profit": round(profit, 2),
             "rolled": rolled,
         })
 
         if rolled:
             roll_profits.append(profit)
-            K_held = dt
+            total_slippage += slip_sell + slip_buy
+            K_held = K_replacement
             held_expiry_date = current_date + pd.Timedelta(days=tenor_days)
 
     # -- Month 12: Expiration --
@@ -171,6 +191,7 @@ def simulate_single_loan(
         num_rolls=len(roll_profits),
         final_spot=s_final,
         debt_at_expiry=d_final,
+        total_slippage_cost=total_slippage,
         month_details=month_details,
     )
 
@@ -225,6 +246,7 @@ def average_results(results: list[LoanResult]) -> LoanResult:
         num_rolls=sum(r.num_rolls for r in results) / n,
         final_spot=sum(r.final_spot for r in results) / n,
         debt_at_expiry=sum(r.debt_at_expiry for r in results) / n,
+        total_slippage_cost=sum(r.total_slippage_cost for r in results) / n,
     )
 
 
@@ -361,6 +383,7 @@ def format_tier_report(results: list[LoanResult], title: str) -> str:
         f"  Avg terminal payoff (rolling)  : ${avg('terminal_payoff_rolling'):,.2f}",
         f"  Avg terminal delta             : ${avg('terminal_delta'):,.2f}",
         f"  Avg full economic delta        : ${avg_econ:,.2f} ({avg_econ_pct:.1f}% of premium)",
+        f"  Avg total slippage cost        : ${avg('total_slippage_cost'):,.2f}",
     ]
     return "\n".join(lines)
 
@@ -390,10 +413,13 @@ def save_tier_csv(results: list[LoanResult], filepath: str) -> None:
             "initial_premium": round(r.initial_premium, 2),
             "roll_savings": round(r.net_savings, 2),
             "roll_savings_pct": round(r.savings_pct, 2),
+            "effective_put_cost_pct": round(r.initial_premium / r.spot_at_start * 100, 2),
+            "rolling_net_cost_pct": round((r.initial_premium - r.net_savings) / r.spot_at_start * 100, 2),
             "terminal_payoff_static": round(r.terminal_payoff_static, 2),
             "terminal_payoff_rolling": round(r.terminal_payoff_rolling, 2),
             "terminal_delta": round(r.terminal_delta, 2),
             "full_economic_delta": round(r.full_economic_delta, 2),
+            "total_slippage_cost": round(r.total_slippage_cost, 2),
             "num_rolls": (int(r.num_rolls) if r.num_rolls == int(r.num_rolls)
                           else round(r.num_rolls, 1)),
             "final_spot": round(r.final_spot, 2),
