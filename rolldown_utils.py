@@ -97,6 +97,96 @@ def lookup_iv(surface: pd.DataFrame, date: pd.Timestamp,
     return _surface_caches[key].lookup(date, ttm_days, moneyness)
 
 
+class RegimeIndex:
+    """Maps simulated dates to historical surface dates by trailing return.
+
+    Pre-computes trailing simple returns for all surface dates using
+    historical prices. During forward simulation, resolves a query date
+    to the historical date whose recent return most closely matches the
+    simulated path's recent return.
+
+    For dates within the historical surface range, returns the query date
+    as-is (no regime matching needed).
+    """
+
+    def __init__(self, daily_prices: pd.Series, surface: pd.DataFrame,
+                 window_days: int = 7):
+        surf_dates = (surface.index.get_level_values("date")
+                      .unique().sort_values())
+        self._last_surface_date = pd.Timestamp(surf_dates[-1])
+        self._window_days = window_days
+
+        returns: list[float] = []
+        dates: list[pd.Timestamp] = []
+
+        for d in surf_dates:
+            ts = pd.Timestamp(d)
+            lookback = ts - pd.Timedelta(days=window_days)
+            idx_now = daily_prices.index.get_indexer([ts], method="nearest")[0]
+            idx_prev = daily_prices.index.get_indexer([lookback], method="nearest")[0]
+            if idx_now < 0 or idx_prev < 0 or idx_now == idx_prev:
+                continue
+            p_now = float(daily_prices.iloc[idx_now])
+            p_prev = float(daily_prices.iloc[idx_prev])
+            if p_prev <= 0:
+                continue
+            returns.append(p_now / p_prev - 1.0)
+            dates.append(ts)
+
+        # Sort by return for O(log n) binary search
+        sort_idx = np.argsort(returns)
+        self._sorted_returns = np.array(returns)[sort_idx]
+        self._sorted_dates = np.array(dates, dtype="datetime64[ns]")[sort_idx]
+
+    @property
+    def last_surface_date(self) -> pd.Timestamp:
+        return self._last_surface_date
+
+    def resolve(self, daily_prices: pd.Series,
+                query_date: pd.Timestamp) -> pd.Timestamp:
+        """Resolve a query date to the best historical surface date.
+
+        If query_date is within the surface range, returns it as-is.
+        Otherwise, matches the simulated trailing return to the closest
+        historical return and returns that date.
+        """
+        if query_date <= self._last_surface_date:
+            return query_date
+
+        lookback = query_date - pd.Timedelta(days=self._window_days)
+        idx_now = daily_prices.index.get_indexer([query_date], method="nearest")[0]
+        idx_prev = daily_prices.index.get_indexer([lookback], method="nearest")[0]
+
+        if idx_now < 0 or idx_prev < 0 or idx_now == idx_prev:
+            return self._last_surface_date
+
+        # Verify actual date span is meaningful (at least half the window)
+        actual_span = (daily_prices.index[idx_now]
+                       - daily_prices.index[idx_prev]).days
+        if actual_span < self._window_days // 2:
+            return self._last_surface_date
+
+        p_now = float(daily_prices.iloc[idx_now])
+        p_prev = float(daily_prices.iloc[idx_prev])
+
+        if p_prev <= 0:
+            return self._last_surface_date
+
+        query_return = p_now / p_prev - 1.0
+
+        # Binary search for nearest return
+        pos = np.searchsorted(self._sorted_returns, query_return)
+        candidates = []
+        if pos > 0:
+            candidates.append(pos - 1)
+        if pos < len(self._sorted_returns):
+            candidates.append(pos)
+
+        best = min(candidates,
+                   key=lambda i: abs(self._sorted_returns[i] - query_return))
+        return pd.Timestamp(self._sorted_dates[best])
+
+
 def nearest_price(daily_prices: pd.Series,
                   target_date: pd.Timestamp) -> float:
     """Get the price nearest to target_date from a daily price series."""

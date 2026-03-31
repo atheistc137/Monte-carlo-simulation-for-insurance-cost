@@ -182,6 +182,67 @@ class TestEvaluateRoll:
         assert should is False
 
 
+from rolldown_utils import RegimeIndex
+
+
+class TestRegimeIndex:
+    def test_historical_date_passthrough(self, synthetic_prices, synthetic_surface):
+        """Dates within surface range return as-is."""
+        ri = RegimeIndex(synthetic_prices, synthetic_surface)
+        query = pd.Timestamp("2024-06-01")
+        assert ri.resolve(synthetic_prices, query) == query
+
+    def test_future_date_maps_to_historical(self, synthetic_prices, synthetic_surface):
+        """Dates beyond surface return a historical surface date."""
+        ri = RegimeIndex(synthetic_prices, synthetic_surface)
+        future = pd.Timestamp("2025-06-01")
+        resolved = ri.resolve(synthetic_prices, future)
+        assert resolved <= ri.last_surface_date
+        assert resolved >= synthetic_prices.index[0]
+
+    def test_crash_vs_rally_different_dates(self, synthetic_prices, synthetic_surface):
+        """A -20% path and +20% path should resolve to different dates."""
+        ri = RegimeIndex(synthetic_prices, synthetic_surface)
+        last_price = float(synthetic_prices.iloc[-1])
+
+        # Place future_date a few days after prices end so the 7-day
+        # lookback window straddles the real->simulated junction
+        future_date = synthetic_prices.index[-1] + pd.Timedelta(days=5)
+        extra_dates = pd.date_range(
+            synthetic_prices.index[-1] + pd.Timedelta(days=1),
+            future_date, freq="D",
+        )
+
+        # Rally: price jumps +20% at junction
+        rally = pd.concat([
+            synthetic_prices,
+            pd.Series([last_price * 1.20] * len(extra_dates),
+                      index=extra_dates, name="close"),
+        ])
+        resolved_rally = ri.resolve(rally, future_date)
+
+        # Crash: price drops -20% at junction
+        crash = pd.concat([
+            synthetic_prices,
+            pd.Series([last_price * 0.80] * len(extra_dates),
+                      index=extra_dates, name="close"),
+        ])
+        resolved_crash = ri.resolve(crash, future_date)
+
+        assert resolved_rally != resolved_crash
+
+    def test_insufficient_history_fallback(self, synthetic_prices, synthetic_surface):
+        """Query date with too few prices falls back to last surface date."""
+        ri = RegimeIndex(synthetic_prices, synthetic_surface)
+        tiny = pd.Series(
+            [100_000.0, 100_100.0],
+            index=pd.date_range("2025-06-01", periods=2, freq="D"),
+            name="close",
+        )
+        resolved = ri.resolve(tiny, pd.Timestamp("2025-06-02"))
+        assert resolved == ri.last_surface_date
+
+
 import datetime as _dt
 from btc_iv import quarterly_expiries
 

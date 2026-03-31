@@ -23,6 +23,7 @@ from liquidation_utils import (
     load_surface,
 )
 from rolldown_utils import (
+    RegimeIndex,
     apply_slippage,
     generate_gbm_path,
     lookup_iv,
@@ -64,8 +65,9 @@ def simulate_single_loan(
     loan_tenor_months: int = 12,
     loan_rate: float = 0.10,
     payments_per_year: int = 12,
-    min_roll_profit: float = 200.0,
+    min_roll_profit: float = 20.0,
     r: float = 0.0,
+    regime_index: RegimeIndex | None = None,
 ) -> LoanResult:
     """Simulate one loan with static-vs-rolling PUT comparison.
 
@@ -109,9 +111,11 @@ def simulate_single_loan(
         # -- Held PUT remaining TTM --
         held_days_left = max((held_expiry_date - current_date).days, 1)
 
-        # -- IV lookup: always use surface (frozen at latest available date) --
-        iv_held = lookup_iv(surface, current_date, held_days_left, K_held / st)
-        iv_repl = lookup_iv(surface, current_date, tenor_days, K_replacement / st)
+        # -- IV lookup: use regime-matched surface date when available --
+        surface_date = (regime_index.resolve(daily_prices, current_date)
+                        if regime_index else current_date)
+        iv_held = lookup_iv(surface, surface_date, held_days_left, K_held / st)
+        iv_repl = lookup_iv(surface, surface_date, tenor_days, K_replacement / st)
 
         # Price held PUT (held_days_left already computed above)
         held_value_raw = bs_price(st, K_held, held_days_left / 365.0, r,
@@ -134,6 +138,7 @@ def simulate_single_loan(
         month_details.append({
             "month": month,
             "date": str(current_date.date()),
+            "surface_date": str(surface_date.date()),
             "spot": round(st, 2),
             "debt": round(dt, 2),
             "K_held": round(K_held, 2),
@@ -258,11 +263,13 @@ def run_tier2(
     mu: float = 0.0,
     sigma: float = 0.5,
     seed: int | None = None,
+    regime_index: RegimeIndex | None = None,
     **loan_kwargs,
 ) -> list[LoanResult]:
     """Tier 2: Recent loans — real data up to today, GBM tails for remaining months.
 
-    All months use the IV surface directly (frozen at latest available date).
+    When regime_index is provided, forward months use conditional surface
+    matching instead of the frozen latest snapshot.
     """
     last_date = daily_prices.index[-1]
     tier2_start = last_date - pd.DateOffset(years=1)
@@ -298,6 +305,7 @@ def run_tier2(
             try:
                 path_results.append(
                     simulate_single_loan(extended, surface, sd,
+                                         regime_index=regime_index,
                                          **loan_kwargs))
             except (ValueError, KeyError):
                 continue
@@ -317,11 +325,13 @@ def run_tier3(
     mu: float = 0.0,
     sigma: float = 0.5,
     seed: int | None = None,
+    regime_index: RegimeIndex | None = None,
     **loan_kwargs,
 ) -> list[LoanResult]:
     """Tier 3: Forward MC — full GBM paths from today's spot price.
 
-    All months use the IV surface directly (frozen at latest available date).
+    When regime_index is provided, each month's IV lookup uses a historical
+    surface date matched by trailing return, instead of the frozen snapshot.
     """
     last_date = daily_prices.index[-1]
     spot_today = float(daily_prices.iloc[-1])
@@ -330,15 +340,23 @@ def run_tier3(
     rng = np.random.default_rng(seed)
     n_days = loan_tenor * 31 + 30  # enough days to cover loan
 
+    # Prepend real history so 7-day lookback works for early simulated months
+    history_tail = daily_prices[last_date - pd.Timedelta(days=10):]
+
     results: list[LoanResult] = []
     for _ in range(n_forward_paths):
         gbm = generate_gbm_path(spot_today, mu, sigma, n_days, rng)
         gbm_dates = pd.date_range(last_date, periods=n_days + 1, freq="D")
-        path_prices = pd.Series(gbm, index=gbm_dates, name="close")
+        gbm_series = pd.Series(gbm, index=gbm_dates, name="close")
+
+        # Concatenate real tail (excluding last_date to avoid duplicate)
+        # with the full GBM path starting at last_date
+        path_prices = pd.concat([history_tail.iloc[:-1], gbm_series])
 
         try:
             results.append(
                 simulate_single_loan(path_prices, surface, last_date,
+                                     regime_index=regime_index,
                                      **loan_kwargs))
         except (ValueError, KeyError) as e:
             logging.warning("Tier 3 path skipped: %s", e)
@@ -406,8 +424,9 @@ def format_tier3_report(results: list[LoanResult], spot_today: float) -> str:
 def save_tier_csv(results: list[LoanResult], filepath: str) -> None:
     """Save per-loan/per-path results to CSV."""
     rows = []
-    for r in results:
+    for idx, r in enumerate(results):
         rows.append({
+            "path_id": idx,
             "start_date": r.start_date.strftime("%Y-%m-%d"),
             "spot": round(r.spot_at_start, 2),
             "initial_premium": round(r.initial_premium, 2),
@@ -429,6 +448,27 @@ def save_tier_csv(results: list[LoanResult], filepath: str) -> None:
     logging.info("Saved %d rows to %s", len(rows), filepath)
 
 
+def save_detail_csv(results: list[LoanResult], filepath: str) -> None:
+    """Save per-month roll details to CSV. Skips results with empty month_details."""
+    columns = ["path_id", "month", "spot", "debt",
+               "K_held", "K_replacement", "roll_profit", "rolled"]
+    rows = []
+    for idx, r in enumerate(results):
+        for md in r.month_details:
+            rows.append({
+                "path_id": idx,
+                "month": md["month"],
+                "spot": round(md["spot"], 2),
+                "debt": round(md["debt"], 2),
+                "K_held": round(md["K_held"], 2),
+                "K_replacement": round(md["K_replacement"], 2),
+                "roll_profit": round(md["roll_profit"], 2),
+                "rolled": int(md["rolled"]),
+            })
+    pd.DataFrame(rows, columns=columns).to_csv(filepath, index=False)
+    logging.info("Saved %d detail rows to %s", len(rows), filepath)
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description="Bitmor PUT Roll-Down Cost Reduction Simulator")
@@ -440,7 +480,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--loan_tenor_months", type=int, default=12)
     p.add_argument("--loan_rate", type=float, default=0.10)
     p.add_argument("--payments_per_year", type=int, default=12)
-    p.add_argument("--min_roll_profit", type=float, default=200.0)
+    p.add_argument("--min_roll_profit", type=float, default=20.0)
     p.add_argument("--r", type=float, default=0.0, help="Risk-free rate")
     p.add_argument("--backtest_years", type=int, default=3)
     p.add_argument("--start_freq", default="daily",
@@ -450,6 +490,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--n_forward_paths", type=int, default=1000,
                    help="Full forward MC paths (Tier 3)")
     p.add_argument("--seed", type=int, default=None)
+    p.add_argument("--no-regime-match", action="store_true",
+                   help="Disable conditional surface matching for Tier 2/3 "
+                        "(use frozen surface instead)")
     return p.parse_args()
 
 
@@ -462,6 +505,11 @@ def main() -> None:
 
     mu, sigma = calibrate_hist_mu_sigma(price_hourly)
     logging.info("Calibrated GBM: mu=%.4f, sigma=%.4f", mu, sigma)
+
+    regime_index = (None if args.no_regime_match
+                    else RegimeIndex(daily_prices, surface))
+    if regime_index:
+        logging.info("Regime matching enabled (7-day trailing return)")
 
     loan_kwargs = dict(
         ltv=args.ltv,
@@ -479,19 +527,24 @@ def main() -> None:
                       args.start_freq, **loan_kwargs)
     print(format_tier_report(tier1, "Tier 1: Pure Historical"))
     save_tier_csv(tier1, f"result/rolldown_tier1_{today}.csv")
+    save_detail_csv(tier1, f"result/rolldown_tier1_detail_{today}.csv")
 
-    # -- Tier 2 (real data up to today, GBM tails, frozen IV surface) --
+    # -- Tier 2 (real data up to today, GBM tails) --
     tier2 = run_tier2(daily_prices, surface, args.n_mc_paths, args.start_freq,
-                      mu, sigma, args.seed, **loan_kwargs)
+                      mu, sigma, args.seed, regime_index=regime_index,
+                      **loan_kwargs)
     print(format_tier_report(tier2, "Tier 2: Recent + Simulated"))
     save_tier_csv(tier2, f"result/rolldown_tier2_{today}.csv")
+    save_detail_csv(tier2, f"result/rolldown_tier2_detail_{today}.csv")
 
-    # -- Tier 3 (full GBM, frozen IV surface) --
+    # -- Tier 3 (full GBM) --
     spot_today = float(daily_prices.iloc[-1])
     tier3 = run_tier3(daily_prices, surface, args.n_forward_paths,
-                      mu, sigma, args.seed, **loan_kwargs)
+                      mu, sigma, args.seed, regime_index=regime_index,
+                      **loan_kwargs)
     print(format_tier3_report(tier3, spot_today))
     save_tier_csv(tier3, f"result/rolldown_tier3_{today}.csv")
+    save_detail_csv(tier3, f"result/rolldown_tier3_detail_{today}.csv")
 
 
 if __name__ == "__main__":
