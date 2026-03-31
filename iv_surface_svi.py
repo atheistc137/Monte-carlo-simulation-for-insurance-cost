@@ -24,7 +24,10 @@ from scipy.optimize import minimize
 MNY_GRID = np.arange(0.4, 3.00, 0.1)
 TTM_GRID = np.sort(np.concatenate([np.arange(15, 61), [90, 180, 270, 365]]))
 DEFAULT_MIN_QUOTES = 6
+DEFAULT_MIN_QUOTES_LONG = 12
 DEFAULT_MAX_FF_DAYS = 60
+LONG_TENOR_BUCKETS = {"180d", "270d", "365d"}
+LONG_TTMS = [90, 180, 270, 365]
 
 # ───────────────────────── tenor bucketing ────────────────────────────────
 TENOR_BUCKETS = [
@@ -142,6 +145,93 @@ def calibrate_one_day(d: pd.Timestamp, tenor_bucket: str,
     }
 
 
+# ────────────────────────── data quality filters ─────────────────────────
+def clean_svi_params(params: pd.DataFrame, min_quotes_short: int = DEFAULT_MIN_QUOTES,
+                     min_quotes_long: int = DEFAULT_MIN_QUOTES_LONG) -> pd.DataFrame:
+    """Remove degenerate SVI fits before forward-fill.
+
+    Filters applied (in order):
+      1. Sigma floor — fits with sigma < 0.01 produce exploding wings.
+      2. Quote floor — long tenors (180d/270d/365d) need >= min_quotes_long
+         quotes for a reliable 5-parameter fit.
+      3. Spike detection — for each tenor bucket, rows where ``a`` or ``b``
+         deviate > 3 std from a 7-day rolling median are dropped.
+
+    Dropped rows become NaN gaps that the downstream forward-fill inherits
+    from the last good calibration day.
+    """
+    n_before = len(params)
+
+    # 1. Sigma floor — degenerate curvature
+    mask_sigma = params["sigma"] >= 0.01
+
+    # 2. Per-tenor quote minimum
+    is_long = params["tenor_bucket"].isin(LONG_TENOR_BUCKETS)
+    mask_quotes = (~is_long | (params["quotes"] >= min_quotes_long)) & \
+                  (is_long | (params["quotes"] >= min_quotes_short))
+
+    # 3. Spike detection on a, b per tenor bucket (7-day rolling median)
+    mask_spike = pd.Series(True, index=params.index)
+    for _tb, grp in params.groupby("tenor_bucket"):
+        grp_sorted = grp.sort_values("date")
+        for col in ["a", "b"]:
+            rolling_med = grp_sorted[col].rolling(7, center=True, min_periods=3).median()
+            rolling_std = grp_sorted[col].rolling(7, center=True, min_periods=3).std()
+            deviation = (grp_sorted[col] - rolling_med).abs()
+            is_spike = deviation > 3 * rolling_std.clip(lower=1e-6)
+            mask_spike.loc[grp_sorted.index[is_spike]] = False
+
+    combined = mask_sigma & mask_quotes & mask_spike
+    cleaned = params[combined].copy()
+    n_dropped = n_before - len(cleaned)
+    if n_dropped:
+        logging.info("SVI quality filter: dropped %d / %d fits "
+                     "(sigma: %d, quotes: %d, spikes: %d)",
+                     n_dropped, n_before,
+                     int((~mask_sigma).sum()),
+                     int((~mask_quotes).sum()),
+                     int((~mask_spike).sum()))
+    return cleaned
+
+
+def enforce_tv_monotonicity(surf_df: pd.DataFrame) -> pd.DataFrame:
+    """Enforce total-variance monotonicity across long tenors.
+
+    For each (date, moneyness) pair, total variance w = (IV/100)^2 * (T/365)
+    must be non-decreasing as T increases.  If a shorter tenor has higher w
+    than the next longer one, its IV is capped down — the shorter tenor is
+    the suspect because adding calendar time should only add variance.
+    """
+    long_mask = surf_df["ttm_days"].isin(LONG_TTMS)
+    if not long_mask.any():
+        return surf_df
+
+    surf_df = surf_df.copy()
+    n_fixed = 0
+
+    long_rows = surf_df[long_mask]
+    for (_date, _mny), grp in long_rows.groupby(["date", "mny"]):
+        if len(grp) < 2:
+            continue
+        idx = grp.sort_values("ttm_days").index
+        ttms = surf_df.loc[idx, "ttm_days"].values.astype(float)
+        ivs = surf_df.loc[idx, "iv"].values.copy()
+        ws = (ivs / 100.0) ** 2 * (ttms / 365.0)
+
+        # Walk backwards from longest tenor; cap shorter tenors down
+        for i in range(len(ws) - 2, -1, -1):
+            if ws[i] > ws[i + 1]:
+                ws[i] = ws[i + 1]
+                ivs[i] = np.sqrt(max(ws[i], 1e-12) / (ttms[i] / 365.0)) * 100.0
+                n_fixed += 1
+
+        surf_df.loc[idx, "iv"] = ivs
+
+    if n_fixed:
+        logging.info("Total-variance monotonicity: fixed %d points", n_fixed)
+    return surf_df
+
+
 # ────────────────────────── CLI ───────────────────────────────────────────
 def main():
     p = argparse.ArgumentParser(description=__doc__)
@@ -149,7 +239,9 @@ def main():
     p.add_argument("--px", default="BTCUSDT_1h.csv",  help="Input: spot CSV file")
     p.add_argument("--out_param", default="btc_svi_params.csv",   help="Output: SVI parameters per day")
     p.add_argument("--out_surf",  default="btc_iv_surface_svi.csv", help="Output: synthetic IV surface grid")
-    p.add_argument("--min_quotes", type=int, default=DEFAULT_MIN_QUOTES, help="Minimum quotes per day")
+    p.add_argument("--min_quotes", type=int, default=DEFAULT_MIN_QUOTES, help="Minimum quotes per day (short tenors)")
+    p.add_argument("--min_quotes_long", type=int, default=DEFAULT_MIN_QUOTES_LONG,
+                   help="Minimum quotes for 180d/270d/365d tenors")
     p.add_argument("--max_ff_days", type=int, default=DEFAULT_MAX_FF_DAYS, help="Max forward-fill days for spot")
     p.add_argument("--n_jobs",    type=int, default=-1, help="Parallel jobs (-1 = all cores)")
     p.add_argument("--verbose",   action="store_true", help="Verbose logging")
@@ -198,6 +290,12 @@ def main():
     )
     params = pd.DataFrame([r for r in results if r is not None])
 
+    # ── Data quality filter ──────────────────────────────────────────
+    if not params.empty:
+        params = clean_svi_params(params,
+                                  min_quotes_short=cfg.min_quotes,
+                                  min_quotes_long=cfg.min_quotes_long)
+
     # Forward-fill sparse tenor buckets (with staleness cap)
     if not params.empty:
         params = params.sort_values(["tenor_bucket", "date"])
@@ -243,8 +341,14 @@ def main():
                 iv = np.sqrt(max(w, 1e-12) / t) * 100.0
                 surf_rows.append(dict(date=trade_date, ttm_days=T, mny=mny, iv=iv))
 
-    pd.DataFrame(surf_rows).to_csv(cfg.out_surf, index=False, float_format="%.6f")
-    logging.info("Saved synthetic IV grid → %s (%d rows)", cfg.out_surf, len(surf_rows))
+    surf_df = pd.DataFrame(surf_rows)
+
+    # ── Total-variance monotonicity across long tenors ───────────────
+    if not surf_df.empty:
+        surf_df = enforce_tv_monotonicity(surf_df)
+
+    surf_df.to_csv(cfg.out_surf, index=False, float_format="%.6f")
+    logging.info("Saved synthetic IV grid → %s (%d rows)", cfg.out_surf, len(surf_df))
 
 
 if __name__ == "__main__":

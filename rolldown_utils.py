@@ -4,6 +4,7 @@ Utility helpers for the Bitmor PUT roll-down simulator.
 from __future__ import annotations
 
 import logging
+import math
 
 import numpy as np
 import pandas as pd
@@ -267,11 +268,11 @@ def snap_to_strike(raw_strike: float, spot: float,
     else:
         interval = 5_000
 
-    snapped = round(raw_strike / interval) * interval
+    snapped = math.ceil(raw_strike / interval) * interval
 
     # Enforce minimum strike floor
     min_floor = max(10_000, min_moneyness * spot)
-    min_floor = round(min_floor / 5_000) * 5_000  # snap floor to $5K grid
+    min_floor = math.ceil(min_floor / 5_000) * 5_000  # snap floor to $5K grid
 
     return max(snapped, min_floor)
 

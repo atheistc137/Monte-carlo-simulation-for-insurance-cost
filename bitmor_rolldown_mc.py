@@ -10,6 +10,7 @@ Three-tier analysis:
 from __future__ import annotations
 
 import logging
+import sys
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -485,7 +486,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--backtest_years", type=int, default=3)
     p.add_argument("--start_freq", default="daily",
                    choices=["daily", "weekly", "monthly"])
-    p.add_argument("--n_mc_paths", type=int, default=1000,
+    p.add_argument("--n_mc_paths", type=int, default=100,
                    help="MC paths per start date (Tier 2)")
     p.add_argument("--n_forward_paths", type=int, default=1000,
                    help="Full forward MC paths (Tier 3)")
@@ -545,6 +546,22 @@ def main() -> None:
     print(format_tier3_report(tier3, spot_today))
     save_tier_csv(tier3, f"result/rolldown_tier3_{today}.csv")
     save_detail_csv(tier3, f"result/rolldown_tier3_detail_{today}.csv")
+
+    # -- Embed results into dashboard and open it --
+    import subprocess
+    dashboard = "bitmor-dashboard.html"
+    logging.info("Embedding CSV data into %s ...", dashboard)
+    subprocess.run(
+        [sys.executable, "embed_csv_to_dashboard.py", "--date", today,
+         "--dashboard", dashboard],
+        check=True,
+    )
+
+    import webbrowser
+    import os
+    path = os.path.abspath(dashboard)
+    logging.info("Opening dashboard: %s", path)
+    webbrowser.open(f"file://{path}")
 
 
 if __name__ == "__main__":
