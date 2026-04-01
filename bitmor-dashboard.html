@@ -11,15 +11,21 @@
 
   :root {
     --bg: #030916;
-    --bg2: #080f1f;
-    --bg3: #0d1628;
+    --bg-card: #0a1428;
+    --bg-card-hover: #0f1d38;
+    --border: #1a2a4a;
+    --border-light: #243556;
     --accent: #F25E13;
-    --accent2: #ff8547;
-    --text: #e8eaf0;
-    --muted: #6b7a96;
-    --border: #1a2540;
-    --green: #22d3a6;
-    --red: #f25e6a;
+    --persimmon-dim: rgba(242,94,19,0.15);
+    --persimmon-glow: rgba(242,94,19,0.4);
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.15);
+    --red: #ef4444;
+    --yellow: #eab308;
+    --text: #e8ecf4;
+    --text-dim: #7a8ba8;
+    --text-muted: #4a5d7a;
+    --white: #ffffff;
     --font: 'Bricolage Grotesque', sans-serif;
     --mono: 'IBM Plex Mono', monospace;
   }
@@ -44,1012 +50,429 @@
 
   .container { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; position: relative; z-index: 1; }
 
-  /* HEADER */
-  header { padding: 40px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
-  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-  .logo-mark {
-    width: 32px; height: 32px; background: var(--accent); border-radius: 6px;
-    display: grid; place-items: center; font-weight: 800; font-size: 16px;
-    color: #fff; letter-spacing: -1px; flex-shrink: 0;
+  /* NAV */
+  .top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(3,9,22,0.93);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  .logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
-  .logo-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
-  h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 10px; }
-  h1 span { color: var(--accent); }
-  .subtitle { font-size: 16px; color: var(--muted); max-width: 540px; line-height: 1.6; }
-
-  /* SECTIONS */
-  .section { margin-bottom: 48px; }
-  .section-label { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
-  .section h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
-  .section .desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; max-width: 620px; }
-  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
-
-  /* GRIDS */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .four-col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  @media (max-width: 640px) {
-    .two-col, .three-col, .four-col { grid-template-columns: 1fr 1fr; }
+  .nav-logo { display: flex; align-items: center; gap: 10px; }
+  .nav-logo-mark {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--accent); display: flex; align-items: center;
+    justify-content: center; font-size: 14px; font-weight: 800; color: var(--white);
   }
+  .nav-logo-text { font-size: 15px; font-weight: 600; color: var(--text); }
+  .nav-tabs { display: flex; }
+  .nav-tab {
+    padding: 16px 20px; background: none; border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-dim); font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: var(--font);
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { border-bottom-color: var(--accent); color: var(--text); }
+  .nav-cta {
+    padding: 7px 18px; border-radius: 6px; background: var(--accent);
+    color: var(--white); font-size: 12px; font-weight: 600; text-decoration: none;
+  }
+
+  /* VIEWS */
+  .view-content { display: none; }
 
   /* CARDS */
-  .card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
-  .card h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
-  .dark-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
 
-  /* FIELDS */
-  .field { margin-bottom: 18px; }
-  .field:last-child { margin-bottom: 0; }
-  .field label { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); margin-bottom: 8px; font-family: var(--mono); }
-  .field label span { font-size: 13px; color: var(--text); font-weight: 500; }
+  /* PILL BUTTONS */
+  .pill-btn {
+    padding: 6px 14px; border-radius: 6px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-dim); font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: var(--font);
+  }
+  .pill-btn:hover { border-color: var(--accent); color: var(--text); }
+  .pill-btn.active {
+    border-color: var(--accent); background: var(--persimmon-dim); color: var(--accent);
+  }
+
+  /* RANGE INPUT */
   input[type="range"] { width: 100%; height: 4px; -webkit-appearance: none; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
   input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); cursor: pointer; transition: transform 0.15s; }
   input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
-  /* METRICS */
-  .metric { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-  .metric-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
-  .metric-value { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
-  .metric-value.accent { color: var(--accent); }
-  .metric-value.green { color: var(--green); }
-  .metric-value.red { color: var(--red); }
-
-  /* INFO TOOLTIP */
-  .metric-info { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--muted); color: var(--muted); font-family: var(--mono); font-size: 8px; font-weight: 600; cursor: default; vertical-align: middle; margin-left: 4px; text-transform: none; letter-spacing: 0; }
-  .metric-info:hover { border-color: var(--accent); color: var(--accent); }
-  .metric-info .tip { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-family: var(--mono); font-size: 10px; font-weight: 400; color: var(--muted); white-space: nowrap; pointer-events: none; transition: opacity 0.15s; z-index: 10; letter-spacing: 0; text-transform: none; }
-  .metric-info:hover .tip { visibility: visible; opacity: 1; }
-
-  /* FORMULA */
-  .formula-block { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 18px 22px; font-family: var(--mono); font-size: 13px; line-height: 2; color: var(--text); }
-  .formula-block .var { color: var(--accent2); }
-  .formula-block .comment { color: var(--muted); font-size: 11px; }
-  .formula-block .result { color: var(--green); font-weight: 600; }
-
-  /* PUT PILLS */
-  .payout-pill { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-  .payout-pill .label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-  .payout-pill .val { font-size: 18px; font-weight: 800; }
-  .payout-pill .val.green { color: var(--green); }
-  .payout-pill .val.red { color: var(--red); }
-  .payout-pill .val.neutral { color: var(--text); }
-  .payout-pill .sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
-
-  /* SCENARIO BADGE */
-  .scenario-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 100px; font-family: var(--mono); font-size: 11px; font-weight: 600; border: 1px solid; }
-  .scenario-badge.safe { color: var(--green); border-color: rgba(34,211,166,0.3); background: rgba(34,211,166,0.07); }
-  .scenario-badge.danger { color: var(--red); border-color: rgba(242,94,106,0.3); background: rgba(242,94,106,0.07); }
-
-  /* AMORT TABLE */
-  .amort-wrap { max-height: 320px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--border); }
-  .amort-wrap::-webkit-scrollbar { width: 4px; }
-  .amort-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
-  thead { position: sticky; top: 0; background: var(--bg3); z-index: 1; }
-  th { padding: 10px 14px; text-align: right; color: var(--muted); font-weight: 500; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); font-size: 10px; text-transform: uppercase; }
-  th:first-child { text-align: left; }
-  td { padding: 9px 14px; text-align: right; color: var(--text); border-bottom: 1px solid rgba(26,37,64,0.5); }
-  td:first-child { text-align: left; color: var(--muted); }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(242,94,19,0.04); }
-
-  /* BUTTONS */
-  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
-  .dp-btn { padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--muted); font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
-  .dp-btn:hover { color: var(--text); border-color: var(--accent); }
-  .dp-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-  /* CHART WRAPS */
-  .chart-wrap { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
-  .chart-wrap h4 { font-size: 12px; font-weight: 700; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
-
-  /* CASH FLOW TIMELINE */
-  .cf-timeline { display: flex; flex-direction: column; }
-  .cf-event { display: grid; grid-template-columns: 64px 1fr auto auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(26,37,64,0.6); font-size: 13px; }
-  .cf-event:last-child { border-bottom: none; }
-  .cf-month { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-  .cf-desc { color: var(--text); font-size: 12px; line-height: 1.4; }
-  .cf-flow { font-family: var(--mono); font-size: 13px; font-weight: 600; text-align: right; min-width: 90px; }
-  .cf-running { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; min-width: 90px; }
-  .cf-flow.pos { color: var(--green); }
-  .cf-flow.neg { color: var(--red); }
-
-  /* STATS (from rolldown dashboard) */
-  .stats-card { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-  .stat { flex: 1 1 130px; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; min-width: 120px; }
-  .stat-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; min-height: 28px; display: flex; align-items: flex-end; }
-  .stat-value { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; color: var(--text); }
-
-  /* CHART CONTAINERS */
-  .chart-container { width: 100%; height: 500px; margin-bottom: 24px; background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-
-  /* FOOTER */
-  footer { margin-top: 64px; padding: 28px 0; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-  footer p { font-size: 12px; color: var(--muted); font-family: var(--mono); }
-  footer a { color: var(--accent); text-decoration: none; }
-
-  /* STICKY TAB BAR */
-  .sticky-tabs {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--bg);
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 24px;
+  /* PATH NAV */
+  .path-nav-btn {
+    width: 32px; height: 32px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-dim); font-size: 14px; cursor: pointer;
+    font-family: var(--font); display: flex; align-items: center; justify-content: center;
   }
-  .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-  .main-tab-btn {
-    padding: 9px 16px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--bg3);
-    color: var(--muted);
-    font-family: var(--font);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.18s;
-    white-space: nowrap;
+  .path-nav-btn:hover { border-color: var(--accent); color: var(--text); }
+  .path-random-btn {
+    padding: 6px 14px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg-card-hover);
+    color: var(--text); font-size: 11px; font-weight: 500;
+    cursor: pointer; font-family: var(--font); display: flex; align-items: center; gap: 5px;
   }
-  .main-tab-btn:hover { color: var(--text); border-color: var(--accent); }
-  .main-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .path-random-btn:hover { border-color: var(--accent); }
 
-  .tab-content { display: none; }
-
-  /* PATH INFO BADGE */
-  .path-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg3);
-    cursor: pointer;
-    transition: all 0.18s;
-    font-size: 13px;
-    margin-bottom: 20px;
+  /* TIER TABS */
+  .tier-tab {
+    padding: 10px 20px; background: none; border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-dim); font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: var(--font);
   }
-  .path-badge:hover { border-color: var(--accent); }
-  .path-badge .badge-tier {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: 700;
-  }
-  .path-badge .badge-tier.tier-1 { color: var(--green); background: rgba(34,211,166,0.1); }
-  .path-badge .badge-tier.tier-2 { color: var(--accent); background: rgba(242,94,19,0.1); }
-  .path-badge .badge-tier.tier-3 { color: #7c8cf5; background: rgba(124,140,245,0.1); }
+  .tier-tab:hover { color: var(--text); }
+  .tier-tab.active { border-bottom-color: var(--accent); color: var(--text); }
 
-  /* DISCLAIMER */
-  .disclaimer-box {
-    background: rgba(107,122,150,0.06);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--muted);
-    border-radius: 0 10px 10px 0;
-    padding: 14px 18px;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.6;
-    margin: 32px 0;
-    font-family: var(--mono);
+  /* CHART TOGGLE */
+  .chart-toggle {
+    padding: 5px 14px; background: transparent; border: none;
+    color: var(--text-dim); font-size: 11px; font-weight: 500;
+    cursor: pointer; font-family: var(--font);
+  }
+  .chart-toggle:hover { color: var(--text); }
+  .chart-toggle.active { background: var(--bg-card-hover); color: var(--text); }
+
+  /* TIER BADGE */
+  .tier-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
   }
 
-  /* HIGHLIGHT FLASH */
-  @keyframes highlightFlash {
-    0% { border-color: var(--accent); box-shadow: 0 0 12px rgba(242,94,19,0.3); }
-    100% { border-color: var(--border); box-shadow: none; }
-  }
-  .highlight-flash {
-    animation: highlightFlash 1s ease-out;
-  }
-
-  /* RESHUFFLE BUTTON */
-  .reshuffle-btn {
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: 1px solid var(--accent);
-    background: rgba(242,94,19,0.08);
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.18s;
-    letter-spacing: 0.5px;
-  }
-  .reshuffle-btn:hover { background: var(--accent); color: #fff; }
-
-  /* CROSS-LINK */
-  .cross-link {
-    color: var(--accent);
-    cursor: pointer;
-    text-decoration: none;
-    border-bottom: 1px dashed var(--accent);
-  }
-  .cross-link:hover { border-bottom-style: solid; }
-
-  /* TIER NARRATIVE */
-  .tier-narrative {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.7;
-    margin-bottom: 24px;
-    max-width: 800px;
-  }
-  .tier-narrative strong { color: var(--text); }
-
-  /* METHODOLOGY SECTIONS */
-  .method-section {
-    margin-bottom: 32px;
-    padding: 24px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    transition: border-color 0.3s, box-shadow 0.3s;
-  }
-  .method-section h4 {
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-  .method-section p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 8px; }
-  .method-section ul { padding-left: 20px; margin-bottom: 8px; }
-  .method-section li { font-size: 14px; color: var(--muted); margin-bottom: 4px; line-height: 1.6; }
-  .method-section strong { color: var(--text); }
-  .method-section .formula {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 8px 8px 0;
-    padding: 12px 16px;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--text);
-    margin: 12px 0;
-    line-height: 1.8;
-    overflow-x: auto;
-  }
-  .method-section .formula .var { color: var(--accent2); }
-  .method-section .formula .comment { color: var(--muted); font-size: 11px; }
-
-  /* FLOW DIAGRAM */
-  .flow-diagram {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin: 16px 0;
-    overflow-x: auto;
-    padding: 8px 0;
-  }
-  .flow-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    min-width: 90px;
-    flex-shrink: 0;
-  }
-  .flow-box {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.3;
-    white-space: nowrap;
-  }
-  .flow-box.action { background: rgba(242,94,19,0.12); border: 1px solid rgba(242,94,19,0.3); color: var(--accent); }
-  .flow-box.asset { background: rgba(34,211,166,0.1); border: 1px solid rgba(34,211,166,0.25); color: var(--green); }
-  .flow-box.protocol { background: rgba(124,140,245,0.1); border: 1px solid rgba(124,140,245,0.25); color: #7c8cf5; }
-  .flow-box.danger { background: rgba(242,94,106,0.1); border: 1px solid rgba(242,94,106,0.25); color: var(--red); }
-  .flow-sub { font-size: 10px; color: var(--muted); font-family: var(--mono); }
-  .flow-arrow {
-    font-size: 16px;
-    color: var(--muted);
-    padding: 0 6px;
-    flex-shrink: 0;
-  }
-
-  /* IRM CURVE (CSS) */
-  .irm-curve {
-    position: relative;
-    width: 100%;
-    height: 140px;
-    margin: 16px 0;
-    border-left: 2px solid var(--muted);
-    border-bottom: 2px solid var(--muted);
-  }
-  .irm-curve .irm-line {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-  .irm-curve .irm-label {
-    position: absolute;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-  }
-  .irm-curve .irm-dot {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    transform: translate(-50%, 50%);
-  }
-
-  /* LIQUIDATION CASCADE */
-  .cascade-grid {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 8px;
-    align-items: center;
-    margin: 16px 0;
-  }
-  .cascade-box {
-    padding: 12px;
-    border-radius: 8px;
-    font-family: var(--mono);
-    font-size: 11px;
-    text-align: center;
-    line-height: 1.4;
-  }
-  .cascade-arrow {
-    font-size: 18px;
-    color: var(--muted);
-    text-align: center;
-  }
-
-  /* BACKTEST INTRO */
-  .tab-intro {
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border);
-  }
-  .tab-intro h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
-  .tab-intro p { font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 800px; }
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; }
 
   @media (max-width: 640px) {
-    .stats-card { gap: 6px; }
-    .stat { flex: 1 1 calc(50% - 6px); min-width: 0; }
+    .top-nav { padding: 0 16px; }
   }
 </style>
 </head>
 <body>
+<nav class="top-nav">
+  <div class="nav-logo">
+    <div class="nav-logo-mark">B</div>
+    <span class="nav-logo-text">Bitmor</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-view="calculator" onclick="Nav.switchTab('calculator')">Cost Calculator</button>
+    <button class="nav-tab" data-view="research" onclick="Nav.switchTab('research')">Roll-Down Research</button>
+  </div>
+  <a href="https://bitmor.xyz/loans" target="_blank" rel="noopener" class="nav-cta">Join Waitlist</a>
+</nav>
 <div class="container">
 
-  <header>
-    <div class="logo">
-      <div class="logo-mark">B</div>
-      <div>
-        <div class="logo-text">Bitmor</div>
-        <div class="logo-sub">bitmor.xyz</div>
-      </div>
-    </div>
-    <h1>The <span>math</span> behind Bitcoin mortgages.</h1>
-    <p class="subtitle">Configure a loan, explore PUT option protection — backtested across 2,000+ outcomes.</p>
-  </header>
+<!-- VIEW 1: COST CALCULATOR -->
+<div class="view-content" id="view-calculator" style="display:block;">
 
-  <!-- ── TAB BAR ── -->
-  <div class="sticky-tabs">
-    <div class="tabs">
-      <button class="main-tab-btn active" data-tab="1" onclick="Nav.switchTab(1)">General Explainer</button>
-      <button class="main-tab-btn" data-tab="2" onclick="Nav.switchTab(2)">Backtest &amp; Simulations</button>
-      <button class="main-tab-btn" data-tab="3" onclick="Nav.switchTab(3)">Bitmor Math</button>
-      <button class="main-tab-btn" data-tab="4" onclick="Nav.switchTab(4)">Backtest Methodology</button>
-    </div>
-  </div>
+  <!-- Intro block -->
+  <div style="margin-bottom:48px;margin-top:32px;">
+    <h1 style="font-size:32px;font-weight:700;color:var(--text);margin:0 0 8px;">Bitcoin mortgages, on-chain</h1>
+    <p style="font-size:15px;color:var(--text-dim);margin:0 0 28px;line-height:1.7;max-width:680px;">Bitmor lets you buy BTC with a down payment and repay in fixed monthly installments. A PUT option replaces traditional liquidation, so your position is never force-sold on a price drop.</p>
 
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <!-- TAB 1: GENERAL EXPLAINER                                  -->
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <div class="tab-content" id="tab-explainer" style="display:block;">
-
-    <!-- ── SECTION 0: LOAN ORIGINATION ── -->
-    <div class="section">
-      <div class="section-label">00 — Bitmor Loan Origination</div>
-      <h2>How a loan is created</h2>
-      <p class="desc">A Bitmor loan acquires BTC using a USDC down payment plus pool liquidity, then locks the BTC as collateral.</p>
-
-      <div class="method-section" style="margin-top:0;">
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box asset">USDC<br>Down Payment</div>
-            <div class="flow-sub">30% of BTC value</div>
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">
-            <div class="flow-box action">Pool Funds<br>Remaining</div>
-            <div class="flow-sub">70% from lenders</div>
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">
-            <div class="flow-box protocol">Buy BTC<br>on DEX</div>
-            <div class="flow-sub">full amount</div>
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">
-            <div class="flow-box asset">Deposit BTC<br>in Vault</div>
-            <div class="flow-sub">locked as collateral</div>
-          </div>
+    <!-- Loan origination card -->
+    <div class="card" style="padding:20px 24px;">
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;">How a loan is created</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:0;width:100%;">
+        <div style="flex:0 1 150px;padding:14px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border-light);text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;">USDC<br>Down Payment</div>
+          <div style="font-size:9px;color:var(--text-muted);margin-top:5px;">30% of BTC value</div>
         </div>
-        <p>Collateral is released only after full repayment.</p>
-      </div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- ── SECTION 1: LOAN + PUT COST ── -->
-    <div class="section">
-      <div class="section-label">01 — Loan Configuration</div>
-      <h2>Structure your loan</h2>
-      <p class="desc">Put ~30% down in USDC, finance the rest through a lending pool, and repay in fixed monthly installments. The PUT option cost is computed via Black-Scholes from your loan parameters.</p>
-
-      <div class="two-col" style="margin-bottom:16px;">
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <h3 style="margin-bottom:0;">Parameters</h3>
-            <div style="text-align:right;">
-              <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">BTC Spot</div>
-              <div id="live-spot-price" style="font-family:var(--mono);font-size:13px;font-weight:600;color:var(--green);">Fetching...</div>
-            </div>
-          </div>
-          <div class="field">
-            <label>BTC Price <span id="lbl-btcprice">$100,000</span></label>
-            <input type="range" id="btcprice" min="30000" max="200000" step="1000" value="100000" oninput="calc()">
-          </div>
-          <div class="field">
-            <label>Annual Interest Rate <span id="lbl-apr">9%</span></label>
-            <input type="range" id="apr" min="5" max="20" step="0.5" value="9" oninput="calc()">
-          </div>
-          <div class="field">
-            <label>BTC Amount <span id="lbl-btcamt">1.0 BTC</span></label>
-            <div style="display:flex;gap:8px;margin-top:4px;">
-              <button class="dp-btn" onclick="selectBTCAmt(0.01, this)">0.01 BTC</button>
-              <button class="dp-btn" onclick="selectBTCAmt(0.1, this)">0.1 BTC</button>
-              <button class="dp-btn active" onclick="selectBTCAmt(1, this)">1 BTC</button>
-            </div>
-          </div>
-          <div class="field">
-            <label>Down Payment % <span id="lbl-dp">30%</span></label>
-            <div style="display:flex;gap:8px;margin-top:4px;">
-              <button class="dp-btn" onclick="selectDP2(20, this)">20%</button>
-              <button class="dp-btn active" onclick="selectDP2(30, this)">30%</button>
-              <button class="dp-btn" onclick="selectDP2(40, this)">40%</button>
-              <button class="dp-btn" onclick="selectDP2(50, this)">50%</button>
-            </div>
-          </div>
-          <div class="field">
-            <label>Loan Term <span id="lbl-term">12 months</span></label>
-            <div id="term-btn-group" style="display:flex;gap:8px;margin-top:4px;">
-              <button class="dp-btn" onclick="selectTerm(3, this)" style="flex:1;min-width:0;">3mo</button>
-              <button class="dp-btn" onclick="selectTerm(6, this)" style="flex:1;min-width:0;">6mo</button>
-              <button class="dp-btn" onclick="selectTerm(9, this)" style="flex:1;min-width:0;">9mo</button>
-              <button class="dp-btn active" onclick="selectTerm(12, this)" style="flex:1;min-width:0;">12mo</button>
-            </div>
-          </div>
+        <span style="color:var(--text-muted);font-size:16px;padding:0 20px;flex-shrink:0;">→</span>
+        <div style="flex:0 1 150px;padding:14px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border-light);text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;">Pool Funds<br>Remaining</div>
+          <div style="font-size:9px;color:var(--text-muted);margin-top:5px;">70% from lenders</div>
         </div>
-
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div class="formula-block" id="loan-formula">—</div>
-          <div class="three-col">
-            <div class="metric">
-              <div class="metric-label">BTC Value</div>
-              <div class="metric-value" id="out-total">—</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Down Payment</div>
-              <div class="metric-value accent" id="out-down">—</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Financed</div>
-              <div class="metric-value" id="out-financed">—</div>
-            </div>
-          </div>
-          <div class="three-col">
-            <div class="metric">
-              <div class="metric-label">Monthly Payment</div>
-              <div class="metric-value accent" id="out-monthly">—</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Total Interest</div>
-              <div class="metric-value red" id="out-totalint">—</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Total Cost</div>
-              <div class="metric-value" id="out-totalcost">—</div>
-            </div>
-          </div>
-          <div class="three-col" id="put-recovery-row">
-            <div class="metric">
-              <div class="metric-label">PUT Option Cost <span class="metric-info" id="out-put-cost-source-wrap">i<span class="tip" id="out-put-cost-source"></span></span></div>
-              <div class="metric-value red" id="out-put-cost">—</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Expected Recovery <span class="metric-info" id="out-recovery-note-wrap">i<span class="tip" id="out-recovery-note"></span></span></div>
-              <div class="metric-value green" id="out-expected-recovery">—</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Net Hedge Cost <span class="metric-info" id="out-net-hedge-note-wrap">i<span class="tip" id="out-net-hedge-note"></span></span></div>
-              <div class="metric-value accent" id="out-net-hedge">—</div>
-            </div>
-          </div>
+        <span style="color:var(--text-muted);font-size:16px;padding:0 20px;flex-shrink:0;">→</span>
+        <div style="flex:0 1 150px;padding:14px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border-light);text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;">Buy BTC<br>on DEX</div>
+          <div style="font-size:9px;color:var(--text-muted);margin-top:5px;">full amount</div>
+        </div>
+        <span style="color:var(--text-muted);font-size:16px;padding:0 20px;flex-shrink:0;">→</span>
+        <div style="flex:0 1 150px;padding:14px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border-light);text-align:center;">
+          <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.4;">Deposit BTC<br>in Vault</div>
+          <div style="font-size:9px;color:var(--text-muted);margin-top:5px;">locked as collateral</div>
         </div>
       </div>
-
-      <!-- PUT option cost block -->
-      <div class="dark-card">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
-          <div>
-            <div class="section-label" style="margin-bottom:4px;">PUT Option Cost</div>
-            <div style="font-size:13px;color:var(--muted);max-width:500px;line-height:1.5;">Strike = financed principal. Purchased at origination. Eliminates price-based liquidation for the full loan term.</div>
-          </div>
-          <div id="scenario-badge" class="scenario-badge safe">● BTC above strike — PUT expires worthless</div>
-        </div>
-
-        <!-- BS MODEL SECTION -->
-        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
-            <div style="font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">Black-Scholes Model — Vol Stress Test</div>
-            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-              <span style="font-family:var(--mono);font-size:11px;color:var(--muted);">Deribit IV (nearest strike): <span id="deribit-iv-inline" style="color:var(--text);font-weight:600;">—</span></span>
-              <div class="field" style="margin:0;display:flex;align-items:center;gap:10px;">
-                <span style="font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;">σ stress test</span>
-                <input type="range" id="iv" min="30" max="150" step="5" value="55" style="width:120px;" oninput="this.dataset.userSet='1';calc()">
-                <span id="lbl-iv" style="font-family:var(--mono);font-size:12px;color:var(--text);font-weight:600;min-width:36px;">55%</span>
-              </div>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-            <div class="payout-pill">
-              <div class="label">Strike (Principal)</div>
-              <div class="val neutral" id="put-strike">—</div>
-            </div>
-            <div class="payout-pill">
-              <div class="label">BS PUT Price</div>
-              <div class="val red" id="put-premium-pct">—</div>
-              <div class="sub" id="put-premium-usd">—</div>
-            </div>
-            <div class="payout-pill">
-              <div class="label">Total Upfront (BS)</div>
-              <div class="val red" id="put-total-upfront">—</div>
-              <div class="sub">down + BS PUT</div>
-            </div>
-            <div class="payout-pill">
-              <div class="label">Effective Entry</div>
-              <div class="val neutral" id="put-entry-pct">—</div>
-              <div class="sub">% of BTC value</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DERIBIT LIVE SECTION -->
-        <div style="background:rgba(34,211,166,0.04);border:1px solid rgba(34,211,166,0.18);border-radius:10px;padding:18px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
-            <div class="deribit-expiry-header" style="font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);">Deribit Market Price — 26 MAR 27</div>
-            <div id="put-data-source" style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.5px;">● Loading...</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-            <div class="payout-pill" style="background:transparent;border-color:rgba(34,211,166,0.2);">
-              <div class="label" style="color:var(--green);">Nearest Strike · IV</div>
-              <div class="val neutral" id="deribit-nearest-strike">—</div>
-              <div class="sub" id="deribit-iv-sub">—</div>
-            </div>
-            <div class="payout-pill" style="background:transparent;border-color:rgba(34,211,166,0.2);">
-              <div class="label" style="color:var(--green);">Deribit Mark Price</div>
-              <div class="val neutral" id="deribit-mark">—</div>
-              <div class="sub" id="deribit-mark-pct">—</div>
-            </div>
-            <div class="payout-pill" style="background:transparent;border-color:rgba(34,211,166,0.2);">
-              <div class="label" style="color:var(--green);">Expiry</div>
-              <div class="val neutral" style="font-size:14px;" id="deribit-expiry">26 MAR 27</div>
-              <div class="sub" id="deribit-snap-date">—</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- ── SECTION 2: AMORTIZATION ── -->
-    <div class="section">
-      <div class="section-label">02 — Repayment Schedule</div>
-      <h2>Full amortization</h2>
-      <p class="desc">Each payment covers accrued interest first, then reduces principal. Balance reaches zero at the end of the term — collateral is released at that point.</p>
-      <div class="amort-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Mo.</th>
-              <th>Payment</th>
-              <th>Principal</th>
-              <th>Interest</th>
-              <th>Balance</th>
-              <th>% Paid</th>
-            </tr>
-          </thead>
-          <tbody id="amort-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- ── DISCLAIMER ── -->
-    <div class="disclaimer-box">
-      Sections 1-2 above are interactive and illustrative — configure any loan to see its amortization.
-      Section 3 below uses actual backtest and simulation data with fixed parameters (70% LTV, 12-month term, 10% APR).
-      The path shown is randomly selected from 2,000+ historical and simulated loan outcomes.
-    </div>
-
-    <!-- ── SECTION 3: PUT ROLL-DOWN (REAL DATA) ── -->
-    <div class="section" id="section-rolldown">
-      <div class="section-label">03 — PUT Roll-Down Strategy</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
-        <div id="path-badge" class="path-badge" onclick="Tab1.onBadgeClick()">
-          <span class="badge-tier tier-1">TIER 1</span>
-          <span id="path-badge-text">Loading...</span>
-        </div>
-        <button class="reshuffle-btn" onclick="Tab1.reshuffle()">Reshuffle Path</button>
-      </div>
-
-      <div class="chart-wrap" style="margin-bottom:16px;">
-        <h4>Debt balance vs PUT strike over loan term</h4>
-        <div id="rolldown-chart" style="width:100%;height:360px;"></div>
-      </div>
-
-      <div class="two-col" style="margin-bottom:16px;align-items:start;">
-        <div class="card" style="padding:20px;">
-          <h3 style="margin-bottom:16px;">Roll-down cash flows</h3>
-          <div class="cf-timeline" id="path-cf-timeline"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div id="path-metrics"></div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <!-- TAB 2: BACKTEST & SIMULATIONS                             -->
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <div class="tab-content" id="tab-backtests">
-
-    <div class="tab-intro">
-      <h2>PUT Roll-Down: Does It Work?</h2>
-      <p>Every Bitmor loan is hedged with a PUT option. As monthly payments reduce the debt, the PUT strike becomes too high — so we sell it and buy a cheaper one at the lower strike, pocketing the difference as <strong style="color:var(--text)">roll savings</strong>. These backtests measure how much of the initial PUT premium can be recovered through this strategy across <strong style="color:var(--text)">2,000+ historical and simulated loans</strong>.</p>
-      <p style="margin-top:8px;">Higher recovery = lower effective hedging cost. <span class="cross-link" onclick="Nav.goTo(4,'strategy')">How the roll-down works →</span></p>
-    </div>
-
-    <!-- Tier 1 -->
-    <div class="section" id="tier-section-1">
-      <div class="section-label">Tier 1 — Historical Backtest</div>
-      <div class="tier-narrative" id="narrative-1"></div>
-      <div class="stats-card" id="stats-1"></div>
-      <div class="chart-container" id="chart-1"></div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- Tier 2 -->
-    <div class="section" id="tier-section-2">
-      <div class="section-label">Tier 2 — Historical Entry + Simulated Forward</div>
-      <div class="tier-narrative" id="narrative-2"></div>
-      <div class="stats-card" id="stats-2"></div>
-      <div class="chart-container" id="chart-2"></div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- Tier 3 -->
-    <div class="section" id="tier-section-3">
-      <div class="section-label">Tier 3 — Forward Simulation</div>
-      <div class="tier-narrative" id="narrative-3"></div>
-      <div class="stats-card" id="stats-3"></div>
-      <div class="chart-container" id="chart-3-scatter"></div>
-      <div class="chart-container" id="chart-3-hist"></div>
-    </div>
-
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <!-- TAB 3: BITMOR MATH                                        -->
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <div class="tab-content" id="tab-math">
-
-    <div class="section">
-      <div class="section-label">Protocol Reference</div>
-      <h2>Bitmor Math</h2>
-      <p class="desc">Key formulas and mechanics behind BTC-backed lending. <span class="cross-link" onclick="Nav.switchTab(1)">Configure a loan above →</span></p>
-
-      <!-- MONTHLY PAYMENT -->
-      <div class="method-section" id="annuity-formula">
-        <h4>Monthly Payment (Annuity)</h4>
-        <p>Each loan has a fixed monthly payment sized conservatively at origination using the maximum possible borrow APR:</p>
-        <div class="formula">
-          <span class="var">A</span> = <span class="var">P</span> × <span class="var">r</span>(1 + <span class="var">r</span>)<sup>n</sup> / ((1 + <span class="var">r</span>)<sup>n</sup> − 1) <span class="comment">// standard annuity</span><br>
-          <span class="comment">where P = principal, r = r_max / 12, n = months</span><br>
-          <span class="var">monthly_payment</span> = min(<span class="var">A</span>, <span class="var">debt_remaining</span>) <span class="comment">// never overpay</span>
-        </div>
-        <p>Actual interest accrues at the live variable rate via Aave-style indices; the schedule provides predictable cash-flow and a conservative bound. <span class="cross-link" onclick="Nav.switchTab(1)">Try different terms above →</span></p>
-
-        <!-- Amortization mini-diagram -->
-        <div style="margin-top:16px;">
-          <div style="display:flex;gap:4px;align-items:flex-end;height:80px;">
-            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
-              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:70px;opacity:0.15;"></div>
-              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:8px;"></div>
-            </div>
-            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
-              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:60px;opacity:0.25;"></div>
-              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:18px;"></div>
-            </div>
-            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
-              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:48px;opacity:0.35;"></div>
-              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:30px;"></div>
-            </div>
-            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
-              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:36px;opacity:0.45;"></div>
-              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:42px;"></div>
-            </div>
-            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
-              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:22px;opacity:0.55;"></div>
-              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:56px;"></div>
-            </div>
-            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;">
-              <div style="width:100%;background:var(--accent);border-radius:4px 4px 0 0;height:8px;opacity:0.65;"></div>
-              <div style="width:100%;background:var(--green);border-radius:0 0 4px 4px;height:70px;"></div>
-            </div>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-top:6px;">
-            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">Mo.1</span>
-            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">Mo.12</span>
-          </div>
-          <div style="display:flex;gap:16px;margin-top:8px;">
-            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">■ <span style="color:var(--accent);opacity:0.6">Interest portion</span></span>
-            <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">■ <span style="color:var(--green)">Principal portion</span></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- INTEREST RATE MODEL -->
-      <div class="method-section" id="interest-rate-model">
-        <h4>Interest Rate Model</h4>
-        <p>Bitmor uses a two-slope utilization curve, similar to Aave. Low utilization keeps rates affordable; high utilization incentivizes new deposits:</p>
-
-        <!-- IRM Curve SVG -->
-        <div style="margin:16px 0;">
-          <svg viewBox="0 0 400 160" style="width:100%;max-width:500px;height:auto;" xmlns="http://www.w3.org/2000/svg">
-            <!-- Axes -->
-            <line x1="50" y1="10" x2="50" y2="130" stroke="#6b7a96" stroke-width="1.5"/>
-            <line x1="50" y1="130" x2="380" y2="130" stroke="#6b7a96" stroke-width="1.5"/>
-            <!-- Grid lines -->
-            <line x1="50" y1="90" x2="380" y2="90" stroke="#1a2540" stroke-width="1" stroke-dasharray="4"/>
-            <line x1="50" y1="50" x2="380" y2="50" stroke="#1a2540" stroke-width="1" stroke-dasharray="4"/>
-            <line x1="314" y1="10" x2="314" y2="130" stroke="#1a2540" stroke-width="1" stroke-dasharray="4"/>
-            <!-- Slope 1: 0% → 80% util, 5% → 10% rate -->
-            <line x1="50" y1="90" x2="314" y2="50" stroke="#F25E13" stroke-width="2.5"/>
-            <!-- Slope 2: 80% → 100% util, 10% → 15% rate -->
-            <line x1="314" y1="50" x2="380" y2="10" stroke="#f25e6a" stroke-width="2.5"/>
-            <!-- Kink point -->
-            <circle cx="314" cy="50" r="5" fill="#F25E13"/>
-            <!-- Labels -->
-            <text x="45" y="95" text-anchor="end" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">5%</text>
-            <text x="45" y="55" text-anchor="end" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">10%</text>
-            <text x="45" y="15" text-anchor="end" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">15%</text>
-            <text x="50" y="148" text-anchor="middle" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">0%</text>
-            <text x="314" y="148" text-anchor="middle" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">80%</text>
-            <text x="380" y="148" text-anchor="middle" fill="#6b7a96" font-family="IBM Plex Mono" font-size="10">100%</text>
-            <!-- Axis labels -->
-            <text x="215" y="158" text-anchor="middle" fill="#6b7a96" font-family="IBM Plex Mono" font-size="9">UTILIZATION</text>
-            <text x="12" y="70" text-anchor="middle" fill="#6b7a96" font-family="IBM Plex Mono" font-size="9" transform="rotate(-90 12 70)">APR</text>
-            <!-- Kink label -->
-            <text x="314" y="42" text-anchor="middle" fill="#F25E13" font-family="IBM Plex Mono" font-size="9" font-weight="600">KINK</text>
-          </svg>
-        </div>
-
-      </div>
-
-      <!-- LIQUIDATION -->
-      <div class="method-section" id="liquidation-math">
-        <h4>Liquidation Triggers</h4>
-        <p>Two paths to liquidation — price-based (uninsured loans only) and non-payment:</p>
-
-        <!-- Liquidation decision flow -->
-        <div class="flow-diagram" style="flex-wrap:wrap;justify-content:center;">
-          <div class="flow-step">
-            <div class="flow-box protocol">BTC Price<br>Drops</div>
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">
-            <div class="flow-box action">Insured?</div>
-          </div>
-          <div class="flow-arrow" style="display:flex;flex-direction:column;gap:2px;padding:0 12px;">
-            <span style="font-size:10px;color:var(--green);font-family:var(--mono);">YES ↓</span>
-            <span style="font-size:10px;color:var(--red);font-family:var(--mono);">NO →</span>
-          </div>
-          <div class="flow-step" style="display:flex;flex-direction:column;gap:8px;">
-            <div class="flow-box asset" style="font-size:10px;">Protected<br>No price liq.</div>
-            <div class="flow-box danger" style="font-size:10px;">Check<br>Trigger</div>
-          </div>
-        </div>
-
-        <div class="formula">
-          <span class="comment">// Price-based trigger (uninsured only):</span><br>
-          <span class="var">allocated_BTC</span> × <span class="var">price</span> &lt; <span class="var">debt_now</span> × (1 + <span class="var">buf</span>) <span class="comment">// buf ≈ 3%</span>
-        </div>
-
-        <p><strong>Non-payment</strong> triggers a micro-liquidation first — selling just enough BTC to cover one missed payment, preserving the rest of the position.</p>
-      </div>
-
-      <!-- MICRO-LIQUIDATION -->
-      <div class="method-section" id="micro-liquidation">
-        <h4>Micro-Liquidation</h4>
-        <p>Instead of liquidating the entire position for a missed payment, Bitmor sells the minimum BTC required:</p>
-
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box danger">Missed<br>Payment</div>
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">
-            <div class="flow-box action">Sell min<br>BTC needed</div>
-            <div class="flow-sub">+ liquidator fee</div>
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">
-            <div class="flow-box asset">Cover 1<br>month</div>
-            <div class="flow-sub">monthly_payment + buf</div>
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">
-            <div class="flow-box protocol">Post-sale<br>guard check</div>
-            <div class="flow-sub">remaining ≥ debt</div>
-          </div>
-        </div>
-
-        <div class="formula">
-          <span class="var">cash_needed</span> = <span class="var">monthly_payment</span> + <span class="var">buf</span> × <span class="var">monthly_payment</span><br>
-          <span class="var">sold_btc</span> = <span class="var">cash_needed</span> / <span class="var">price</span><br>
-          <span class="comment">// Guard: remaining BTC value ≥ D_after + buf × debt_now</span>
-        </div>
-        <p>If the guard fails (insufficient collateral), it escalates to full liquidation.</p>
-      </div>
-
-      <!-- INSURANCE -->
-      <div class="method-section" id="insurance-math">
-        <h4>Insurance (PUT Option)</h4>
-        <p>Optional per-loan PUT cover sized to the purchased BTC. While active, price-based liquidation is <strong>disabled</strong>.</p>
-
-        <!-- Insurance flow -->
-        <div class="flow-diagram">
-          <div class="flow-step">
-            <div class="flow-box action">Buy PUT<br>at strike K</div>
-            <div class="flow-sub">110% of breakeven</div>
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">
-            <div class="flow-box asset">Price Liq.<br>Blocked</div>
-            <div class="flow-sub">while cover active</div>
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">
-            <div class="flow-box protocol">Roll Down<br>as debt falls</div>
-            <div class="flow-sub">recover premium</div>
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step">
-            <div class="flow-box asset">Savings<br>Captured</div>
-            <div class="flow-sub">sell high / buy low</div>
-          </div>
-        </div>
-
-        <div class="formula">
-          <span class="var">K</span> = <span class="var">price</span> × loan / (loan + deposit) × 110% <span class="comment">// strike above breakeven</span><br>
-          <span class="var">Q</span> = (loan + deposit) / <span class="var">BTC_price</span> <span class="comment">// quantity = total BTC bought</span>
-        </div>
-        <p>Coverage is trimmed FIFO whenever BTC is sold. On non-payment liquidation, the PUT is sold alongside BTC to cover lender principal + interest + liquidator fee. <span class="cross-link" onclick="Nav.goTo(2,'tier-section-1')">See backtest results →</span></p>
-      </div>
-
+      <div style="font-size:11px;color:var(--text-dim);margin-top:14px;">Collateral is released only after full repayment.</div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <!-- TAB 4: BACKTEST METHODOLOGY                               -->
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <div class="tab-content" id="tab-methodology">
+  <!-- Section 01: Loan Configuration -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+    <span style="font-size:12px;color:var(--accent);font-weight:600;letter-spacing:0.1em;">01</span>
+    <span style="font-size:12px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;">Loan Configuration</span>
+  </div>
+  <h2 style="font-size:28px;font-weight:600;color:var(--text);margin:0 0 6px;">What does it really cost?</h2>
+  <p style="font-size:14px;color:var(--text-dim);margin:0 0 24px;line-height:1.6;max-width:620px;">See the total cost of a Bitmor loan at today's price, including interest, PUT hedge, and estimated savings from rolling down.</p>
 
-    <div class="section">
-      <div class="section-label">Reference</div>
-      <h2>Backtest Methodology</h2>
-      <p class="desc">How the roll-down backtest and simulation work, from strategy mechanics to data sources.</p>
-
-      <div class="method-section" id="strategy">
-        <h4>Strategy Overview</h4>
-        <p>PUT struck at debt level. As payments reduce debt, sell the old PUT (strike too high), buy cheaper one at new lower strike. Difference = roll savings. Only rolls when net gain &gt; $20 (after accounting for bid-ask slippage).</p>
-        <p><span class="cross-link" onclick="Tab1.reshuffleFromTier(null)">See a live example →</span></p>
+  <!-- Horizontal parameter bar -->
+  <div class="card" style="padding:18px 24px;margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
+      <div style="flex-shrink:0;">
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">BTC Spot</div>
+        <div id="live-spot-display" style="font-size:22px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;">Loading...</div>
       </div>
-
-      <div class="method-section" id="roll-mechanics">
-        <h4>Roll Decision</h4>
-        <p>Monthly checkpoints (months 1–11). Reprice held PUT via IV surface, compare to replacement at current debt. Slippage (bid-ask spread, modeled as a linear OTM penalty up to 5%) is deducted from both sell and buy sides. Profitable rolls are accumulated as roll savings.</p>
+      <div style="width:1px;height:40px;background:var(--border);flex-shrink:0;"></div>
+      <div style="min-width:180px;flex:1 1 180px;">
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:12px;color:var(--text-dim);">Annual Interest Rate</span>
+            <span id="lbl-apr" style="font-size:13px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;">9.0%</span>
+          </div>
+          <input type="range" id="apr" min="5" max="12" step="0.5" value="9" oninput="calc()">
+        </div>
       </div>
-
-      <div class="method-section" id="premium-recovery">
-        <h4>Premium Recovery</h4>
-        <p>Recovery % = cumulative roll savings / initial premium. Higher = cheaper hedge. <span class="cross-link" onclick="Nav.goTo(2,'tier-section-1')">See results →</span></p>
+      <div style="width:1px;height:40px;background:var(--border);flex-shrink:0;"></div>
+      <div style="flex-shrink:0;">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">Down Payment</div>
+        <div id="dp-pills" style="display:flex;gap:6px;">
+          <button class="pill-btn" onclick="selectDP(20,this)">20%</button>
+          <button class="pill-btn active" onclick="selectDP(30,this)">30%</button>
+          <button class="pill-btn" onclick="selectDP(40,this)">40%</button>
+          <button class="pill-btn" onclick="selectDP(50,this)">50%</button>
+        </div>
       </div>
-
-      <div class="method-section" id="option-pricing">
-        <h4>Option Pricing</h4>
-        <p>Black-Scholes for European cash-settled PUTs. Inputs: spot, strike (= outstanding debt), time to expiry, IV from SVI surface. Risk-free rate = 0.</p>
-      </div>
-
-      <div class="method-section" id="iv-surface">
-        <h4>IV Surface</h4>
-        <p>Deribit historical trades, 700+ days. SVI parameterization per day across 5 tenor buckets (short/90d/180d/270d/365d). 26 moneyness points. Min 6 quotes for short tenors, 12 for long tenors (180d+); sparse buckets forward-filled up to 60 days.</p>
-      </div>
-
-      <div class="method-section" id="data-quality">
-        <h4>Data Quality</h4>
-        <p>The SVI surface is filtered for degenerate fits, low-quote days, statistical outliers, and calendar-arbitrage violations before backtest use. Dropped rows are forward-filled from the most recent clean calibration (max 60-day staleness).</p>
-      </div>
-
-      <div class="method-section" id="gbm-calibration">
-        <h4>GBM Calibration</h4>
-        <p>Geometric Brownian Motion. Drift &amp; vol from ~3 years Binance BTCUSDT hourly data, resampled to daily log returns. Daily resolution (dt = 1/365). Forward months use regime-matched IV surfaces: each simulated month's 7-day trailing return is matched to the closest historical return, and that date's calibrated surface is used.</p>
-      </div>
-
-      <div class="method-section" id="simulation-tiers">
-        <h4>Simulation Tiers</h4>
-        <p><strong>Tier 1:</strong> Pure historical — real prices, real IV. <span class="cross-link" onclick="Nav.goTo(2,'tier-section-1')">Results →</span></p>
-        <p><strong>Tier 2:</strong> Real entry + 1,000 GBM paths forward. Averaged per start date. <span class="cross-link" onclick="Nav.goTo(2,'tier-section-2')">Results →</span></p>
-        <p><strong>Tier 3:</strong> 1,000 independent paths from today's spot. Individual outcomes. <span class="cross-link" onclick="Nav.goTo(2,'tier-section-3')">Results →</span></p>
-      </div>
-
-      <div class="method-section" id="loan-parameters">
-        <h4>Loan Parameters</h4>
-        <p><strong>LTV:</strong> 70% · <strong>Term:</strong> 12mo · <strong>APR:</strong> 10% · <strong>Payment:</strong> Fixed monthly · <strong>Option tenors:</strong> 3/6/9/12mo · <strong>Min roll:</strong> $20 · <strong>Slippage:</strong> linear OTM penalty, max 5%</p>
-      </div>
-
-      <div class="method-section" id="assumptions">
-        <h4>Key Assumptions</h4>
-        <ul>
-          <li><strong>Regime-matched IV:</strong> Forward months select a historical surface date whose 7-day trailing return best matches the simulated path's recent return, rather than freezing on today's snapshot.</li>
-          <li><strong>No fees:</strong> No exchange fees applied. Real recovery slightly lower.</li>
-          <li><strong>Monthly only:</strong> 11 roll checkpoints per loan.</li>
-          <li><strong>Slippage modeled:</strong> Linear OTM penalty (up to 5%) applied on both buy and sell sides of each roll.</li>
-        </ul>
-      </div>
-
-      <div class="method-section" id="data-sources">
-        <h4>Data Sources</h4>
-        <p><strong>Spot:</strong> Binance BTCUSDT hourly, ~3 years. <strong>Options:</strong> Deribit historical trades, ~1.4M data points, 700+ days.</p>
+      <div style="width:1px;height:40px;background:var(--border);flex-shrink:0;"></div>
+      <div style="flex-shrink:0;">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">Loan Term</div>
+        <div style="padding:5px 12px;border-radius:6px;border:1px solid var(--accent);background:var(--persimmon-dim);color:var(--accent);font-size:12px;font-weight:500;">12 months</div>
       </div>
     </div>
-
   </div>
 
-  <footer>
-    <p>bitmor.xyz &nbsp;·&nbsp; <a href="https://bitmor.xyz/loans">Loan Waitlist</a></p>
-    <p>Educational tool. Not financial advice.</p>
-  </footer>
+  <!-- Hero effective price card -->
+  <div id="hero-card" class="card" style="background:linear-gradient(135deg,#0f1d38 0%,#0a1428 100%);border:1px solid var(--border-light);position:relative;overflow:hidden;margin-bottom:20px;padding:32px 36px;">
+    <div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:var(--persimmon-glow);filter:blur(100px);opacity:0.25;"></div>
+    <div style="position:relative;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Effective cost per BTC today</div>
+          <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:6px;">
+            <span id="hero-eff-price" style="font-size:48px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-0.02em;">—</span>
+            <span id="hero-prem-pct" style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;">—</span>
+          </div>
+          <div id="hero-breakdown" style="font-size:13px;color:var(--text-dim);line-height:1.8;font-variant-numeric:tabular-nums;">—</div>
+        </div>
+        <div style="min-width:280px;flex:0 0 280px;">
+          <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">Cost composition</div>
+          <div id="hero-bar" style="display:flex;height:36px;border-radius:8px;overflow:hidden;border:1px solid var(--border);"></div>
+          <div id="hero-bar-labels" style="display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--text-dim);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three detail cards -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;">
+    <div class="card" style="padding:20px;">
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Upfront Cost</div>
+      <div id="detail-upfront-total" style="font-size:24px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;margin-bottom:10px;">—</div>
+      <div id="detail-upfront-lines" style="font-size:11px;color:var(--text-dim);line-height:1.8;">—</div>
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:8px;font-size:10px;color:var(--text-muted);">Paid at origination</div>
+    </div>
+    <div class="card" style="padding:20px;cursor:pointer;" onclick="document.getElementById('amort-section').scrollIntoView({behavior:'smooth',block:'start'})">
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">12-Month Repayment</div>
+      <div id="detail-monthly" style="font-size:24px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;margin-bottom:10px;">—</div>
+      <div id="detail-repay-lines" style="font-size:11px;color:var(--text-dim);line-height:1.8;">—</div>
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:8px;font-size:10px;color:var(--accent);font-weight:500;">View schedule ↓</div>
+    </div>
+    <div class="card recovery-card" onclick="Nav.switchTab('research')" style="padding:20px;background:var(--green-dim);border-color:rgba(34,197,94,0.2);cursor:pointer;height:100%;">
+      <div style="font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;font-weight:600;">Expected Recovery</div>
+      <div id="detail-recovery-total" style="font-size:24px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;margin-bottom:10px;">—</div>
+      <div id="detail-recovery-lines" style="font-size:11px;color:var(--text-dim);line-height:1.7;">—</div>
+      <div style="border-top:1px solid rgba(34,197,94,0.13);margin-top:10px;padding-top:8px;font-size:10px;color:var(--green);font-weight:500;">How does this work? →</div>
+    </div>
+  </div>
+
+  <!-- PUT pricing bar -->
+  <div class="card" style="padding:16px 20px;border-color:rgba(242,94,19,0.2);background:var(--persimmon-dim);margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--accent);"></div>
+        <span style="font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;">PUT Option Cost</span>
+      </div>
+      <span id="put-data-source" style="font-size:9px;color:var(--green);">● Loading...</span>
+    </div>
+    <div id="put-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;"></div>
+    <div id="put-footer" style="border-top:1px solid var(--border);margin-top:12px;padding-top:10px;display:flex;justify-content:space-between;align-items:center;"></div>
+    <div id="put-note" style="font-size:10px;color:var(--text-dim);margin-top:8px;line-height:1.5;">Strike = financed principal. Purchased at origination. Eliminates price-based liquidation for the full loan term.</div>
+  </div>
+
+  <!-- Amortization section -->
+  <div id="amort-section" style="margin-top:40px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+      <span style="font-size:12px;color:var(--accent);font-weight:600;letter-spacing:0.1em;">02</span>
+      <span style="font-size:12px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;">Repayment Schedule</span>
+    </div>
+    <h2 style="font-size:22px;font-weight:600;color:var(--text);margin:0 0 4px;">Month-by-month amortization</h2>
+    <p style="font-size:13px;color:var(--text-dim);margin:0 0 20px;">Each payment covers accrued interest first, then reduces principal. Balance reaches zero at month 12.</p>
+    <div class="card" style="padding:20px 24px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;">
+        <thead><tr>
+          <th style="text-align:center;padding:10px 12px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;">Mo.</th>
+          <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;">Payment</th>
+          <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;">Principal</th>
+          <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;">Interest</th>
+          <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;">Balance</th>
+          <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;">% Paid</th>
+        </tr></thead>
+        <tbody id="amort-body"></tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
+
+<!-- VIEW 2: ROLL-DOWN RESEARCH -->
+<div class="view-content" id="view-research" style="display:none;">
+
+  <!-- Context banner -->
+  <div id="research-banner" class="card" style="padding:14px 20px;background:var(--persimmon-dim);border-color:rgba(242,94,19,0.2);margin-bottom:32px;margin-top:32px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div id="research-banner-text" style="font-size:13px;color:var(--text-dim);">Loading stats…</div>
+      <div style="font-size:11px;color:var(--text-muted);">70% LTV · 12mo · 10% APR</div>
+    </div>
+  </div>
+
+  <!-- Hero heading -->
+  <div style="text-align:center;margin-bottom:40px;">
+    <div style="font-size:12px;color:var(--accent);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px;">PUT Roll-Down Research</div>
+    <h1 style="font-size:36px;font-weight:700;color:var(--text);margin:0 0 8px;">Rolling down cuts the cost of hedging</h1>
+    <p style="font-size:15px;color:var(--text-dim);margin:0 0 32px;max-width:560px;margin-left:auto;margin-right:auto;line-height:1.6;">As monthly payments reduce debt, the PUT strike rolls down with it. The old option is worth more than the new one. You pocket the difference.</p>
+  </div>
+
+  <!-- Section 01: Path Explorer -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+    <span style="font-size:12px;color:var(--accent);font-weight:600;letter-spacing:0.1em;">01</span>
+    <span style="font-size:12px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;">Path Explorer</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h2 style="font-size:22px;font-weight:600;color:var(--text);margin:0 0 4px;">Single path deep-dive</h2>
+      <p style="font-size:13px;color:var(--text-dim);margin:0;">Explore individual loan outcomes to see roll-down mechanics in action.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="path-nav-btn" onclick="PathExplorer.prev()">←</button>
+      <div style="padding:6px 14px;border-radius:6px;background:var(--bg-card);border:1px solid var(--border);font-size:11px;color:var(--text-dim);font-variant-numeric:tabular-nums;">Path <span id="path-num" style="color:var(--text);font-weight:600;">#1</span> of <span id="path-total">2,494</span></div>
+      <button class="path-nav-btn" onclick="PathExplorer.next()">→</button>
+      <button class="path-random-btn" onclick="PathExplorer.random()"><span style="font-size:13px;">↻</span> Random</button>
+    </div>
+  </div>
+
+  <!-- Debt vs Strike chart -->
+  <div class="card" style="margin-bottom:16px;">
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;">Debt Balance vs PUT Strike</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">The gap between strike (dashed) and debt (solid) is where roll savings come from.</div>
+    <div id="rolldown-chart" style="width:100%;height:300px;"></div>
+    <div id="rolldown-chart-legend" style="display:flex;gap:20px;justify-content:center;margin-top:4px;font-size:10px;color:var(--text-dim);font-family:var(--font);"></div>
+  </div>
+
+  <!-- Cash flows + summary cards -->
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:16px;margin-bottom:16px;">
+    <div class="card" style="padding:16px 20px;overflow-x:auto;">
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px;">Roll-down cash flows</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums;">
+        <thead><tr>
+          <th style="text-align:center;padding:6px 10px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:9px;text-transform:uppercase;letter-spacing:0.06em;">Mo.</th>
+          <th style="text-align:left;padding:6px 10px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:9px;text-transform:uppercase;letter-spacing:0.06em;">Action</th>
+          <th style="text-align:right;padding:6px 10px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:9px;text-transform:uppercase;letter-spacing:0.06em;">Saving</th>
+          <th style="text-align:right;padding:6px 10px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:9px;text-transform:uppercase;letter-spacing:0.06em;">Cumulative</th>
+        </tr></thead>
+        <tbody id="path-cf-table"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div id="path-recovery-hero" class="card" style="padding:16px;background:var(--green-dim);border-color:rgba(34,197,94,0.2);text-align:center;"></div>
+      <div id="path-netcost-hero" class="card" style="padding:16px;text-align:center;"></div>
+      <div id="path-secondary" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+      <div id="path-tertiary" class="card" style="padding:10px 12px;"></div>
+    </div>
+  </div>
+
+  <!-- Section 02: Aggregate Results -->
+  <div style="margin-top:40px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+      <span style="font-size:12px;color:var(--accent);font-weight:600;letter-spacing:0.1em;">02</span>
+      <span style="font-size:12px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;">Aggregate Results</span>
+    </div>
+    <h2 style="font-size:22px;font-weight:600;color:var(--text);margin:0 0 6px;">Three levels of evidence</h2>
+    <p style="font-size:13px;color:var(--text-dim);margin:0 0 20px;">Three tiers of evidence, from pure historical to fully simulated. Tier 1 uses only real market data.</p>
+
+    <div id="tier-tabs" style="display:flex;border-bottom:1px solid var(--border);margin-bottom:24px;">
+      <button class="tier-tab active" data-tier="1" onclick="TierView.switchTier(1)">Historical</button>
+      <button class="tier-tab" data-tier="2" onclick="TierView.switchTier(2)">Hist + Simulated</button>
+      <button class="tier-tab" data-tier="3" onclick="TierView.switchTier(3)">Forward Sim</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <span id="tier-badge" class="tier-badge"></span>
+      <span id="tier-desc" style="font-size:13px;color:var(--text-dim);line-height:1.5;"></span>
+    </div>
+
+    <div class="card" style="padding:20px 24px;margin-bottom:16px;background:linear-gradient(135deg,#0f1d38,#0a1428);border-color:var(--border-light);">
+      <div id="tier-stats-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;"></div>
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Recovery range</div>
+      <div id="tier-range-bar" style="display:flex;align-items:center;gap:16px;"></div>
+      <div id="tier-insight" style="font-size:12px;color:var(--text-dim);margin-top:16px;padding-top:14px;border-top:1px solid var(--border);line-height:1.6;"></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div id="tier-chart-title" style="font-size:13px;font-weight:600;color:var(--text);"></div>
+      <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+        <button class="chart-toggle active" data-mode="scatter" onclick="TierView.setChartMode('scatter')">Scatter</button>
+        <button class="chart-toggle" data-mode="dist" onclick="TierView.setChartMode('dist')">Distribution</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div id="tier-chart-desc" style="font-size:11px;color:var(--text-dim);margin-bottom:14px;"></div>
+      <div id="tier-chart" style="width:100%;height:400px;"></div>
+      <div id="tier-chart-legend" style="display:flex;gap:20px;justify-content:center;margin-top:4px;font-size:10px;color:var(--text-dim);font-family:var(--font);"></div>
+      <div id="tier-chart-callout" style="margin-top:16px;padding:12px 16px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;gap:12px;align-items:flex-start;"></div>
+    </div>
+  </div>
+
+  <!-- Section 03: Methodology (collapsible) -->
+  <div style="margin-top:40px;">
+    <div class="card" style="padding:14px 20px;cursor:pointer;" onclick="toggleMethodology()">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:var(--accent);font-weight:600;letter-spacing:0.1em;">03</span>
+          <span style="font-size:12px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;">Methodology</span>
+        </div>
+        <span id="method-chevron" style="font-size:14px;color:var(--text-muted);transition:transform 0.2s;">▾</span>
+      </div>
+      <div id="method-collapsed-desc" style="font-size:12px;color:var(--text-dim);margin-top:4px;">Key assumptions, data sources, and limitations behind these numbers.</div>
+    </div>
+    <div id="method-expanded" style="display:none;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+      <div class="card"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">Option Pricing</div><div style="font-size:12px;color:var(--text-dim);line-height:1.6;">Black-Scholes, European cash-settled PUTs. Risk-free rate assumed zero (crypto convention). IV from SVI surface.</div></div>
+      <div class="card"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">IV Surface</div><div style="font-size:12px;color:var(--text-dim);line-height:1.6;">Deribit options trades, 700+ days of data. SVI parameterization, 26 moneyness points.</div></div>
+      <div class="card"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">GBM Calibration</div><div style="font-size:12px;color:var(--text-dim);line-height:1.6;">~3yr Binance BTCUSDT hourly candles. Daily log returns for drift and vol estimation.</div></div>
+      <div class="card"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">Assumptions</div><div style="font-size:12px;color:var(--text-dim);line-height:1.6;">Regime-matched IV: forward months select a historical surface whose 7-day trailing return best matches the simulated path. No transaction fees. Monthly roll checkpoints. Slippage modeled as linear OTM penalty (max 5%).</div></div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<footer style="border-top:1px solid var(--border);padding:24px 32px;margin-top:48px;display:flex;justify-content:space-between;align-items:center;">
+  <div style="font-size:12px;color:var(--text-muted);">bitmor.xyz — Educational tool. Not financial advice.</div>
+  <a href="https://bitmor.xyz/loans" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:500;">Join the Loan Waitlist →</a>
+</footer>
 
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -22270,6 +21693,7 @@ const DataStore = (() => {
       medianRollingNetCostPct: percentile(rollingNetPcts, 50),
       pathsWithPayoff: data.filter(r => r.terminal_payoff_rolling > 0).length,
       payoffPct: (data.filter(r => r.terminal_payoff_rolling > 0).length / n * 100),
+      winRate: (data.filter(r => r.roll_savings > 0).length / n * 100),
     };
   }
 
@@ -22287,49 +21711,31 @@ const DataStore = (() => {
 // NAV MODULE
 // ══════════════════════════════════════════════════════════════
 const Nav = (() => {
-  const tabs = { explainer: 1, backtests: 2, math: 3, methodology: 4 };
-  const tabIds = { 1: 'tab-explainer', 2: 'tab-backtests', 3: 'tab-math', 4: 'tab-methodology' };
-  const hashMap = { 1: '#explainer', 2: '#backtests', 3: '#math', 4: '#methodology' };
-  let currentTab = 1;
-  const initCallbacks = { 1: null, 2: null, 3: null, 4: null };
+  const viewIds = { calculator: 'view-calculator', research: 'view-research' };
+  let currentView = 'calculator';
+  const initCallbacks = { calculator: null, research: null };
 
-  function registerInit(tabNum, fn) { initCallbacks[tabNum] = fn; }
+  function registerInit(viewId, fn) { initCallbacks[viewId] = fn; }
 
-  function switchTab(tabNum) {
-    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.main-tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById(tabIds[tabNum]).style.display = 'block';
-    document.querySelector(`[data-tab="${tabNum}"]`).classList.add('active');
-    currentTab = tabNum;
-    history.replaceState(null, '', hashMap[tabNum]);
-
-    // Lazy init
-    if (initCallbacks[tabNum]) {
-      initCallbacks[tabNum]();
-      initCallbacks[tabNum] = null; // only once
-    }
-  }
-
-  function goTo(tabNum, anchorId) {
-    switchTab(tabNum);
-    if (anchorId) {
-      setTimeout(() => {
-        const el = document.getElementById(anchorId);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          el.classList.add('highlight-flash');
-          setTimeout(() => el.classList.remove('highlight-flash'), 1200);
-        }
-      }, 100);
+  function switchTab(viewId) {
+    document.querySelectorAll('.view-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+    document.getElementById(viewIds[viewId]).style.display = 'block';
+    document.querySelector(`[data-view="${viewId}"]`).classList.add('active');
+    currentView = viewId;
+    history.replaceState(null, '', '#' + viewId);
+    if (initCallbacks[viewId]) {
+      initCallbacks[viewId]();
+      initCallbacks[viewId] = null;
     }
   }
 
   function initFromHash() {
     const hash = location.hash.replace('#', '');
-    if (tabs[hash]) switchTab(tabs[hash]);
+    if (viewIds[hash]) switchTab(hash);
   }
 
-  return { switchTab, goTo, registerInit, initFromHash };
+  return { switchTab, registerInit, initFromHash };
 })();
 
 // ══════════════════════════════════════════════════════════════
@@ -22359,19 +21765,16 @@ function bsPut(S, K, r, T, sigma) {
 }
 
 function calc() {
-  const S       = +document.getElementById('btcprice').value;
-  const amt     = _btcAmt;
+  const S       = window._liveSpot || DERIBIT_SNAPSHOT.spot;
+  const amt     = 1;
   const dpPct   = _dpPct;
-  const n       = _term;
+  const n       = 12;
   const annRate = +document.getElementById('apr').value / 100;
-  const sigma   = +document.getElementById('iv').value / 100;
   const r       = annRate / 12;
   const rfr     = 0.05;
   const T       = n / 12;
 
-  document.getElementById('lbl-btcprice').textContent = usd(S);
-  document.getElementById('lbl-apr').textContent      = (annRate*100).toFixed(1) + '%';
-  document.getElementById('lbl-iv').textContent       = Math.round(sigma*100) + '%';
+  document.getElementById('lbl-apr').textContent = (annRate*100).toFixed(1) + '%';
 
   const total     = S * amt;
   const down      = total * dpPct;
@@ -22379,156 +21782,146 @@ function calc() {
   const M         = principal * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
   const totalCost = M * n;
   const totalInt  = totalCost - principal;
-  const putPrice  = bsPut(total, principal, rfr, T, sigma);
-  const putPct    = (putPrice / principal) * 100;
-  const upfront   = down + putPrice;
-  const entryPct  = (upfront / total) * 100;
 
-  document.getElementById('out-total').textContent     = usd(total);
-  document.getElementById('out-down').textContent      = usd(down);
-  document.getElementById('out-financed').textContent  = usd(principal);
-  document.getElementById('out-monthly').textContent   = usd(M);
-  document.getElementById('out-totalint').textContent  = usd(totalInt);
-  document.getElementById('out-totalcost').textContent = usd(totalCost);
+  // Deribit pricing
+  const table    = livePrices || DERIBIT_SNAPSHOT.puts;
+  const snapSpot = livePrices ? window._liveSpot : DERIBIT_SNAPSHOT.spot;
+  const isLive   = !!livePrices;
 
-  document.getElementById('loan-formula').innerHTML = `
-    <span class="var">${amt.toFixed(1)} BTC</span> × <span class="var">${usd(S)}</span> = <span class="result">${usd(total)}</span><span class="comment"> (total value)</span><br>
-    <span class="result">${usd(total)}</span> × ${Math.round(dpPct*100)}% = <span class="var">${usd(down)}</span><span class="comment"> (down payment)</span><br>
-    <span class="result">${usd(total)}</span> − <span class="var">${usd(down)}</span> = <span class="result">${usd(principal)}</span><span class="comment"> (financed / strike)</span>
+  const perBtcStrike = principal / amt;
+  const listedStrikes = Object.keys(table).map(Number).sort((a, b) => a - b);
+  const nearest   = listedStrikes.reduce((p, c) => Math.abs(c - perBtcStrike) < Math.abs(p - perBtcStrike) ? c : p);
+  const chainIV   = table[nearest]?.iv ?? null;
+  const chainSigma = chainIV !== null ? chainIV / 100 : 0.55;
+
+  const rawMark = interpolateMark(table, perBtcStrike);
+  let deribitMark = null;
+  if (rawMark !== null) {
+    deribitMark = Math.max(0, rawMark * amt);
+  }
+
+  const putPrice  = bsPut(total, principal, rfr, T, chainSigma);
+  const displayPutCost = deribitMark !== null ? deribitMark : putPrice;
+  const putPct    = (displayPutCost / total) * 100;
+  const upfront   = down + displayPutCost;
+
+  // Expected roll-down recovery — use tier data if available, else 34% default
+  let blendedRecoveryPct = 34;
+  try {
+    const s1 = DataStore.getTierStats(1);
+    const s2 = DataStore.getTierStats(2);
+    const s3 = DataStore.getTierStats(3);
+    blendedRecoveryPct = (s1.medianRecoveryPct + s2.medianRecoveryPct + s3.medianRecoveryPct) / 3;
+  } catch (e) {}
+  const rollSavings = displayPutCost * blendedRecoveryPct / 100;
+
+  // Effective price AFTER deducting expected recovery
+  const effPriceGross = upfront + totalCost;
+  const effPrice  = effPriceGross - rollSavings;
+  const premPct   = ((effPrice / total - 1) * 100);
+
+  // Update live spot display
+  const spotEl = document.getElementById('live-spot-display');
+  if (spotEl) spotEl.textContent = '$' + Math.round(S).toLocaleString();
+
+  // Hero card
+  document.getElementById('hero-eff-price').textContent = usd(effPrice);
+  const premEl = document.getElementById('hero-prem-pct');
+  premEl.textContent = '+' + premPct.toFixed(1) + '% over spot';
+  premEl.style.color = premPct <= 10 ? 'var(--green)' : premPct <= 20 ? 'var(--yellow)' : 'var(--accent)';
+
+  document.getElementById('hero-breakdown').innerHTML =
+    `<span style="color:var(--text)">${usd(S)}</span> spot` +
+    ` <span style="color:var(--text-muted)"> + </span>` +
+    `<span style="color:var(--yellow)">${usd(totalInt)}</span> interest` +
+    ` <span style="color:var(--text-muted)"> + </span>` +
+    `<span style="color:var(--accent)">${usd(displayPutCost)}</span> PUT` +
+    ` <span style="color:var(--text-muted)"> − </span>` +
+    `<span style="color:var(--green)">${usd(rollSavings)}</span> roll savings` +
+    ` <span style="color:var(--text-muted)"> = </span>` +
+    `<span style="color:var(--text);font-weight:600">${usd(effPrice)}</span>`;
+
+  // Stacked bar — spot + interest + net PUT cost (PUT − recovery)
+  const netPut = displayPutCost - rollSavings;
+  const barParts = [
+    { label: 'Spot', value: total, bg: 'rgba(74,93,122,0.2)', textColor: 'var(--text-dim)' },
+    { label: 'Int.', value: totalInt, bg: 'rgba(234,179,8,0.27)', textColor: 'var(--yellow)' },
+    { label: 'PUT', value: Math.max(0, netPut), bg: 'var(--persimmon-dim)', textColor: 'var(--accent)' },
+  ];
+  const barTotal = barParts.reduce((s, p) => s + p.value, 0);
+  document.getElementById('hero-bar').innerHTML = barParts.map(p =>
+    `<div style="flex:${(p.value/barTotal)};background:${p.bg};display:flex;align-items:center;justify-content:center;"><span style="font-size:${p.label==='Spot'?10:9}px;color:${p.textColor};font-weight:500;">${p.label}</span></div>`
+  ).join('');
+  const labelColors = ['var(--text-dim)', 'var(--yellow)', 'var(--accent)'];
+  document.getElementById('hero-bar-labels').innerHTML = barParts.map((p, i) =>
+    `<span style="color:${labelColors[i]}">${p.label}: ${(p.value/barTotal*100).toFixed(1)}%</span>`
+  ).join('');
+
+  // Detail cards
+  document.getElementById('detail-upfront-total').textContent = usd(upfront);
+  document.getElementById('detail-upfront-lines').innerHTML =
+    `Down payment (${Math.round(dpPct*100)}%): ${usd(down)}<br>PUT option: ${usd(displayPutCost)} (${putPct.toFixed(1)}% of spot)`;
+
+  document.getElementById('detail-monthly').textContent = usd(M) + '/mo';
+  document.getElementById('detail-repay-lines').innerHTML =
+    `Principal: ${usd(principal)}<br>Interest: ${usd(totalInt)}<br>Total repaid: ${usd(totalCost)}`;
+
+  // Recovery card
+  try {
+    const s1 = DataStore.getTierStats(1);
+    const s2 = DataStore.getTierStats(2);
+    const s3 = DataStore.getTierStats(3);
+    const blendedRecovery = (s1.medianRecoveryPct + s2.medianRecoveryPct + s3.medianRecoveryPct) / 3;
+    const expectedSavings = displayPutCost * blendedRecovery / 100;
+    document.getElementById('detail-recovery-total').textContent = usd(expectedSavings);
+    document.getElementById('detail-recovery-lines').innerHTML =
+      `~${blendedRecovery.toFixed(0)}% of PUT cost recovered<br>via roll-down strategy<br>Net hedge: ${usd(displayPutCost - expectedSavings)}`;
+  } catch (e) {
+    document.getElementById('detail-recovery-total').textContent = '—';
+    document.getElementById('detail-recovery-lines').innerHTML = 'Loading tier data…';
+  }
+
+  // PUT grid (4 cells)
+  const putGrid = document.getElementById('put-grid');
+  const cellStyle = 'padding:12px 14px;background:var(--bg-card);';
+  const labelStyle = 'font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;';
+  const valStyle = 'font-size:16px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;';
+  putGrid.innerHTML = `
+    <div style="${cellStyle}">
+      <div style="${labelStyle}">Strike</div>
+      <div style="${valStyle}">${usd(nearest)}</div>
+    </div>
+    <div style="${cellStyle}">
+      <div style="${labelStyle}">Deribit Mark</div>
+      <div style="${valStyle}">${deribitMark !== null ? usd(deribitMark) : '—'}</div>
+      <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">${deribitMark !== null ? (deribitMark/total*100).toFixed(2)+'% of spot' : ''}</div>
+    </div>
+    <div style="${cellStyle}">
+      <div style="${labelStyle}">IV</div>
+      <div style="${valStyle}">${chainIV !== null ? chainIV.toFixed(1)+'%' : '—'}</div>
+      <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">nearest strike</div>
+    </div>
+    <div style="${cellStyle}">
+      <div style="${labelStyle}">Expiry</div>
+      <div style="${valStyle}font-size:14px;">${getExpiry() ? getExpiry().replace(/^BTC(_USDC)?-/, '').replace(/(\d{2})([A-Z]{3})(\d{2})/, '$1 $2 $3') : '—'}</div>
+    </div>
   `;
 
-  document.getElementById('put-strike').textContent       = usd(principal);
-  document.getElementById('put-premium-pct').textContent  = putPct.toFixed(2) + '%';
-  document.getElementById('put-premium-usd').textContent  = usd(putPrice);
-  document.getElementById('put-total-upfront').textContent = usd(upfront);
-  document.getElementById('put-entry-pct').textContent    = entryPct.toFixed(1) + '%';
+  // PUT footer
+  document.getElementById('put-footer').innerHTML = `
+    <div style="font-size:11px;color:var(--text-dim);">BS theoretical: ${usd(putPrice)} (σ=${(chainSigma*100).toFixed(0)}%)</div>
+    <div style="font-size:11px;color:var(--accent);font-weight:600;">Upfront: ${(upfront/total*100).toFixed(1)}% of BTC value</div>
+  `;
 
-  const badge = document.getElementById('scenario-badge');
-  if (total >= principal) {
-    badge.className   = 'scenario-badge safe';
-    badge.textContent = '● BTC above strike — PUT expires worthless';
-  } else {
-    badge.className   = 'scenario-badge danger';
-    badge.textContent = '● BTC below strike — PUT pays out';
+  // Data source indicator
+  const srcEl = document.getElementById('put-data-source');
+  if (srcEl) {
+    srcEl.textContent = isLive ? '● Live Deribit data' : '● Snapshot: ' + DERIBIT_SNAPSHOT.capturedAt;
+    srcEl.style.color = isLive ? 'var(--green)' : 'var(--text-muted)';
   }
 
-  // Deribit row
-  if (typeof interpolateMark === 'undefined') {
-    ['deribit-nearest-strike','deribit-mark','deribit-mark-pct','deribit-iv-sub','deribit-snap-date','put-data-source','deribit-iv-inline']
-      .forEach(id => { const el = document.getElementById(id); if (el) el.textContent = id === 'put-data-source' ? '● Loading...' : '—'; });
-  } else {
-    const table    = livePrices || DERIBIT_SNAPSHOT.puts;
-    const snapSpot = livePrices ? window._liveSpot : DERIBIT_SNAPSHOT.spot;
-    const isLive   = !!livePrices;
-
-    // Convert principal to per-BTC strike for Deribit lookup
-    // (Deribit strikes are per-BTC, e.g. 40000, 50000; principal is total dollar debt)
-    const perBtcStrike = amt > 0 ? principal / amt : principal;
-    const listedStrikes = Object.keys(table).map(Number).sort((a, b) => a - b);
-    const nearest   = listedStrikes.reduce((p, c) => Math.abs(c - perBtcStrike) < Math.abs(p - perBtcStrike) ? c : p);
-    const chainIV   = table[nearest]?.iv ?? null;
-    const chainSigma = chainIV !== null ? chainIV / 100 : sigma;
-
-    const ivSlider = document.getElementById('iv');
-    if (!ivSlider.dataset.userSet && chainIV !== null) {
-      const snapped = Math.round(chainIV / 5) * 5;
-      ivSlider.value = snapped;
-      document.getElementById('lbl-iv').textContent = snapped + '%';
-    }
-
-    // Lookup mark price at per-BTC strike, then scale by position size
-    const rawMark = interpolateMark(table, perBtcStrike);
-    const fullT = _term / 12;
-    let deribitMark = null;
-    if (rawMark !== null) {
-      deribitMark = Math.max(0, rawMark * amt);
-    }
-    const deribitMarkPct = deribitMark !== null ? (deribitMark / principal * 100) : null;
-
-    if (chainIV !== null) {
-      document.getElementById('deribit-iv-inline').textContent     = chainIV.toFixed(1) + '%';
-      document.getElementById('deribit-nearest-strike').textContent = '$' + nearest.toLocaleString() + ' · IV ' + chainIV.toFixed(1) + '%';
-      document.getElementById('deribit-iv-sub').textContent         = 'implied vol from chain';
-    } else {
-      document.getElementById('deribit-iv-inline').textContent     = '—';
-      document.getElementById('deribit-nearest-strike').textContent = '$' + nearest.toLocaleString();
-      document.getElementById('deribit-iv-sub').textContent         = 'IV not available';
-    }
-
-    if (deribitMark !== null) {
-      document.getElementById('deribit-mark').textContent     = usd(deribitMark);
-      document.getElementById('deribit-mark-pct').textContent = (deribitMark / total * 100).toFixed(2) + '% of spot';
-    } else {
-      document.getElementById('deribit-mark').textContent     = '—';
-      document.getElementById('deribit-mark-pct').textContent = '';
-    }
-
-    const snapLabel = isLive ? 'Live' : 'Snapshot ' + DERIBIT_SNAPSHOT.capturedAt;
-    document.getElementById('deribit-snap-date').textContent = snapLabel;
-    document.getElementById('put-data-source').textContent   = isLive ? '● Live Deribit data' : '● Snapshot: ' + DERIBIT_SNAPSHOT.capturedAt;
-    document.getElementById('put-data-source').style.color   = isLive ? 'var(--green)' : 'var(--muted)';
-
-    // Dynamic expiry display
-    const curExpiry = getExpiry();
-    if (curExpiry) {
-      const expiryLabel = curExpiry.replace(/^BTC(_USDC)?-/, '').replace(/(\d{2})([A-Z]{3})(\d{2})/, '$1 $2 $3');
-      document.getElementById('deribit-expiry').textContent = expiryLabel;
-      const headerEl = document.querySelector('#tab-explainer .deribit-expiry-header');
-      if (headerEl) headerEl.textContent = 'Deribit Market Price — ' + expiryLabel;
-    }
-
-    window._deribitMark = deribitMark;
-    window._chainIV     = chainSigma;
-  }
-
-  // -- PUT cost / expected recovery / net hedge row --
-  const useDeribit = typeof window._deribitMark !== 'undefined' && window._deribitMark !== null;
-  const displayPutCost = useDeribit ? window._deribitMark : putPrice;
-  const putCostSource  = useDeribit ? 'Deribit mark' : 'BS model';
-
-  document.getElementById('out-put-cost').textContent    = usd(displayPutCost);
-  document.getElementById('out-put-cost-source').textContent = putCostSource;
-
-  function setTip(tipId, text) {
-    const tip = document.getElementById(tipId);
-    tip.textContent = text;
-    tip.parentElement.style.display = text ? '' : 'none';
-  }
-  setTip('out-put-cost-source', putCostSource);
-
-  if (n === 12) {
-    try {
-      const s1 = DataStore.getTierStats(1);
-      const s2 = DataStore.getTierStats(2);
-      const s3 = DataStore.getTierStats(3);
-      const blendedRecovery = (s1.medianRecoveryPct + s2.medianRecoveryPct + s3.medianRecoveryPct) / 3;
-      const netHedge = displayPutCost * (1 - blendedRecovery / 100);
-
-      const recEl = document.getElementById('out-expected-recovery');
-      recEl.textContent = blendedRecovery.toFixed(1) + '%';
-      recEl.className   = 'metric-value green';
-      recEl.style.color = '';
-      setTip('out-recovery-note', 'avg of tier medians · 70% LTV, 10% APR');
-      const hedgeEl = document.getElementById('out-net-hedge');
-      hedgeEl.textContent = usd(Math.max(0, netHedge));
-      hedgeEl.className   = 'metric-value accent';
-      hedgeEl.style.color = '';
-      setTip('out-net-hedge-note', 'after expected roll savings');
-    } catch (e) {
-      document.getElementById('out-expected-recovery').textContent = '—';
-      setTip('out-recovery-note', 'loading tier data…');
-      document.getElementById('out-net-hedge').textContent         = '—';
-      setTip('out-net-hedge-note', '');
-    }
-  } else {
-    document.getElementById('out-expected-recovery').textContent = 'N/A';
-    document.getElementById('out-expected-recovery').className   = 'metric-value';
-    document.getElementById('out-expected-recovery').style.color = 'var(--muted)';
-    setTip('out-recovery-note', '12-month loans only');
-    document.getElementById('out-net-hedge').textContent         = 'N/A';
-    document.getElementById('out-net-hedge').style.color         = 'var(--muted)';
-    setTip('out-net-hedge-note', '12-month loans only');
-  }
+  window._deribitMark = deribitMark;
+  window._chainIV     = chainSigma;
 
   // Amortization table
   let bal = principal;
@@ -22540,7 +21933,14 @@ function calc() {
     bal -= princ;
     const paidPct = ((1 - Math.max(0, bal) / principal) * 100).toFixed(1);
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${t}</td><td>${usd(M)}</td><td>${usd(princ)}</td><td>${usd(int)}</td><td>${usd(Math.max(0, bal))}</td><td style="color:var(--green)">${paidPct}%</td>`;
+    tr.innerHTML = `
+      <td style="text-align:center;padding:9px 12px;color:var(--text-dim);border-bottom:1px solid rgba(26,42,74,0.13);">${t}</td>
+      <td style="text-align:right;padding:9px 12px;color:var(--text);border-bottom:1px solid rgba(26,42,74,0.13);">${usd(M)}</td>
+      <td style="text-align:right;padding:9px 12px;color:var(--accent);border-bottom:1px solid rgba(26,42,74,0.13);">${usd(princ)}</td>
+      <td style="text-align:right;padding:9px 12px;color:var(--text-dim);border-bottom:1px solid rgba(26,42,74,0.13);">${usd(int)}</td>
+      <td style="text-align:right;padding:9px 12px;color:var(--text);font-weight:500;border-bottom:1px solid rgba(26,42,74,0.13);">${usd(Math.max(0, bal))}</td>
+      <td style="text-align:right;padding:9px 12px;color:var(--green);border-bottom:1px solid rgba(26,42,74,0.13);">${paidPct}%</td>
+    `;
     tbody.appendChild(tr);
   }
 }
@@ -22675,78 +22075,23 @@ async function fetchDeribitPrices() {
   }
 }
 
-function selectBTCAmt(amt, btn) {
-  _btcAmt = amt;
-  document.querySelectorAll('[onclick^="selectBTCAmt"]').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('lbl-btcamt').textContent = amt + ' BTC';
-  if (amt <= 0.01) {
-    _term = 3;
-    updateTermButtons([3]);
-  } else {
-    updateTermButtons([3, 6, 9, 12]);
-    if (_term === 3) {
-      _term = 12;
-      document.querySelectorAll('[onclick^="selectTerm"]').forEach(b => {
-        b.classList.toggle('active', parseInt(b.textContent) === 12);
-      });
-      document.getElementById('lbl-term').textContent = '12 months';
-    }
-  }
-  livePrices = null;
-  fetchDeribitPrices();
-  calc();
-}
-
-function selectDP2(pct, btn) {
+function selectDP(pct, btn) {
   _dpPct = pct / 100;
-  document.querySelectorAll('[onclick^="selectDP2"]').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('lbl-dp').textContent = pct + '%';
   calc();
-}
-
-function selectTerm(mo, btn) {
-  _term = mo;
-  document.querySelectorAll('[onclick^="selectTerm"]').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('lbl-term').textContent = mo + ' months';
-  fetchDeribitPrices();
-  calc();
-}
-
-function updateTermButtons(available) {
-  document.querySelectorAll('[onclick^="selectTerm"]').forEach(btn => {
-    const mo = parseInt(btn.textContent);
-    const enabled = available.includes(mo);
-    btn.disabled = !enabled;
-    btn.style.opacity = enabled ? '1' : '0.3';
-    btn.style.cursor  = enabled ? 'pointer' : 'not-allowed';
-    if (!enabled) btn.classList.remove('active');
-  });
-  if (!available.includes(_term)) {
-    _term = available[available.length - 1];
-    const activeBtn = [...document.querySelectorAll('[onclick^="selectTerm"]')]
-      .find(b => parseInt(b.textContent) === _term);
-    if (activeBtn) activeBtn.classList.add('active');
-  }
-  document.getElementById('lbl-term').textContent = _term + ' months';
 }
 
 async function fetchBTCSpot() {
-  const el = document.getElementById('live-spot-price');
   try {
     const res = await fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot', { signal: AbortSignal.timeout(4000) });
     if (!res.ok) throw new Error();
     const data = await res.json();
     const price = parseFloat(data.data.amount);
     if (!isNaN(price)) {
-      el.textContent = '$' + Math.round(price).toLocaleString();
-      el.style.color = 'var(--green)';
-      const slider = document.getElementById('btcprice');
-      const clamped = Math.min(Math.max(Math.round(price / 1000) * 1000, +slider.min), +slider.max);
-      slider.value = clamped;
-      document.getElementById('lbl-btcprice').textContent = '$' + clamped.toLocaleString();
+      window._liveSpot = price;
+      const el = document.getElementById('live-spot-display');
+      if (el) { el.textContent = '$' + Math.round(price).toLocaleString(); el.style.color = 'var(--green)'; }
       calc(); return;
     }
   } catch(e) {}
@@ -22756,24 +22101,22 @@ async function fetchBTCSpot() {
     const data = await res.json();
     const price = parseFloat(data.price);
     if (!isNaN(price)) {
-      el.textContent = '$' + Math.round(price).toLocaleString();
-      el.style.color = 'var(--green)';
-      const slider = document.getElementById('btcprice');
-      const clamped = Math.min(Math.max(Math.round(price / 1000) * 1000, +slider.min), +slider.max);
-      slider.value = clamped;
-      document.getElementById('lbl-btcprice').textContent = '$' + clamped.toLocaleString();
+      window._liveSpot = price;
+      const el = document.getElementById('live-spot-display');
+      if (el) { el.textContent = '$' + Math.round(price).toLocaleString(); el.style.color = 'var(--green)'; }
       calc(); return;
     }
   } catch(e) {}
-  el.textContent = 'Unavailable';
-  el.style.color = 'var(--muted)';
+  const el = document.getElementById('live-spot-display');
+  if (el) { el.textContent = 'Unavailable'; el.style.color = 'var(--text-muted)'; }
 }
 
 // ══════════════════════════════════════════════════════════════
-// TAB 1 CONTROLLER — Section 3: PUT Roll-Down with Real Data
+// PATH EXPLORER — Roll-Down Visualization
 // ══════════════════════════════════════════════════════════════
-const Tab1 = (() => {
+const PathExplorer = (() => {
   let currentPath = null;
+  let _pathSeed = 1;
   const LTV = 0.70, TERM = 12, APR = 0.10;
 
   function computeAmortization(spot) {
@@ -22796,7 +22139,6 @@ const Tab1 = (() => {
     const n = TERM;
 
     if (!monthDetails || monthDetails.length === 0) {
-      // Tier 2 fallback: evenly spaced guess
       const rollMonths = [];
       const numRolls = Math.round(path.num_rolls);
       if (numRolls >= 1) {
@@ -22816,7 +22158,6 @@ const Tab1 = (() => {
       return { rollMonths, strikes };
     }
 
-    // Real data path — use K_held from month 1 as initial Deribit-rounded strike
     const rollMonths = monthDetails.filter(d => d.rolled === 1).map(d => d.month);
     const strikes = new Array(n + 1).fill(null);
     const initialK = monthDetails.length > 0 ? monthDetails[0].K_held : balances[0];
@@ -22837,11 +22178,10 @@ const Tab1 = (() => {
     const monthDetails = DataStore.getPathDetails(path.tier, path.path_id);
     const n = TERM;
 
-    // Use Deribit-rounded initial strike from detail data when available
     const initialK = (monthDetails && monthDetails.length > 0) ? monthDetails[0].K_held : principal;
     const flows = [];
     let running = -initial_premium;
-    flows.push({ month: 0, label: `Buy $${fmtK(initialK)} PUT (12mo)`, flow: -initial_premium, running });
+    flows.push({ month: 0, label: `Buy ${fmtK(initialK)} PUT (12mo)`, flow: -initial_premium, running });
 
     if (monthDetails && monthDetails.length > 0) {
       let currentStrike = initialK;
@@ -22852,25 +22192,24 @@ const Tab1 = (() => {
         running += profit;
         flows.push({
           month: rm,
-          label: `Sell $${fmtK(detail.K_held)} PUT, buy $${fmtK(detail.K_replacement)} PUT (${moLeft}mo)`,
+          label: `Sell ${fmtK(detail.K_held)}, buy ${fmtK(detail.K_replacement)} (${moLeft}mo)`,
           flow: +profit,
           running
         });
         currentStrike = detail.K_replacement;
       }
-      flows.push({ month: n, label: `$${fmtK(currentStrike)} PUT expires`, flow: 0, running });
+      flows.push({ month: n, label: `${fmtK(currentStrike)} PUT expires`, flow: 0, running });
     } else {
-      // Tier 2 fallback
       const savingsPerRoll = path.num_rolls > 0 ? path.roll_savings / path.num_rolls : 0;
       let currentStrike = principal;
       for (const rm of rollMonths) {
         const moLeft = n - rm;
         const newStrike = amort.balances[rm];
         running += savingsPerRoll;
-        flows.push({ month: rm, label: `Sell $${fmtK(currentStrike)} PUT (${moLeft}mo left)`, flow: +savingsPerRoll, running });
+        flows.push({ month: rm, label: `Sell ${fmtK(currentStrike)} (${moLeft}mo left)`, flow: +savingsPerRoll, running });
         currentStrike = newStrike;
       }
-      flows.push({ month: n, label: `$${fmtK(currentStrike)} PUT expires`, flow: 0, running });
+      flows.push({ month: n, label: `${fmtK(currentStrike)} PUT expires`, flow: 0, running });
     }
 
     return flows;
@@ -22885,18 +22224,8 @@ const Tab1 = (() => {
     const amort = computeAmortization(spot);
     const rollSchedule = reconstructRollSchedule(path, amort.balances);
 
-    // Badge
-    const tierLabels = {
-      1: 'Full Historical Backtest',
-      2: 'Historical Entry + Simulated Forward',
-      3: 'Full Monte Carlo Simulation',
-    };
-    const tierEl = document.querySelector('#path-badge .badge-tier');
-    tierEl.className = `badge-tier tier-${path.tier}`;
-    tierEl.textContent = `TIER ${path.tier}`;
-    const dateStr = path.start_date || 'Today';
-    document.getElementById('path-badge-text').textContent =
-      `${tierLabels[path.tier]} — ${path.tier === 3 ? "Starting from today's" : 'Loan started ' + dateStr + ','} BTC at $${Math.round(spot).toLocaleString()}`;
+    // Path nav
+    document.getElementById('path-num').textContent = '#' + _pathSeed;
 
     // Debt vs Strike chart (Plotly)
     const months = Array.from({ length: TERM + 1 }, (_, i) => i === 0 ? 'Start' : `Mo.${i}`);
@@ -22913,345 +22242,493 @@ const Tab1 = (() => {
       x: months, y: rollSchedule.strikes,
       type: 'scatter', mode: 'lines+markers',
       name: 'PUT Strike',
-      line: { color: '#22d3a6', width: 2, dash: 'dash' },
-      marker: { size: 6, color: '#22d3a6' },
+      line: { color: '#2dd4bf', width: 2, dash: 'dash' },
+      marker: { size: 6, color: '#2dd4bf' },
     };
+    // BTC spot price background trace (when month-level data available)
+    const monthDetails = DataStore.getPathDetails(path.tier, path.path_id);
+    const traces = [];
+    let hasBtc = false;
+    if (monthDetails && monthDetails.length > 0) {
+      const sorted = [...monthDetails].sort((a, b) => a.month - b.month);
+      const btcPrices = [spot, ...sorted.map(d => d.spot)];
+      traces.push({
+        x: months, y: btcPrices,
+        type: 'scatter', mode: 'lines',
+        name: 'BTC Spot',
+        line: { color: 'rgba(107,122,150,0.5)', width: 1.5 },
+        yaxis: 'y2',
+        hoverinfo: 'skip',
+      });
+      hasBtc = true;
+    }
+    traces.push(debtTrace, strikeTrace);
+
     const chartLayout = {
-      margin: { t: 36, b: 70, l: 80, r: 20 },
-      xaxis: { tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, gridcolor: 'rgba(26,37,64,0.6)' },
+      margin: { t: 10, b: 60, l: 70, r: hasBtc ? 80 : 60 },
+      xaxis: { tickangle: -45, tickfont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 10 }, gridcolor: 'rgba(26,42,74,0.4)' },
       yaxis: {
-        tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 },
-        gridcolor: 'rgba(26,37,64,0.6)',
+        tickfont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 10 },
+        gridcolor: 'rgba(26,42,74,0.4)',
         tickformat: '$,.0f',
       },
-      legend: { x: 0, y: 1.12, orientation: 'h', font: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, xanchor: 'left', yanchor: 'bottom' },
+      showlegend: false,
       hovermode: 'x unified',
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
     };
-    Plotly.newPlot('rolldown-chart', [debtTrace, strikeTrace], chartLayout, { responsive: true, displayModeBar: false });
+    if (hasBtc) {
+      chartLayout.yaxis2 = {
+        overlaying: 'y', side: 'right', showgrid: false,
+        tickformat: '$,.0f',
+        tickfont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 10 },
+      };
+    }
+    Plotly.newPlot('rolldown-chart', traces, chartLayout, { responsive: true, displayModeBar: false });
 
-    // Cash flow timeline
+    // Custom HTML legend
+    const legendEl = document.getElementById('rolldown-chart-legend');
+    legendEl.innerHTML =
+      (hasBtc ? `<span><span style="display:inline-block;width:16px;height:2px;background:rgba(107,122,150,0.5);vertical-align:middle;margin-right:6px;border-radius:1px;"></span>BTC Spot</span>` : '') +
+      `<span><span style="display:inline-block;width:16px;height:2px;background:#F25E13;vertical-align:middle;margin-right:6px;border-radius:1px;"></span>Debt Balance</span>` +
+      `<span><span style="display:inline-block;width:16px;height:0;border-top:2px dashed #2dd4bf;vertical-align:middle;margin-right:6px;"></span>PUT Strike</span>`;
+
+    // Cash flow table
     const flows = reconstructCashFlows(path, amort, rollSchedule);
-    const timeline = document.getElementById('path-cf-timeline');
-    timeline.innerHTML = '';
+    const cfTable = document.getElementById('path-cf-table');
+    cfTable.innerHTML = '';
     flows.forEach(ev => {
       const isPos = ev.flow > 0;
       const isZero = ev.flow === 0;
       const flowStr = isZero ? '—' : (isPos ? '+' : '') + fmtUSD(ev.flow);
-      const runStr = '∑ ' + (ev.running >= 0 ? '+' : '−') + fmtUSD(Math.abs(ev.running));
-      timeline.innerHTML += `
-        <div class="cf-event">
-          <div class="cf-month">Mo.${ev.month}</div>
-          <div class="cf-desc">${ev.label}</div>
-          <div class="cf-flow ${isPos ? 'pos' : isZero ? '' : 'neg'}">${flowStr}</div>
-          <div class="cf-running">${runStr}</div>
-        </div>`;
+      const runStr = (ev.running >= 0 ? '+' : '−') + fmtUSD(Math.abs(ev.running));
+      const flowColor = isPos ? 'var(--green)' : isZero ? 'var(--text-dim)' : 'var(--red)';
+      cfTable.innerHTML += `
+        <tr style="border-bottom:1px solid rgba(26,42,74,0.13);">
+          <td style="text-align:center;padding:6px 10px;color:var(--text-dim);font-size:10px;">${ev.month}</td>
+          <td style="text-align:left;padding:6px 10px;color:var(--text);font-size:11px;">${ev.label}</td>
+          <td style="text-align:right;padding:6px 10px;color:${flowColor};font-weight:600;font-size:11px;">${flowStr}</td>
+          <td style="text-align:right;padding:6px 10px;color:var(--text-muted);font-size:10px;">${runStr}</td>
+        </tr>`;
     });
 
-    // Summary metrics
-    const metricsHtml = `
-      <div class="three-col" style="grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="metric">
-          <div class="metric-label">Initial Premium</div>
-          <div class="metric-value red">${fmtUSD(path.initial_premium)}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Roll Savings</div>
-          <div class="metric-value green">${fmtUSD(path.roll_savings)}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Recovery</div>
-          <div class="metric-value accent">${path.roll_savings_pct.toFixed(1)}%</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Num Rolls</div>
-          <div class="metric-value">${path.num_rolls}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Final BTC Spot</div>
-          <div class="metric-value">${'$' + Math.round(path.final_spot).toLocaleString()}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Terminal Payoff</div>
-          <div class="metric-value ${path.terminal_payoff_rolling > 0 ? 'green' : ''}">${fmtUSD(path.terminal_payoff_rolling)}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">PUT Cost % of BTC</div>
-          <div class="metric-value">${path.effective_put_cost_pct.toFixed(2)}%</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Net Cost After Roll</div>
-          <div class="metric-value green">${path.rolling_net_cost_pct.toFixed(2)}%</div>
-        </div>
+    // Summary cards
+    document.getElementById('path-recovery-hero').innerHTML = `
+      <div style="font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Recovery</div>
+      <div style="font-size:28px;font-weight:700;color:var(--green);">${path.roll_savings_pct.toFixed(1)}%</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">${fmtUSD(path.roll_savings)} saved</div>
+    `;
+
+    const netCost = path.initial_premium - path.roll_savings;
+    document.getElementById('path-netcost-hero').innerHTML = `
+      <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Net Hedge Cost</div>
+      <div style="font-size:24px;font-weight:700;color:var(--accent);">${fmtUSD(netCost)}</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">${path.rolling_net_cost_pct.toFixed(2)}% of BTC</div>
+    `;
+
+    document.getElementById('path-secondary').innerHTML = `
+      <div class="card" style="padding:10px 12px;text-align:center;">
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Rolls</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text);">${path.num_rolls}</div>
+      </div>
+      <div class="card" style="padding:10px 12px;text-align:center;">
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Effective BTC Price <span title="Spot + Interest + PUT cost − PUT recovery" style="cursor:help;display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;border:1px solid var(--text-muted);font-size:7px;font-weight:600;vertical-align:middle;margin-left:2px;">i</span></div>
+        <div id="path-eff-price" style="font-size:18px;font-weight:700;color:var(--text);">—</div>
       </div>
     `;
-    document.getElementById('path-metrics').innerHTML = metricsHtml;
+
+    // Effective BTC price = spot + interest + PUT cost − roll savings
+    const effBtcPrice = spot + amort.totalInterest + path.initial_premium - path.roll_savings;
+    document.getElementById('path-eff-price').textContent = '$' + Math.round(effBtcPrice).toLocaleString();
+
+    const tierLabels = { 1: 'Historical', 2: 'Hist+Sim', 3: 'Monte Carlo' };
+    const dateStr = path.start_date || 'Today';
+    document.getElementById('path-tertiary').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:10px;color:var(--text-muted);">Tier ${path.tier} · ${tierLabels[path.tier]}</span>
+        <span style="font-size:10px;color:var(--text-dim);">${dateStr} · Entry $${Math.round(spot).toLocaleString()}</span>
+      </div>
+    `;
   }
 
-  function reshuffle(forceTier) {
-    renderPath(DataStore.getRandomPath(forceTier));
-  }
-
-  function reshuffleFromTier(tier) {
-    renderPath(DataStore.getRandomPath(tier || undefined));
-    Nav.switchTab(1);
-    setTimeout(() => {
-      document.getElementById('section-rolldown').scrollIntoView({ behavior: 'smooth' });
-    }, 150);
-  }
-
-  function onBadgeClick() {
-    if (currentPath) Nav.goTo(2, 'tier-section-' + currentPath.tier);
-  }
+  function prev() { _pathSeed = Math.max(1, _pathSeed - 1); renderPath(DataStore.getRandomPath(null, _pathSeed)); }
+  function next() { _pathSeed++; renderPath(DataStore.getRandomPath(null, _pathSeed)); }
+  function random() { _pathSeed = Math.floor(Math.random() * 2494) + 1; renderPath(DataStore.getRandomPath()); }
 
   function init() {
-    reshuffle();
+    const totalPaths = DataStore.getTierRows(1).length + DataStore.getTierRows(2).length + DataStore.getTierRows(3).length;
+    document.getElementById('path-total').textContent = totalPaths.toLocaleString();
+    renderPath(DataStore.getRandomPath());
   }
 
-  return { init, reshuffle, reshuffleFromTier, onBadgeClick };
+  return { init, prev, next, random };
 })();
 
 // ══════════════════════════════════════════════════════════════
-// TAB 2 CONTROLLER — Backtest & Simulations
+// TIER VIEW — Backtest & Simulation Statistics
 // ══════════════════════════════════════════════════════════════
-const Tab2 = (() => {
+const TierView = (() => {
   const fmt = (v, dec = 0) => v.toLocaleString('en-US', {
     minimumFractionDigits: dec, maximumFractionDigits: dec
   });
+  let currentTier = 1;
+  let currentChartMode = 'scatter';
 
-  function renderStats(containerId, stats, isTier3) {
-    let html = `
-      <div class="stat"><span class="stat-label">${isTier3 ? 'Paths' : 'Loans'}</span>
-        <span class="stat-value">${stats.count}</span></div>
-      <div class="stat"><span class="stat-label">Avg Premium</span>
-        <span class="stat-value">$${fmt(stats.avgPremium)}</span></div>
-      <div class="stat"><span class="stat-label">Median Roll Savings</span>
-        <span class="stat-value" style="color:#22d3a6">$${fmt(stats.medianRollSavings)}</span></div>
-      <div class="stat"><span class="stat-label">Median Recovery</span>
-        <span class="stat-value" style="color:#F25E13">${fmt(stats.medianRecoveryPct, 1)}%</span></div>
-      <div class="stat"><span class="stat-label">PUT Cost % of BTC</span>
-        <span class="stat-value">${fmt(stats.medianPutCostPct, 2)}%</span></div>
-      <div class="stat"><span class="stat-label">Net Cost % of BTC</span>
-        <span class="stat-value" style="color:#22d3a6">${fmt(stats.medianRollingNetCostPct, 2)}%</span></div>
+  const tierMeta = {
+    1: { label: 'TIER 1', badge: 'Strongest', color: '#22c55e', bg: 'rgba(34,197,94,0.1)', desc: 'Pure historical backtest — BTC rallied from ~$28K to ~$66K across 731 loans (Mar 2023–2025).' },
+    2: { label: 'TIER 2', badge: 'Blended', color: '#eab308', bg: 'rgba(234,179,8,0.1)', desc: 'Bear market regime — BTC declined from ~$82K to ~$66K. Loans that started recently and haven\'t matured are extended with 1,000 simulated forward paths each.' },
+    3: { label: 'TIER 3', badge: 'Speculative', color: '#F25E13', bg: 'rgba(242,94,19,0.1)', desc: '1,000 Monte Carlo paths from today\'s spot — 64% bullish, 37% bearish, reflecting BTC\'s historical drift and vol.' },
+  };
+
+  function renderStats(tier, stats) {
+    const isTier3 = tier === 3;
+    const rollSavingsPct = stats.medianPutCostPct - stats.medianRollingNetCostPct;
+    const cells = [
+      { label: 'Recovery (median)', value: fmt(stats.medianRecoveryPct, 1) + '%', color: '#22c55e' },
+      { label: 'Net Hedge Cost', value: fmt(stats.medianRollingNetCostPct, 2) + '%', color: 'var(--accent)' },
+      { label: 'Gross PUT Cost', value: fmt(stats.medianPutCostPct, 2) + '%', color: 'var(--text)' },
+      { label: 'Win Rate', value: fmt(stats.winRate, 1) + '%', color: 'var(--text)', sub: fmt(stats.count) + ' ' + (isTier3 ? 'paths' : 'loans') },
+      { label: 'Roll Savings', value: fmt(rollSavingsPct, 2) + '%', color: '#22c55e', sub: 'of BTC value' },
+    ];
+    const cellStyle = 'padding:14px;background:var(--bg-card);';
+    document.getElementById('tier-stats-grid').innerHTML = cells.map(c =>
+      `<div style="${cellStyle}">
+        <div style="font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">${c.label}</div>
+        <div style="font-size:18px;font-weight:700;color:${c.color};font-variant-numeric:tabular-nums;">${c.value}</div>
+        ${c.sub ? `<div style="font-size:8px;color:var(--text-dim);margin-top:2px;">${c.sub}</div>` : ''}
+      </div>`
+    ).join('');
+  }
+
+  function renderRangeBar(stats) {
+    const data = DataStore.getTierRows(currentTier);
+    const recoveries = data.map(r => r.roll_savings / r.initial_premium * 100).sort((a, b) => a - b);
+    const p5 = recoveries[Math.floor(recoveries.length * 0.05)];
+    const p50 = recoveries[Math.floor(recoveries.length * 0.50)];
+    const p95 = recoveries[Math.floor(recoveries.length * 0.95)];
+    const maxVal = Math.max(p95 * 1.1, 100);
+    const barLeft = (p5 / maxVal * 100);
+    const barRight = (100 - p95 / maxVal * 100);
+    const medianPos = (p50 / maxVal * 100);
+
+    document.getElementById('tier-range-bar').innerHTML = `
+      <div style="text-align:center;flex-shrink:0;min-width:56px;">
+        <div style="font-size:16px;font-weight:700;color:var(--red);font-variant-numeric:tabular-nums;">${p5.toFixed(1)}%</div>
+        <div style="font-size:8px;color:var(--text-muted);">5th pctl</div>
+      </div>
+      <div style="flex:1;">
+        <div style="position:relative;height:10px;background:var(--border);border-radius:5px;">
+          <div style="position:absolute;left:${barLeft}%;right:${barRight}%;top:0;bottom:0;background:linear-gradient(90deg,rgba(239,68,68,0.33),rgba(234,179,8,0.33),rgba(34,197,94,0.33));border-radius:5px;"></div>
+          <div style="position:absolute;left:${medianPos}%;top:-3px;width:4px;height:16px;background:var(--green);border-radius:2px;transform:translateX(-50%);box-shadow:0 0 6px rgba(34,197,94,0.4);"></div>
+        </div>
+        <div style="display:flex;justify-content:center;margin-top:6px;">
+          <span style="font-size:10px;color:var(--green);font-weight:600;">&#9650; median ${p50.toFixed(1)}%</span>
+        </div>
+      </div>
+      <div style="text-align:center;flex-shrink:0;min-width:56px;">
+        <div style="font-size:16px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;">${p95.toFixed(1)}%</div>
+        <div style="font-size:8px;color:var(--text-muted);">95th pctl</div>
+      </div>
     `;
-    if (false) { /* Tier 3 extra stats removed */ }
-    document.getElementById(containerId).innerHTML = html;
   }
 
-  function renderTimeSeries(divId, data, title) {
-    const dates = data.map(r => r.start_date);
+  function renderInsight(stats) {
+    const el = document.getElementById('tier-insight');
+    el.innerHTML =
+      `The median borrower recovers <span style="color:var(--green);font-weight:600;">${fmt(stats.medianRecoveryPct, 1)}%</span> of the PUT cost, bringing the net hedge from ${fmt(stats.medianPutCostPct, 2)}% down to <span style="color:var(--accent);font-weight:600;">${fmt(stats.medianRollingNetCostPct, 2)}% of BTC</span>.`;
+  }
+
+  const hoverLabel = {
+    bgcolor: '#030916',
+    bordercolor: '#1a2a4a',
+    font: { family: 'IBM Plex Mono, monospace', size: 11, color: '#e8ecf4' },
+    align: 'left',
+  };
+
+  function buildScatterHover(r, recoveryPct, isTier3) {
+    const sep = '<span style="color:#1a2a4a">─────────────────</span>';
+    const dim = '#7a8ba8';
+    const green = '#22c55e';
+    const accent = '#F25E13';
+    const row = (l, v, vc) => `<span style="color:${dim}">${l}</span>  <b style="color:${vc || '#e8ecf4'}">${v}</b>`;
+    if (isTier3) {
+      return (
+        `<b style="color:#e8ecf4">Final BTC</b>  <b style="color:#e8ecf4">$${r.final_spot.toLocaleString()}</b><br>` +
+        sep + '<br>' +
+        row('Premium', '$' + r.initial_premium.toLocaleString()) + '<br>' +
+        row('Roll Savings', '$' + r.roll_savings.toLocaleString(), green) + '<br>' +
+        row('Recovery', recoveryPct.toFixed(1) + '%', green) + '<br>' +
+        sep + '<br>' +
+        row('PUT Cost', (r.initial_premium / r.spot * 100).toFixed(2) + '% of BTC', dim) + '<br>' +
+        row('Net Cost', ((r.initial_premium - r.roll_savings) / r.spot * 100).toFixed(2) + '% of BTC', accent)
+      );
+    } else {
+      return (
+        `<span style="color:#4a5d7a;font-size:10px">${r.start_date || ''}</span><br>` +
+        row('Entry Spot', '$' + r.spot.toLocaleString()) + '<br>' +
+        sep + '<br>' +
+        row('Premium', '$' + r.initial_premium.toLocaleString()) + '<br>' +
+        row('Roll Savings', '$' + r.roll_savings.toLocaleString(), green) + '<br>' +
+        row('Recovery', recoveryPct.toFixed(1) + '%', green) + '<br>' +
+        sep + '<br>' +
+        row('PUT Cost', (r.initial_premium / r.spot * 100).toFixed(2) + '% of BTC', dim) + '<br>' +
+        row('Net Cost', ((r.initial_premium - r.roll_savings) / r.spot * 100).toFixed(2) + '% of BTC', accent)
+      );
+    }
+  }
+
+  function renderScatter(data) {
+    const isTier3 = currentTier === 3;
     const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
-    const spots = data.map(r => r.spot);
     const sortedRec = [...recoveryPct].sort((a, b) => a - b);
-    const medianRecovery = sortedRec[Math.floor(sortedRec.length / 2)];
-    const hoverText = data.map(r =>
-      `Date: ${r.start_date}<br>` +
-      `Entry Spot: $${r.spot.toLocaleString()}<br>` +
-      `Premium: $${r.initial_premium.toLocaleString()}<br>` +
-      `PUT Cost (% of BTC): ${(r.initial_premium / r.spot * 100).toFixed(2)}%<br>` +
-      `Roll Savings: $${r.roll_savings.toLocaleString()}<br>` +
-      `Recovery: ${(r.roll_savings / r.initial_premium * 100).toFixed(1)}%<br>` +
-      `Net Cost After Rolling (% of BTC): ${((r.initial_premium - r.roll_savings) / r.spot * 100).toFixed(2)}%`
-    );
+    const medianPct = sortedRec[Math.floor(sortedRec.length / 2)];
 
-    const trace1 = {
-      x: dates, y: recoveryPct,
-      type: 'scatter', mode: 'markers',
-      name: '% of Premium Recovered',
-      marker: { size: 5, color: '#F25E13', opacity: 0.7 },
-      text: hoverText, hoverinfo: 'text', yaxis: 'y1',
-    };
-    const trace2 = {
-      x: dates, y: spots,
-      type: 'scatter', mode: 'lines',
-      name: 'BTC Spot Price',
-      line: { color: 'rgba(107,122,150,0.5)', width: 1.5 },
-      yaxis: 'y2', hoverinfo: 'skip',
-    };
-    const traceMedian = {
-      x: [dates[0], dates[dates.length - 1]],
-      y: [medianRecovery, medianRecovery],
-      type: 'scatter', mode: 'lines',
-      name: `Median (${medianRecovery.toFixed(1)}%)`,
-      line: { color: '#22d3a6', width: 2, dash: 'dot' },
-      hoverinfo: 'skip', yaxis: 'y1',
-    };
-    const layout = {
-      title: { text: title, font: { size: 14, color: '#6b7a96', family: 'IBM Plex Mono' } },
-      xaxis: { title: 'Loan Start Date', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-      yaxis: { title: '% of Premium Recovered', zeroline: false, color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-      yaxis2: { title: { text: 'BTC Spot ($)', standoff: 15 }, overlaying: 'y', side: 'right', showgrid: false, tickformat: '$,.0f', color: '#6b7a96', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-      legend: { x: 0, y: -0.22, orientation: 'h', font: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, traceorder: 'normal', itemwidth: 30 },
-      margin: { t: 50, b: 120, l: 60, r: 100 },
-      hovermode: 'closest',
-      plot_bgcolor: 'rgba(0,0,0,0)',
-      paper_bgcolor: 'rgba(0,0,0,0)',
-    };
-    Plotly.newPlot(divId, [trace2, traceMedian, trace1], layout, { responsive: true, displayModeBar: false });
+    const hoverText = data.map((r, i) => buildScatterHover(r, recoveryPct[i], isTier3));
+
+    const traces = [];
+
+    if (isTier3) {
+      // Tier 3: X = final BTC price
+      const xVals = data.map(r => r.final_spot);
+      const medianLine = {
+        x: [Math.min(...xVals), Math.max(...xVals)], y: [medianPct, medianPct],
+        type: 'scatter', mode: 'lines',
+        name: `Median (${medianPct.toFixed(1)}%)`,
+        line: { color: '#22c55e', width: 2, dash: 'dot' }, hoverinfo: 'skip',
+      };
+      const trace = {
+        x: xVals, y: recoveryPct,
+        type: 'scatter', mode: 'markers',
+        name: '% Recovered',
+        marker: { size: 5, opacity: 0.6, color: recoveryPct, colorscale: [[0, 'rgba(242,94,19,0.3)'], [1, 'rgba(242,94,19,1)']], showscale: false },
+        text: hoverText, hoverinfo: 'text',
+        hoverlabel: hoverLabel,
+      };
+      traces.push(medianLine, trace);
+      const layout = {
+        xaxis: { title: 'Final BTC Spot Price ($)', tickformat: '$,.0f', color: '#4a5d7a', gridcolor: '#1a2a4a', tickfont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 11 } },
+        yaxis: { title: '% of Premium Recovered', color: '#4a5d7a', gridcolor: '#1a2a4a', tickfont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 11 } },
+        margin: { t: 10, b: 60, l: 60, r: 40 },
+        hovermode: 'closest',
+        plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)',
+        showlegend: false,
+      };
+      Plotly.newPlot('tier-chart', traces, layout, { responsive: true, displayModeBar: false });
+      // Custom HTML legend for Tier 3
+      document.getElementById('tier-chart-legend').innerHTML =
+        `<span><span style="display:inline-block;width:16px;height:0;border-top:2px dotted #22c55e;vertical-align:middle;margin-right:6px;"></span>Median (${medianPct.toFixed(1)}%)</span>` +
+        `<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F25E13;vertical-align:middle;margin-right:4px;"></span>% Recovered</span>`;
+    } else {
+      // Tier 1/2: X = start date, with BTC price line on right Y-axis
+      const dates = data.map(r => r.start_date);
+      const spots = data.map(r => r.spot);
+
+      const btcTrace = {
+        x: dates, y: spots,
+        type: 'scatter', mode: 'lines',
+        name: 'BTC Spot',
+        line: { color: 'rgba(107,122,150,0.5)', width: 1.5 },
+        yaxis: 'y2',
+        hoverinfo: 'skip',
+      };
+      const medianLine = {
+        x: [dates[0], dates[dates.length - 1]], y: [medianPct, medianPct],
+        type: 'scatter', mode: 'lines',
+        name: `Median (${medianPct.toFixed(1)}%)`,
+        line: { color: '#22c55e', width: 2, dash: 'dot' }, hoverinfo: 'skip',
+        yaxis: 'y1',
+      };
+      const trace = {
+        x: dates, y: recoveryPct,
+        type: 'scatter', mode: 'markers',
+        name: '% Recovered',
+        marker: { size: 5, opacity: 0.7, color: '#F25E13' },
+        text: hoverText, hoverinfo: 'text',
+        hoverlabel: hoverLabel,
+        yaxis: 'y1',
+      };
+      traces.push(btcTrace, medianLine, trace);
+      const layout = {
+        xaxis: { title: 'Loan Start Date', color: '#4a5d7a', gridcolor: '#1a2a4a', tickfont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 11 } },
+        yaxis: { title: '% of Premium Recovered', zeroline: false, color: '#4a5d7a', gridcolor: '#1a2a4a', tickfont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 11 } },
+        yaxis2: { title: { text: 'BTC Spot ($)', standoff: 15 }, overlaying: 'y', side: 'right', showgrid: false, tickformat: '$,.0f', color: '#4a5d7a', tickfont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 11 } },
+        margin: { t: 10, b: 70, l: 60, r: 100 },
+        hovermode: 'closest',
+        plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)',
+        showlegend: false,
+      };
+      Plotly.newPlot('tier-chart', traces, layout, { responsive: true, displayModeBar: false });
+      // Custom HTML legend for Tier 1/2
+      document.getElementById('tier-chart-legend').innerHTML =
+        `<span><span style="display:inline-block;width:16px;height:2px;background:rgba(107,122,150,0.5);vertical-align:middle;margin-right:6px;border-radius:1px;"></span>BTC Spot</span>` +
+        `<span><span style="display:inline-block;width:16px;height:0;border-top:2px dotted #22c55e;vertical-align:middle;margin-right:6px;"></span>Median (${medianPct.toFixed(1)}%)</span>` +
+        `<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F25E13;vertical-align:middle;margin-right:4px;"></span>% Recovered</span>`;
+    }
+
+    // Callout — tier-dependent text matching JSX
+    const callout = document.getElementById('tier-chart-callout');
+    callout.style.display = 'flex';
+    const calloutText = isTier3
+      ? 'Low recovery at high final prices is the best outcome. BTC appreciated so much that the PUT expired worthless, but your collateral gained far more than the insurance cost.'
+      : '<span style="color:var(--text);font-weight:500;">Low recovery = BTC pumped.</span> When recovery is near zero, BTC rallied sharply from the loan start. The PUT expired worthless, but the borrower\'s BTC appreciated far more than the insurance cost.';
+    callout.innerHTML = `
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <span style="color:var(--green);font-size:14px;">↑</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);line-height:1.5;">${calloutText}</div>
+    `;
   }
 
-  function renderHistogram(divId, data) {
+  function renderHistogram(data) {
+    const isTier3 = currentTier === 3;
     const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
+    const totalCount = data.length;
+
+    // Pre-bin data to create custom hover matching JSX tooltip
+    const binSize = 5;
+    const maxBin = Math.ceil(Math.max(...recoveryPct) / binSize) * binSize;
+    const bins = [];
+    for (let b = 0; b <= maxBin; b += binSize) {
+      const count = recoveryPct.filter(v => v >= b && v < b + binSize).length;
+      bins.push({ bin: b, binEnd: b + binSize, count, pct: Math.round(count / totalCount * 1000) / 10 });
+    }
 
     const trace = {
-      x: recoveryPct, type: 'histogram',
-      xbins: { size: 5 },
-      marker: { color: 'rgba(242, 94, 19, 0.6)', line: { color: 'rgba(242, 94, 19, 0.9)', width: 1 } },
-      name: '% of Premium Recovered',
+      x: bins.map(b => b.bin + binSize / 2),
+      y: bins.map(b => b.count),
+      type: 'bar',
+      width: binSize * 0.85,
+      marker: { color: 'rgba(242,94,19,0.6)', line: { color: 'rgba(242,94,19,0.9)', width: 1 } },
+      text: bins.map(b =>
+        `<b style="color:#e8ecf4">${b.bin}–${b.binEnd}% recovery</b><br>` +
+        `<span style="color:#7a8ba8">Count</span>  <b style="color:#F25E13">${b.count} ${isTier3 ? 'paths' : 'loans'}</b><br>` +
+        `<span style="color:#7a8ba8">% of total</span>  <b style="color:#e8ecf4">${b.pct}%</b>`
+      ),
+      hoverinfo: 'text',
+      hoverlabel: hoverLabel,
+      textposition: 'none',
     };
 
     const sorted = [...recoveryPct].sort((a, b) => a - b);
     const pctl = (p) => sorted[Math.floor(sorted.length * p / 100)];
-    const pctiles = [
-      { p: 25, v: pctl(25) },
-      { p: 50, v: pctl(50) },
-      { p: 75, v: pctl(75) },
-    ];
-
+    const pctiles = [{ p: 25, v: pctl(25) }, { p: 50, v: pctl(50) }, { p: 75, v: pctl(75) }];
     const shapes = pctiles.map(({ v, p }) => ({
       type: 'line', x0: v, x1: v, y0: 0, y1: 1, yref: 'paper',
-      line: { color: p === 50 ? '#22d3a6' : '#6b7a96', width: p === 50 ? 2 : 1.5, dash: p === 50 ? 'dot' : 'dash' },
+      line: { color: p === 50 ? '#22c55e' : '#4a5d7a', width: p === 50 ? 2 : 1.5, dash: p === 50 ? 'dot' : 'dash' },
     }));
-
     const annotations = pctiles.map(({ p, v }, i) => ({
       x: v, y: 1.0 - i * 0.06, yref: 'paper', xanchor: 'left', xshift: 6,
       text: `${p === 50 ? 'Median' : 'P' + p}: ${v.toFixed(1)}%`,
-      showarrow: false, font: { size: 11, color: p === 50 ? '#22d3a6' : '#e8eaf0', family: 'IBM Plex Mono' },
+      showarrow: false, font: { size: 11, color: p === 50 ? '#22c55e' : '#e8ecf4', family: 'IBM Plex Mono' },
     }));
-
     const layout = {
-      title: { text: 'Distribution of Premium Recovery (%)', font: { size: 14, color: '#6b7a96', family: 'IBM Plex Mono' } },
-      xaxis: { title: '% of Premium Recovered', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-      yaxis: { title: 'Count', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
+      xaxis: { title: '% of Premium Recovered', color: '#4a5d7a', gridcolor: '#1a2a4a', tickfont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 11 } },
+      yaxis: { title: 'Count', color: '#4a5d7a', gridcolor: '#1a2a4a', tickfont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#4a5d7a', family: 'IBM Plex Mono', size: 11 } },
       shapes, annotations,
-      margin: { t: 50, b: 110, l: 60, r: 40 },
-      plot_bgcolor: 'rgba(0,0,0,0)',
-      paper_bgcolor: 'rgba(0,0,0,0)',
+      margin: { t: 10, b: 80, l: 60, r: 20 },
+      plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)',
       showlegend: false,
+      bargap: 0.06,
     };
-
-    Plotly.newPlot(divId, [trace], layout, { responsive: true, displayModeBar: false });
+    Plotly.newPlot('tier-chart', [trace], layout, { responsive: true, displayModeBar: false });
+    document.getElementById('tier-chart-callout').style.display = 'none';
   }
 
-  function renderScatter(divId, data) {
-    const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
-    const sortedRec = [...recoveryPct].sort((a, b) => a - b);
-    const medianPct = sortedRec[Math.floor(sortedRec.length / 2)];
-    const hoverText = data.map((r, i) =>
-      `Final Spot: $${r.final_spot.toLocaleString()}<br>` +
-      `PUT Cost (% of BTC): ${(r.initial_premium / r.spot * 100).toFixed(2)}%<br>` +
-      `Roll Savings: $${r.roll_savings.toLocaleString()}<br>` +
-      `Recovery: ${recoveryPct[i].toFixed(1)}%<br>` +
-      `Net Cost (% of BTC): ${((r.initial_premium - r.roll_savings) / r.spot * 100).toFixed(2)}%<br>` +
-      `Rolls: ${r.num_rolls}`
-    );
+  function switchTier(n) {
+    currentTier = n;
+    document.querySelectorAll('.tier-tab').forEach(el => el.classList.remove('active'));
+    document.querySelector(`[data-tier="${n}"]`).classList.add('active');
 
-    const trace = {
-      x: data.map(r => r.final_spot),
-      y: recoveryPct,
-      type: 'scatter', mode: 'markers',
-      marker: {
-        size: 5, opacity: 0.6,
-        color: recoveryPct,
-        colorscale: [[0, 'rgba(242,94,19,0.3)'], [1, 'rgba(242,94,19,1)']],
-        showscale: true,
-        colorbar: { title: 'Recovery %', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, outlinecolor: '#1a2540', bordercolor: '#1a2540' },
-      },
-      text: hoverText, hoverinfo: 'text',
-    };
+    const meta = tierMeta[n];
+    const badge = document.getElementById('tier-badge');
+    badge.textContent = meta.badge;
+    badge.style.color = meta.color;
+    badge.style.background = meta.bg;
+    badge.style.border = '1px solid ' + meta.color + '44';
+    document.getElementById('tier-desc').textContent = meta.desc;
 
-    const spots = data.map(r => r.final_spot);
-    const medianLine = {
-      x: [Math.min(...spots), Math.max(...spots)],
-      y: [medianPct, medianPct],
-      type: 'scatter', mode: 'lines',
-      name: `Median (${medianPct.toFixed(1)}%)`,
-      line: { color: '#22d3a6', width: 2, dash: 'dot' },
-      hoverinfo: 'skip',
-    };
-
-    const layout = {
-      title: { text: 'Premium Recovery vs Final BTC Price', font: { size: 14, color: '#6b7a96', family: 'IBM Plex Mono' } },
-      xaxis: { title: 'Final BTC Spot Price ($)', tickformat: '$,.0f', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-      yaxis: { title: '% of Premium Recovered', color: '#6b7a96', gridcolor: '#1a2540', tickfont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 10 }, titlefont: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 } },
-      margin: { t: 50, b: 120, l: 60, r: 40 },
-      hovermode: 'closest',
-      plot_bgcolor: 'rgba(0,0,0,0)',
-      paper_bgcolor: 'rgba(0,0,0,0)',
-      legend: { x: 0, y: -0.22, orientation: 'h', font: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, traceorder: 'normal', itemwidth: 30 },
-    };
-
-    Plotly.newPlot(divId, [medianLine, trace], layout, { responsive: true, displayModeBar: false });
+    const stats = DataStore.getTierStats(n);
+    renderStats(n, stats);
+    renderRangeBar(stats);
+    renderInsight(stats);
+    renderChart();
   }
 
-  function renderNarratives(stats1, stats2, stats3) {
-    const tier1Data = DataStore.getTierRows(1);
-    const tier2Data = DataStore.getTierRows(2);
-    const firstSpot1 = tier1Data[0].spot;
-    const lastSpot1 = tier1Data[tier1Data.length - 1].final_spot;
+  function setChartMode(mode) {
+    currentChartMode = mode;
+    document.querySelectorAll('.chart-toggle').forEach(el => el.classList.remove('active'));
+    document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+    renderChart();
+  }
 
-    document.getElementById('narrative-1').innerHTML = `
-      <p>Pure historical backtest during a bull market — BTC rallied from ~$${Math.round(firstSpot1/1000)}k to ~$${Math.round(lastSpot1/1000)}k across <strong>${stats1.count} loans</strong> (March 2023–2025).</p>
-      <p>Median <span class="cross-link" onclick="Nav.goTo(4,'roll-mechanics')">premium recovery</span>: <strong>${stats1.medianRecoveryPct.toFixed(1)}%</strong> — roll savings offset most of the hedging cost.
-      <span class="cross-link" onclick="Tab1.reshuffleFromTier(1)">See example →</span></p>
-    `;
+  function renderChart() {
+    const data = DataStore.getTierRows(currentTier);
+    const titleEl = document.getElementById('tier-chart-title');
+    const descEl = document.getElementById('tier-chart-desc');
 
-    const firstSpot2 = tier2Data[0].spot;
-    document.getElementById('narrative-2').innerHTML = `
-      <p>Bear market regime — BTC declined from ~$${Math.round(firstSpot2/1000)}k to ~$${Math.round(tier2Data[tier2Data.length-1].spot/1000)}k across <strong>${stats2.count} loans</strong> (March 2025–2026). Incomplete loans extended with 1,000 <span class="cross-link" onclick="Nav.goTo(4,'gbm-calibration')">simulated paths</span> each.</p>
-      <p>Median premium recovery: <strong>${stats2.medianRecoveryPct.toFixed(1)}%</strong> — in downturns the PUTs gain intrinsic value, pushing recovery above 100%.
-      <span class="cross-link" onclick="Tab1.reshuffleFromTier(2)">See example →</span></p>
-    `;
+    if (currentChartMode === 'scatter') {
+      const chartTitles = {
+        1: 'Historical Backtest — Premium Recovery by Start Date',
+        2: 'Recent Loans — Premium Recovery by Start Date',
+        3: 'Premium Recovery vs Final BTC Price',
+      };
+      titleEl.textContent = chartTitles[currentTier] || 'Recovery vs Final BTC Price';
+      descEl.textContent = currentTier === 3
+        ? 'Each dot is one simulated path. X = final BTC price, Y = % of PUT premium recovered.'
+        : 'Each dot is one loan. X = start date, Y = % of PUT premium recovered. Gray line = BTC spot.';
+      renderScatter(data);
+    } else {
+      titleEl.textContent = 'Distribution of Premium Recovery (%)';
+      descEl.textContent = 'How recovery outcomes are distributed. Most loans recover 10-50% of the PUT cost. In bear markets, some exceed 100%.';
+      renderHistogram(data);
+    }
+  }
 
-    const tier3Data = DataStore.getTierRows(3);
-    const bullish3 = tier3Data.filter(r => r.final_spot > r.spot).length;
-    const bearish3 = tier3Data.length - bullish3;
-    const bullPct3 = (bullish3 / tier3Data.length * 100).toFixed(0);
-    const bearPct3 = (bearish3 / tier3Data.length * 100).toFixed(0);
-    document.getElementById('narrative-3').innerHTML = `
-      <p><strong>${stats3.count}</strong> <span class="cross-link" onclick="Nav.goTo(4,'gbm-calibration')">Monte Carlo</span> paths from today's spot (~$${Math.round(tier3Data[0].spot).toLocaleString()}) — <strong>${bullPct3}%</strong> bullish, <strong>${bearPct3}%</strong> bearish, reflecting BTC's historical drift and volatility.</p>
-      <p>Median premium recovery: <strong>${stats3.medianRecoveryPct.toFixed(1)}%</strong>.
-      <span class="cross-link" onclick="Tab1.reshuffleFromTier(3)">See example →</span></p>
-    `;
+  function populateBanner() {
+    try {
+      const s1 = DataStore.getTierStats(1);
+      const s2 = DataStore.getTierStats(2);
+      const s3 = DataStore.getTierStats(3);
+      const putLo = Math.min(s1.medianPutCostPct, s2.medianPutCostPct, s3.medianPutCostPct);
+      const putHi = Math.max(s1.medianPutCostPct, s2.medianPutCostPct, s3.medianPutCostPct);
+      const avgRecovery = ((s1.medianRecoveryPct + s2.medianRecoveryPct + s3.medianRecoveryPct) / 3);
+      const netLo = Math.min(s1.medianRollingNetCostPct, s2.medianRollingNetCostPct, s3.medianRollingNetCostPct);
+      const netHi = Math.max(s1.medianRollingNetCostPct, s2.medianRollingNetCostPct, s3.medianRollingNetCostPct);
+      document.getElementById('research-banner-text').innerHTML =
+        `Typical PUT cost: <span style="color:var(--accent);font-weight:600;">${putLo.toFixed(1)}–${putHi.toFixed(1)}% of spot</span>` +
+        `<span style="color:var(--text-muted);"> → </span>` +
+        `After roll-down: <span style="color:var(--green);font-weight:600;">~${Math.round(avgRecovery)}% recovered</span>` +
+        `<span style="color:var(--text-muted);"> → </span>` +
+        `Net hedge cost: <span style="color:var(--text);font-weight:500;">${netLo.toFixed(1)}–${netHi.toFixed(1)}% of BTC</span>`;
+    } catch (e) {}
   }
 
   function init() {
-    const stats1 = DataStore.getTierStats(1);
-    const stats2 = DataStore.getTierStats(2);
-    const stats3 = DataStore.getTierStats(3);
-
-    renderNarratives(stats1, stats2, stats3);
-
-    renderStats('stats-1', stats1, false);
-    renderTimeSeries('chart-1', DataStore.getTierRows(1), 'Historical Backtest — Premium Recovery by Start Date');
-
-    renderStats('stats-2', stats2, false);
-    renderTimeSeries('chart-2', DataStore.getTierRows(2), 'Recent Loans — Premium Recovery by Start Date');
-
-    renderStats('stats-3', stats3, true);
-    renderScatter('chart-3-scatter', DataStore.getTierRows(3));
-    renderHistogram('chart-3-hist', DataStore.getTierRows(3));
+    populateBanner();
+    switchTier(1);
   }
 
-  return { init };
+  return { init, switchTier, setChartMode };
 })();
 
 // ══════════════════════════════════════════════════════════════
 // REGISTER LAZY INITS & STARTUP
 // ══════════════════════════════════════════════════════════════
-Nav.registerInit(2, Tab2.init);
-Nav.registerInit(3, () => {}); // Tab 3 (Bitmor Math) is static
-Nav.registerInit(4, () => {}); // Tab 4 (Backtest Methodology) is static
+function toggleMethodology() {
+  const el = document.getElementById('method-expanded');
+  const chevron = document.getElementById('method-chevron');
+  const desc = document.getElementById('method-collapsed-desc');
+  const isOpen = el.style.display === 'grid';
+  el.style.display = isOpen ? 'none' : 'grid';
+  chevron.style.transform = isOpen ? 'none' : 'rotate(180deg)';
+  desc.style.display = isOpen ? 'block' : 'none';
+}
 
-// Initialize Tab 1 immediately
+Nav.registerInit('research', () => { TierView.init(); PathExplorer.init(); });
 priceSource = 'snapshot';
 calc();
-Tab1.init();
 fetchBTCSpot();
 fetchDeribitPrices();
-
-// Handle initial URL hash and browser back/forward
 Nav.initFromHash();
 window.addEventListener('popstate', Nav.initFromHash);
 </script>
