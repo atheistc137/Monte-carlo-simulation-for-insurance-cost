@@ -22501,14 +22501,14 @@ function calc() {
       const s1 = DataStore.getTierStats(1);
       const s2 = DataStore.getTierStats(2);
       const s3 = DataStore.getTierStats(3);
-      const blendedRecovery = (s1.avgRecoveryPct + s2.avgRecoveryPct + s3.avgRecoveryPct) / 3;
+      const blendedRecovery = (s1.medianRecoveryPct + s2.medianRecoveryPct + s3.medianRecoveryPct) / 3;
       const netHedge = displayPutCost * (1 - blendedRecovery / 100);
 
       const recEl = document.getElementById('out-expected-recovery');
       recEl.textContent = blendedRecovery.toFixed(1) + '%';
       recEl.className   = 'metric-value green';
       recEl.style.color = '';
-      setTip('out-recovery-note', '⅓ weight per tier · 70% LTV, 10% APR');
+      setTip('out-recovery-note', 'avg of tier medians · 70% LTV, 10% APR');
       const hedgeEl = document.getElementById('out-net-hedge');
       hedgeEl.textContent = usd(Math.max(0, netHedge));
       hedgeEl.className   = 'metric-value accent';
@@ -23026,14 +23026,14 @@ const Tab2 = (() => {
         <span class="stat-value">${stats.count}</span></div>
       <div class="stat"><span class="stat-label">Avg Premium</span>
         <span class="stat-value">$${fmt(stats.avgPremium)}</span></div>
-      <div class="stat"><span class="stat-label">Avg Roll Savings</span>
-        <span class="stat-value" style="color:#22d3a6">$${fmt(stats.avgRollSavings)}</span></div>
-      <div class="stat"><span class="stat-label">Avg Recovery</span>
-        <span class="stat-value" style="color:#F25E13">${fmt(stats.avgRecoveryPct, 1)}%</span></div>
+      <div class="stat"><span class="stat-label">Median Roll Savings</span>
+        <span class="stat-value" style="color:#22d3a6">$${fmt(stats.medianRollSavings)}</span></div>
+      <div class="stat"><span class="stat-label">Median Recovery</span>
+        <span class="stat-value" style="color:#F25E13">${fmt(stats.medianRecoveryPct, 1)}%</span></div>
       <div class="stat"><span class="stat-label">PUT Cost % of BTC</span>
-        <span class="stat-value">${fmt(stats.avgPutCostPct, 2)}%</span></div>
+        <span class="stat-value">${fmt(stats.medianPutCostPct, 2)}%</span></div>
       <div class="stat"><span class="stat-label">Net Cost % of BTC</span>
-        <span class="stat-value" style="color:#22d3a6">${fmt(stats.avgRollingNetCostPct, 2)}%</span></div>
+        <span class="stat-value" style="color:#22d3a6">${fmt(stats.medianRollingNetCostPct, 2)}%</span></div>
     `;
     if (false) { /* Tier 3 extra stats removed */ }
     document.getElementById(containerId).innerHTML = html;
@@ -23043,7 +23043,8 @@ const Tab2 = (() => {
     const dates = data.map(r => r.start_date);
     const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
     const spots = data.map(r => r.spot);
-    const avgRecovery = recoveryPct.reduce((s, v) => s + v, 0) / recoveryPct.length;
+    const sortedRec = [...recoveryPct].sort((a, b) => a - b);
+    const medianRecovery = sortedRec[Math.floor(sortedRec.length / 2)];
     const hoverText = data.map(r =>
       `Date: ${r.start_date}<br>` +
       `Entry Spot: $${r.spot.toLocaleString()}<br>` +
@@ -23068,11 +23069,11 @@ const Tab2 = (() => {
       line: { color: 'rgba(107,122,150,0.5)', width: 1.5 },
       yaxis: 'y2', hoverinfo: 'skip',
     };
-    const traceAvg = {
+    const traceMedian = {
       x: [dates[0], dates[dates.length - 1]],
-      y: [avgRecovery, avgRecovery],
+      y: [medianRecovery, medianRecovery],
       type: 'scatter', mode: 'lines',
-      name: `Average (${avgRecovery.toFixed(1)}%)`,
+      name: `Median (${medianRecovery.toFixed(1)}%)`,
       line: { color: '#22d3a6', width: 2, dash: 'dot' },
       hoverinfo: 'skip', yaxis: 'y1',
     };
@@ -23087,12 +23088,11 @@ const Tab2 = (() => {
       plot_bgcolor: 'rgba(0,0,0,0)',
       paper_bgcolor: 'rgba(0,0,0,0)',
     };
-    Plotly.newPlot(divId, [trace2, traceAvg, trace1], layout, { responsive: true, displayModeBar: false });
+    Plotly.newPlot(divId, [trace2, traceMedian, trace1], layout, { responsive: true, displayModeBar: false });
   }
 
   function renderHistogram(divId, data) {
     const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
-    const avgPct = recoveryPct.reduce((s, v) => s + v, 0) / recoveryPct.length;
 
     const trace = {
       x: recoveryPct, type: 'histogram',
@@ -23109,30 +23109,16 @@ const Tab2 = (() => {
       { p: 75, v: pctl(75) },
     ];
 
-    const shapes = [
-      ...pctiles.map(({ v }) => ({
-        type: 'line', x0: v, x1: v, y0: 0, y1: 1, yref: 'paper',
-        line: { color: '#6b7a96', width: 1.5, dash: 'dash' },
-      })),
-      {
-        type: 'line', x0: avgPct, x1: avgPct, y0: 0, y1: 1, yref: 'paper',
-        line: { color: '#22d3a6', width: 2, dash: 'dot' },
-      },
-    ];
+    const shapes = pctiles.map(({ v, p }) => ({
+      type: 'line', x0: v, x1: v, y0: 0, y1: 1, yref: 'paper',
+      line: { color: p === 50 ? '#22d3a6' : '#6b7a96', width: p === 50 ? 2 : 1.5, dash: p === 50 ? 'dot' : 'dash' },
+    }));
 
-    const annotations = [
-      ...pctiles.map(({ p, v }, i) => ({
-        x: v, y: 1.0 - i * 0.06, yref: 'paper', xanchor: 'left', xshift: 6,
-        text: `P${p}: ${v.toFixed(1)}%`,
-        showarrow: false, font: { size: 11, color: '#e8eaf0', family: 'IBM Plex Mono' },
-      })),
-      {
-        x: avgPct, y: 1.0 - pctiles.length * 0.06, yref: 'paper',
-        xanchor: 'left', xshift: 6,
-        text: `Avg: ${avgPct.toFixed(1)}%`,
-        showarrow: false, font: { size: 11, color: '#22d3a6', family: 'IBM Plex Mono' },
-      },
-    ];
+    const annotations = pctiles.map(({ p, v }, i) => ({
+      x: v, y: 1.0 - i * 0.06, yref: 'paper', xanchor: 'left', xshift: 6,
+      text: `${p === 50 ? 'Median' : 'P' + p}: ${v.toFixed(1)}%`,
+      showarrow: false, font: { size: 11, color: p === 50 ? '#22d3a6' : '#e8eaf0', family: 'IBM Plex Mono' },
+    }));
 
     const layout = {
       title: { text: 'Distribution of Premium Recovery (%)', font: { size: 14, color: '#6b7a96', family: 'IBM Plex Mono' } },
@@ -23150,7 +23136,8 @@ const Tab2 = (() => {
 
   function renderScatter(divId, data) {
     const recoveryPct = data.map(r => r.roll_savings / r.initial_premium * 100);
-    const avgPct = recoveryPct.reduce((s, v) => s + v, 0) / recoveryPct.length;
+    const sortedRec = [...recoveryPct].sort((a, b) => a - b);
+    const medianPct = sortedRec[Math.floor(sortedRec.length / 2)];
     const hoverText = data.map((r, i) =>
       `Final Spot: $${r.final_spot.toLocaleString()}<br>` +
       `PUT Cost (% of BTC): ${(r.initial_premium / r.spot * 100).toFixed(2)}%<br>` +
@@ -23175,11 +23162,11 @@ const Tab2 = (() => {
     };
 
     const spots = data.map(r => r.final_spot);
-    const avgLine = {
+    const medianLine = {
       x: [Math.min(...spots), Math.max(...spots)],
-      y: [avgPct, avgPct],
+      y: [medianPct, medianPct],
       type: 'scatter', mode: 'lines',
-      name: `Average (${avgPct.toFixed(1)}%)`,
+      name: `Median (${medianPct.toFixed(1)}%)`,
       line: { color: '#22d3a6', width: 2, dash: 'dot' },
       hoverinfo: 'skip',
     };
@@ -23195,7 +23182,7 @@ const Tab2 = (() => {
       legend: { x: 0, y: -0.22, orientation: 'h', font: { color: '#6b7a96', family: 'IBM Plex Mono', size: 11 }, traceorder: 'normal', itemwidth: 30 },
     };
 
-    Plotly.newPlot(divId, [avgLine, trace], layout, { responsive: true, displayModeBar: false });
+    Plotly.newPlot(divId, [medianLine, trace], layout, { responsive: true, displayModeBar: false });
   }
 
   function renderNarratives(stats1, stats2, stats3) {
@@ -23206,14 +23193,14 @@ const Tab2 = (() => {
 
     document.getElementById('narrative-1').innerHTML = `
       <p>Pure historical backtest during a bull market — BTC rallied from ~$${Math.round(firstSpot1/1000)}k to ~$${Math.round(lastSpot1/1000)}k across <strong>${stats1.count} loans</strong> (March 2023–2025).</p>
-      <p>Average <span class="cross-link" onclick="Nav.goTo(4,'roll-mechanics')">premium recovery</span>: <strong>${stats1.avgRecoveryPct.toFixed(1)}%</strong> — roll savings offset most of the hedging cost.
+      <p>Median <span class="cross-link" onclick="Nav.goTo(4,'roll-mechanics')">premium recovery</span>: <strong>${stats1.medianRecoveryPct.toFixed(1)}%</strong> — roll savings offset most of the hedging cost.
       <span class="cross-link" onclick="Tab1.reshuffleFromTier(1)">See example →</span></p>
     `;
 
     const firstSpot2 = tier2Data[0].spot;
     document.getElementById('narrative-2').innerHTML = `
       <p>Bear market regime — BTC declined from ~$${Math.round(firstSpot2/1000)}k to ~$${Math.round(tier2Data[tier2Data.length-1].spot/1000)}k across <strong>${stats2.count} loans</strong> (March 2025–2026). Incomplete loans extended with 1,000 <span class="cross-link" onclick="Nav.goTo(4,'gbm-calibration')">simulated paths</span> each.</p>
-      <p>Average premium recovery: <strong>${stats2.avgRecoveryPct.toFixed(1)}%</strong> — in downturns the PUTs gain intrinsic value, pushing recovery above 100%.
+      <p>Median premium recovery: <strong>${stats2.medianRecoveryPct.toFixed(1)}%</strong> — in downturns the PUTs gain intrinsic value, pushing recovery above 100%.
       <span class="cross-link" onclick="Tab1.reshuffleFromTier(2)">See example →</span></p>
     `;
 
@@ -23224,7 +23211,7 @@ const Tab2 = (() => {
     const bearPct3 = (bearish3 / tier3Data.length * 100).toFixed(0);
     document.getElementById('narrative-3').innerHTML = `
       <p><strong>${stats3.count}</strong> <span class="cross-link" onclick="Nav.goTo(4,'gbm-calibration')">Monte Carlo</span> paths from today's spot (~$${Math.round(tier3Data[0].spot).toLocaleString()}) — <strong>${bullPct3}%</strong> bullish, <strong>${bearPct3}%</strong> bearish, reflecting BTC's historical drift and volatility.</p>
-      <p>Average premium recovery: <strong>${stats3.avgRecoveryPct.toFixed(1)}%</strong>.
+      <p>Median premium recovery: <strong>${stats3.medianRecoveryPct.toFixed(1)}%</strong>.
       <span class="cross-link" onclick="Tab1.reshuffleFromTier(3)">See example →</span></p>
     `;
   }
