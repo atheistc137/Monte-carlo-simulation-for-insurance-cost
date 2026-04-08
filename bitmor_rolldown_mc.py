@@ -35,6 +35,8 @@ from rolldown_utils import (
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
+STRIKE_BUFFER = 0.03  # buy PUT 3% above debt for collateralisation buffer
+
 
 @dataclass
 class LoanResult:
@@ -65,6 +67,7 @@ def simulate_single_loan(
     ltv: float = 0.70,
     loan_tenor_months: int = 12,
     loan_rate: float = 0.10,
+    sizing_rate: float = 0.15,
     payments_per_year: int = 12,
     min_roll_profit: float = 20.0,
     r: float = 0.0,
@@ -82,10 +85,11 @@ def simulate_single_loan(
     # -- Month 0: Origination --
     s0 = nearest_price(daily_prices, start_date)
     d0 = ltv * s0
-    amort = build_amortisation_schedule(d0, loan_rate, 1, payments_per_year)
+    amort = build_amortisation_schedule(d0, sizing_rate, 1, payments_per_year,
+                                         accrual_rate=loan_rate)
 
-    # Snap initial strike to exchange-listed grid
-    K_initial = snap_to_strike(d0, s0)
+    # Strike = debt + 3% buffer, snapped up to exchange-listed grid
+    K_initial = snap_to_strike(d0 * (1 + STRIKE_BUFFER), s0)
 
     iv0 = lookup_iv(surface, start_date, 365, K_initial / s0)
     initial_premium = bs_price(s0, K_initial, 1.0, r, iv0, call=False)
@@ -106,8 +110,8 @@ def simulate_single_loan(
 
         tenor_days = map_tenor_bucket(remaining_months)
 
-        # Snap replacement strike to exchange-listed grid
-        K_replacement = snap_to_strike(dt, st)
+        # Replacement strike = current debt + 3% buffer, snapped up
+        K_replacement = snap_to_strike(dt * (1 + STRIKE_BUFFER), st)
 
         # -- Held PUT remaining TTM --
         held_days_left = max((held_expiry_date - current_date).days, 1)
@@ -511,6 +515,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--ltv", type=float, default=0.70)
     p.add_argument("--loan_tenor_months", type=int, default=12)
     p.add_argument("--loan_rate", type=float, default=0.10)
+    p.add_argument("--sizing_rate", type=float, default=0.15,
+                   help="Annual rate for payment sizing (billing ceiling)")
     p.add_argument("--payments_per_year", type=int, default=12)
     p.add_argument("--min_roll_profit", type=float, default=20.0)
     p.add_argument("--r", type=float, default=0.0, help="Risk-free rate")
@@ -547,6 +553,7 @@ def main() -> None:
         ltv=args.ltv,
         loan_tenor_months=args.loan_tenor_months,
         loan_rate=args.loan_rate,
+        sizing_rate=args.sizing_rate,
         payments_per_year=args.payments_per_year,
         min_roll_profit=args.min_roll_profit,
         r=args.r,
