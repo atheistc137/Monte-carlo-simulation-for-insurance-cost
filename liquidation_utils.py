@@ -122,23 +122,55 @@ def calibrate_hist_mu_sigma(px: pd.Series,
 
 # ───────────────────── Amortisation schedule helper ────────────────────────
 def build_amortisation_schedule(principal: float, annual_rate: float, years: int,
-                                payments_per_year: int = 12) -> List[float]:
+                                payments_per_year: int = 12,
+                                accrual_rate: float | None = None) -> List[float]:
+    """Build a loan amortisation schedule, returning outstanding balances.
+
+    Parameters
+    ----------
+    principal : float
+        Initial loan amount.
+    annual_rate : float
+        Rate used to SIZE the fixed monthly payment (billing ceiling).
+        When *accrual_rate* is ``None`` this is also the interest accrual rate.
+    years : int
+        Loan term in years.
+    payments_per_year : int
+        Number of payments per year (default 12 = monthly).
+    accrual_rate : float | None
+        Annual rate at which interest actually accrues.  When ``None``,
+        defaults to *annual_rate* (single-rate, backward-compatible).
+        Typically lower than *annual_rate* (e.g. 0.10 vs 0.15).
+
+    Returns
+    -------
+    List[float]
+        Outstanding balance after each period, length ``n_periods + 1``.
+        ``balances[0] == principal``, ``balances[-1] == 0.0``.
+    """
     if principal <= 0:
         raise ValueError("Principal must be positive")
     if years <= 0 or payments_per_year <= 0:
         raise ValueError("years and payments_per_year must be positive")
 
-    rate_per_period = annual_rate / payments_per_year
-    n_periods       = years * payments_per_year
-    payment         = (principal * rate_per_period) / (
-                        1 - (1 + rate_per_period) ** -n_periods)
+    sizing_rpp = annual_rate / payments_per_year
+    n_periods  = years * payments_per_year
+    payment    = (principal * sizing_rpp) / (
+                    1 - (1 + sizing_rpp) ** -n_periods)
+
+    accrual_rpp = (accrual_rate / payments_per_year
+                   if accrual_rate is not None
+                   else sizing_rpp)
 
     balances = [principal]
     bal      = principal
-    for _ in range(n_periods):
-        interest         = bal * rate_per_period
-        principal_repay  = payment - interest
-        bal              = max(0.0, bal - principal_repay)
+    for i in range(n_periods):
+        interest = bal * accrual_rpp
+        if i < n_periods - 1:
+            principal_repay = min(payment - interest, bal)
+            bal = max(0.0, bal - principal_repay)
+        else:
+            bal = 0.0
         balances.append(bal)
 
-    return balances          # length == n_periods + 1
+    return balances
