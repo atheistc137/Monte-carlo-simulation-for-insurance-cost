@@ -1,0 +1,17 @@
+# Large data files (not needed for dashboard - data is embedded in HTML)
+btc_iv_surface_svi.csv
+btc_iv_surface2.csv
+btc_iv_surface2_new.csv
+btc_svi_params.csv
+BTCUSDT_1h.csv
+btc_prices_new.csv
+surfaces/
+result/
+
+# Python source / dev files
+*.py
+__pycache__/
+tests/
+docs/
+*.pdf
+.gitignore

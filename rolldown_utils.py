@@ -278,19 +278,37 @@ def snap_to_strike(raw_strike: float, spot: float,
 
 
 def apply_slippage(price: float, moneyness: float,
-                   max_slippage_pct: float = 5.0,
-                   otm_threshold: float = 0.50) -> float:
-    """Compute slippage-adjusted price as a one-sided cost.
+                   base_pct: float = 0.8,
+                   knee_otm: float = 0.30,
+                   max_slippage_pct: float = 5.0) -> float:
+    """Compute slippage-adjusted price as a one-sided half-spread cost.
 
-    Slippage scales linearly from 0% at ATM (moneyness=1.0) to
-    max_slippage_pct at deep OTM (moneyness = 1 - otm_threshold).
+    Calibrated to Deribit BTC put orderbooks (Apr 2026, 6m & 12m expiries).
+
+    Shape:
+      - Flat ~base_pct for ATM through knee_otm OTM  (real spreads ~0.7-1.2%)
+      - Exponential ramp beyond knee_otm toward max_slippage_pct at 50% OTM
+
+    Deribit observed half-spreads (mid→ask, one-sided):
+      ATM   → 0.76-0.95%     10% OTM → 0.81-1.23%
+      20%   → 0.86-1.23%     30% OTM → 1.6-1.8%
+      40%   → 2.4-2.6%       50% OTM → ~4.0%
 
     Returns the absolute slippage amount (always >= 0).
     Caller decides sign: subtract from sell price, add to buy price.
     """
     otm_distance = max(0.0, 1.0 - moneyness)  # 0 at ATM, grows as OTM
-    slippage_pct = min(max_slippage_pct,
-                       otm_distance / otm_threshold * max_slippage_pct)
+
+    if otm_distance <= knee_otm:
+        # Flat base region: ATM through ~30% OTM
+        slippage_pct = base_pct
+    else:
+        # Exponential ramp beyond the knee
+        excess = (otm_distance - knee_otm) / (0.50 - knee_otm)  # 0→1
+        excess = min(excess, 1.0)
+        slippage_pct = base_pct + (max_slippage_pct - base_pct) * excess ** 2
+
+    slippage_pct = min(slippage_pct, max_slippage_pct)
     return price * slippage_pct / 100.0
 
 

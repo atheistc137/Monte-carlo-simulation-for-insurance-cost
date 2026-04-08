@@ -28,31 +28,47 @@ def embed(html: str, const_name: str, csv_content: str) -> str:
         return html.replace(marker, f"{replacement}\n{marker}")
 
 
+def embed_backtest(html: str, fragment_path: str) -> str:
+    """Replace content between BACKTEST_START/END markers with fragment HTML."""
+    fragment = Path(fragment_path).read_text(encoding="utf-8").strip()
+    start_marker = "<!-- BACKTEST_START -->"
+    end_marker = "<!-- BACKTEST_END -->"
+    start_idx = html.index(start_marker)
+    end_idx = html.index(end_marker) + len(end_marker)
+    return html[:start_idx] + start_marker + "\n" + fragment + "\n" + end_marker + html[end_idx:]
+
+
 def main():
     import argparse
     p = argparse.ArgumentParser(description="Embed CSV data into dashboard HTML")
-    p.add_argument("--date", required=True, help="Date suffix for CSV files (YYYYMMDD)")
+    p.add_argument("--date", default=None, help="Date suffix for CSV files (YYYYMMDD)")
+    p.add_argument("--backtest", default=None, help="Path to backtest_tab_fragment.html")
     p.add_argument("--dashboard", default="bitmor-dashboard.html")
     args = p.parse_args()
 
-    d = args.date
-    result_dir = Path("result")
-
     html = Path(args.dashboard).read_text()
 
-    # Embed summary CSVs
-    for tier in [1, 2, 3]:
-        csv_path = result_dir / f"rolldown_tier{tier}_{d}.csv"
-        if csv_path.exists():
-            html = embed(html, f"TIER{tier}_CSV", read_csv(csv_path))
-            print(f"Embedded {csv_path}")
+    # Embed tier CSVs (if --date provided)
+    if args.date:
+        d = args.date
+        result_dir = Path("result")
 
-    # Embed detail CSVs (Tier 1 and 3 only)
-    for tier in [1, 3]:
-        csv_path = result_dir / f"rolldown_tier{tier}_detail_{d}.csv"
-        if csv_path.exists():
-            html = embed(html, f"TIER{tier}_DETAIL_CSV", read_csv(csv_path))
-            print(f"Embedded {csv_path}")
+        for tier in [1, 2, 3]:
+            csv_path = result_dir / f"rolldown_tier{tier}_{d}.csv"
+            if csv_path.exists():
+                html = embed(html, f"TIER{tier}_CSV", read_csv(csv_path))
+                print(f"Embedded {csv_path}")
+
+        for tier in [1, 2, 3]:
+            csv_path = result_dir / f"rolldown_tier{tier}_detail_{d}.csv"
+            if csv_path.exists():
+                html = embed(html, f"TIER{tier}_DETAIL_CSV", read_csv(csv_path))
+                print(f"Embedded {csv_path}")
+
+    # Embed backtest fragment (if --backtest provided)
+    if args.backtest:
+        html = embed_backtest(html, args.backtest)
+        print(f"Embedded backtest from {args.backtest}")
 
     Path(args.dashboard).write_text(html)
     print(f"Updated {args.dashboard}")

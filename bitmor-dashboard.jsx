@@ -398,14 +398,14 @@ const V2=()=>{
     <div style={{textAlign:"center",marginBottom:40}}>
       <div style={{fontSize:12,color:T.persimmon,fontWeight:600,letterSpacing:".12em",textTransform:"uppercase",marginBottom:12}}>PUT Roll-Down Research</div>
       <h1 style={{fontSize:36,fontWeight:700,color:T.text,margin:"0 0 8px"}}>Rolling down cuts the cost of hedging</h1>
-      <p style={{fontSize:15,color:T.textDim,margin:"0 0 32px",maxWidth:560,marginLeft:"auto",marginRight:"auto",lineHeight:1.6}}>As monthly payments reduce debt, the PUT strike rolls down with it. The old option is worth more than the new one. You pocket the difference.</p>
+      <p style={{fontSize:15,color:T.textDim,margin:"0 0 32px",maxWidth:560,marginLeft:"auto",marginRight:"auto",lineHeight:1.6}}>As monthly payments reduce the outstanding debt, the required PUT strike drops with it. The higher-strike option is worth more than the lower-strike replacement — the difference is returned to the borrower.</p>
     </div>
 
     <SL n="01" t="Path Explorer"/>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
       <div>
         <h2 style={{fontSize:22,fontWeight:600,color:T.text,margin:"0 0 4px"}}>Single path deep-dive</h2>
-        <p style={{fontSize:13,color:T.textDim,margin:0}}>Explore individual loan outcomes to see roll-down mechanics in action.</p>
+        <p style={{fontSize:13,color:T.textDim,margin:0}}>Step through one loan at a time to see how each monthly roll plays out.</p>
       </div>
       <div style={{display:"flex",alignItems:"center",gap:8}}>
         <button onClick={()=>setPs(s=>Math.max(1,s-1))} style={{width:32,height:32,borderRadius:6,border:`1px solid ${T.border}`,background:T.bgCard,color:T.textDim,fontSize:14,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",justifyContent:"center"}}>←</button>
@@ -485,8 +485,8 @@ const V2=()=>{
     {/* ── Section 2: Tiered Results (directly after path explorer) ── */}
     <div style={{marginTop:40}}>
       <SL n="02" t="Aggregate Results"/>
-      <h2 style={{fontSize:22,fontWeight:600,color:T.text,margin:"0 0 6px"}}>Three levels of evidence</h2>
-      <p style={{fontSize:13,color:T.textDim,margin:"0 0 20px"}}>Three tiers of evidence, from pure historical to fully simulated. Tier 1 uses only real market data.</p>
+      <h2 style={{fontSize:22,fontWeight:600,color:T.text,margin:"0 0 6px"}}>Three tiers of evidence</h2>
+      <p style={{fontSize:13,color:T.textDim,margin:"0 0 20px"}}>Tier 1 uses only real market data. Tier 2 extends recent loans that haven't matured yet with simulated forward paths. Tier 3 is fully Monte Carlo from today's spot.</p>
       <Tabs tabs={TIERS.map(t=>({id:t.id,label:t.label}))} active={at} onChange={setAt}/>
 
       {/* Tier description */}

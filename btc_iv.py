@@ -29,7 +29,7 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
 
 # ───────────────────── USER SETTINGS ──────────────────────
-LOOKBACK_DAYS    = 365*3
+LOOKBACK_DAYS    = 365*5
 CURRENCY         = "BTC"
 CSV_FILE         = "btc_iv_surface2.csv"
 PNG_DIR          = pathlib.Path("surfaces")

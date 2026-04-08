@@ -232,6 +232,36 @@ def run_tier1(
     return results
 
 
+def _average_month_details(results: list[LoanResult]) -> list[dict]:
+    """Average per-month roll details across MC paths.
+
+    Groups by month number and averages numeric fields (spot, debt, K_held,
+    K_replacement, roll_profit).  ``rolled`` is set to 1 if the majority of
+    paths rolled in that month.
+    """
+    from collections import defaultdict
+    buckets: dict[int, list[dict]] = defaultdict(list)
+    for r in results:
+        for md in r.month_details:
+            buckets[md["month"]].append(md)
+    if not buckets:
+        return []
+    avg_details = []
+    for month in sorted(buckets):
+        entries = buckets[month]
+        k = len(entries)
+        avg_details.append({
+            "month": month,
+            "spot": sum(e["spot"] for e in entries) / k,
+            "debt": sum(e["debt"] for e in entries) / k,
+            "K_held": sum(e["K_held"] for e in entries) / k,
+            "K_replacement": sum(e["K_replacement"] for e in entries) / k,
+            "roll_profit": sum(e["roll_profit"] for e in entries) / k,
+            "rolled": sum(1 for e in entries if e["rolled"]) > k / 2,
+        })
+    return avg_details
+
+
 def average_results(results: list[LoanResult]) -> LoanResult:
     """Average numeric fields across MC path results for one start date."""
     n = len(results)
@@ -253,6 +283,7 @@ def average_results(results: list[LoanResult]) -> LoanResult:
         final_spot=sum(r.final_spot for r in results) / n,
         debt_at_expiry=sum(r.debt_at_expiry for r in results) / n,
         total_slippage_cost=sum(r.total_slippage_cost for r in results) / n,
+        month_details=_average_month_details(results),
     )
 
 
@@ -483,7 +514,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--payments_per_year", type=int, default=12)
     p.add_argument("--min_roll_profit", type=float, default=20.0)
     p.add_argument("--r", type=float, default=0.0, help="Risk-free rate")
-    p.add_argument("--backtest_years", type=int, default=3)
+    p.add_argument("--backtest_years", type=int, default=5)
     p.add_argument("--start_freq", default="daily",
                    choices=["daily", "weekly", "monthly"])
     p.add_argument("--n_mc_paths", type=int, default=100,

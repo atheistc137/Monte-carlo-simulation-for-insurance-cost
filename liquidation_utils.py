@@ -41,7 +41,13 @@ def load_surface(path: Path) -> pd.DataFrame:
 
 def load_price(path: Path) -> pd.Series:
     px = pd.read_csv(path, parse_dates=[0])
-    px.columns = ["timestamp", "close"][:len(px.columns)]
+    if len(px.columns) == 2:
+        px.columns = ["timestamp", "close"]
+    else:
+        # OHLCV format: find close column by name, use first col as timestamp
+        close_col = [c for c in px.columns if "close" in c.lower()][0]
+        px = px[[px.columns[0], close_col]]
+        px.columns = ["timestamp", "close"]
     px["timestamp"] = pd.to_datetime(px["timestamp"]).dt.tz_localize(None)
     return px.set_index("timestamp")["close"].sort_index()
 
