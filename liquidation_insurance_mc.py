@@ -125,6 +125,7 @@ def simulate_one_path(
     debug: bool = False,
     principal_sched: List[float] | None = None,
     loan_rate: float = 0.10,
+    sizing_rate: float = 0.15,
     payments_per_year: int = 12,
 ) -> Union[
     Tuple[float, float, float, float, float, float, List[dict]],
@@ -149,9 +150,9 @@ def simulate_one_path(
     # amort & loan constants
     principal0        = (principal_sched[0] if principal_sched is not None
                          else spot0 * hedge_ratio)
-    rate_pp           = loan_rate / payments_per_year
+    sizing_rpp        = sizing_rate / payments_per_year
     n_periods         = years * payments_per_year
-    payment_orig      = (principal0 * rate_pp) / (1 - (1+rate_pp)**-n_periods)
+    payment_orig      = (principal0 * sizing_rpp) / (1 - (1+sizing_rpp)**-n_periods)
 
     # ── initial option ────────────────────────────────────────────────
     K0         = math.ceil(principal0 / 1_000) * 1_000.0
@@ -207,7 +208,7 @@ def simulate_one_path(
 
             # total payments on a fresh loan sized spot×hedge_ratio
             new_principal   = state.spot * hedge_ratio
-            payment_new     = (new_principal * rate_pp) / (1 - (1+rate_pp)**-n_periods)
+            payment_new     = (new_principal * sizing_rpp) / (1 - (1+sizing_rpp)**-n_periods)
             total_new_cost  = payment_new * n_periods
 
             if total_new_cost < remaining_payments:
@@ -286,6 +287,8 @@ def parse_args() -> argparse.Namespace:
     # loan params
     p.add_argument("--loan_rate",     type=float, default=0.10,
                    help="Annual loan interest (e.g. 0.10 = 10 %)")
+    p.add_argument("--sizing_rate", type=float, default=0.15,
+                   help="Annual rate for payment sizing (billing ceiling)")
     p.add_argument("--principal",     type=float, default=None,
                    help="Loan principal (defaults s0×hedge_ratio)")
     p.add_argument("--debug",         action="store_true",
@@ -311,15 +314,16 @@ def main() -> None:
     rng = np.random.default_rng(cfg.seed)
 
     principal = cfg.principal if cfg.principal is not None else cfg.s0*cfg.hedge_ratio
-    amort_sched = build_amortisation_schedule(principal, cfg.loan_rate,
-                                              cfg.years, cfg.steps_per_year)
+    amort_sched = build_amortisation_schedule(principal, cfg.sizing_rate,
+                                              cfg.years, cfg.steps_per_year,
+                                              accrual_rate=cfg.loan_rate)
 
     # ── DEBUG single path ────────────────────────────────────────────
     if cfg.debug:
         out = simulate_one_path(rng, weekly_tbl, cfg.s0, mu, sigma_hist,
                                 cfg.years, hedge_days, cfg.hedge_ratio,
                                 cfg.rate, True, amort_sched,
-                                cfg.loan_rate, cfg.steps_per_year)
+                                cfg.loan_rate, cfg.sizing_rate, cfg.steps_per_year)
         (pnl, mcap, amcap, fpx, mnpx, mxpx, tape) = out  # type: ignore
         print("\n── DEBUG SUMMARY ───────────────────────────────────────────")
         print(f"Total {cfg.years}-yr P&L      : {pnl:,.2f}")
@@ -357,7 +361,7 @@ def main() -> None:
             rng, weekly_tbl, cfg.s0, mu, sigma_hist,
             yrs, hedge_days, cfg.hedge_ratio,
             cfg.rate, False, amort_sched,
-            cfg.loan_rate, cfg.steps_per_year)
+            cfg.loan_rate, cfg.sizing_rate, cfg.steps_per_year)
 
         arrays["net_pnl"][i]    = pnl
         arrays["max_cap"][i]    = mcap
