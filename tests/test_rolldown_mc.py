@@ -45,7 +45,7 @@ class TestSimulateSingleLoan:
         assert abs(r.net_savings) < 0.01
 
     def test_rolling_strike_never_exceeds_static(self, synthetic_prices, synthetic_surface):
-        """Rolling only lowers the strike (to outstanding debt)."""
+        """Rolling only lowers the strike (to outstanding debt + buffer)."""
         r = simulate_single_loan(
             synthetic_prices, synthetic_surface,
             start_date=pd.Timestamp("2024-03-01"),
@@ -323,3 +323,47 @@ class TestHeldPutTenorLookup:
         # savings are bounded. savings_pct can legitimately exceed 100%
         # (cumulative roll profits > initial premium), but should be finite.
         assert result.savings_pct < 500.0
+
+
+from liquidation_utils import build_amortisation_schedule
+
+
+class TestDualRateAmortisation:
+    def test_single_rate_backward_compat(self):
+        """No accrual_rate -> identical to original single-rate behavior."""
+        bals = build_amortisation_schedule(70_000, 0.10, 1, 12)
+        assert len(bals) == 13
+        assert bals[0] == 70_000
+        assert abs(bals[-1]) < 0.01  # fully amortised
+
+    def test_dual_rate_final_balance_zero(self):
+        """Dual-rate schedule must fully settle in the final period."""
+        bals = build_amortisation_schedule(70_000, 0.15, 1, 12, accrual_rate=0.10)
+        assert len(bals) == 13
+        assert bals[-1] == 0.0
+
+    def test_dual_rate_balance_drops_faster(self):
+        """With accrual < sizing, balance drops faster than single-rate at accrual."""
+        single = build_amortisation_schedule(70_000, 0.10, 1, 12)
+        dual = build_amortisation_schedule(70_000, 0.15, 1, 12, accrual_rate=0.10)
+        # Dual has higher payment (sized at 15%) but same interest (10%)
+        # -> more principal repaid each month -> lower balances
+        for i in range(1, 12):
+            assert dual[i] < single[i], f"Month {i}: dual {dual[i]:.2f} >= single {single[i]:.2f}"
+
+    def test_equal_rates_matches_single(self):
+        """accrual_rate == annual_rate -> same as single-rate."""
+        single = build_amortisation_schedule(70_000, 0.10, 1, 12)
+        dual = build_amortisation_schedule(70_000, 0.10, 1, 12, accrual_rate=0.10)
+        for i in range(13):
+            assert abs(single[i] - dual[i]) < 0.01, f"Month {i} mismatch"
+
+    def test_dual_rate_matches_jsx_reference(self):
+        """Cross-validate against the JSX genAmort output."""
+        bals = build_amortisation_schedule(70_000, 0.15, 1, 12, accrual_rate=0.10)
+        # Month 1: interest = 70000 * 0.10/12 = 583.33
+        # Payment = 6318.55 (15% amort), principal = 6318.55 - 583.33 = 5735.22
+        # Balance = 70000 - 5735.22 = 64264.78
+        assert abs(bals[1] - 64_264.78) < 1.0
+        # Final balance must be 0
+        assert bals[-1] == 0.0
