@@ -367,3 +367,30 @@ class TestDualRateAmortisation:
         assert abs(bals[1] - 64_264.78) < 1.0
         # Final balance must be 0
         assert bals[-1] == 0.0
+
+    def test_simulate_loan_dual_rate_lower_debt(self, synthetic_prices, synthetic_surface):
+        """Dual-rate sizing produces lower debt at each month."""
+        r_single = simulate_single_loan(
+            synthetic_prices, synthetic_surface,
+            start_date=pd.Timestamp("2024-03-01"),
+            loan_rate=0.10, sizing_rate=0.10,  # single-rate equivalent
+        )
+        r_dual = simulate_single_loan(
+            synthetic_prices, synthetic_surface,
+            start_date=pd.Timestamp("2024-03-01"),
+            loan_rate=0.10, sizing_rate=0.15,
+        )
+        # Dual-rate has higher payments -> lower debt at each month
+        for s, d in zip(r_single.month_details, r_dual.month_details):
+            assert d["debt"] <= s["debt"] + 0.01, (
+                f"Month {d['month']}: dual debt {d['debt']:.2f} > single {s['debt']:.2f}"
+            )
+
+    def test_simulate_loan_default_sizing_rate(self, synthetic_prices, synthetic_surface):
+        """Default sizing_rate=0.15 produces valid results."""
+        r = simulate_single_loan(
+            synthetic_prices, synthetic_surface,
+            start_date=pd.Timestamp("2024-03-01"),
+        )
+        assert isinstance(r, LoanResult)
+        assert r.initial_premium > 0
