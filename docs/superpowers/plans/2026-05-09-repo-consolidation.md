@@ -612,16 +612,40 @@ p.add_argument("--price", default="data/BTCUSDT_1h.csv",
 
 Lines ~568–586 contain six `f"result/rolldown_tier{N}_{today}.csv"` strings. Replace `result/` with `results/` in each. Use `replace_all=true` on the substring `"result/rolldown_tier` → `"results/rolldown_tier`.
 
-Line 590:
+Add a `os.makedirs("results", exist_ok=True)` call near the top of the function that writes those CSVs (before the first `save_tier_csv`). Inspect the function to find the right spot — likely just after `today = ...` is computed.
+
+- [ ] **Step 4b: `sim/rolldown/bitmor_rolldown_mc.py` — dashboard subprocess block (lines ~588–596)**
+
+The current code at the end of `main()` invokes the embed script directly:
+
 ```python
+# -- Embed results into dashboard and open it --
+import subprocess
 dashboard = "bitmor-dashboard.html"
-```
-to:
-```python
-dashboard = "dashboard/bitmor-dashboard.html"
+logging.info("Embedding CSV data into %s ...", dashboard)
+subprocess.run(
+    [sys.executable, "embed_csv_to_dashboard.py", "--date", today,
+     "--dashboard", dashboard],
+    check=True,
+)
 ```
 
-Add a `os.makedirs("results", exist_ok=True)` call near the top of the function that writes those CSVs (before the first `save_tier_csv`). Inspect the function to find the right spot — likely just after `today = ...` is computed.
+After the move, `embed_csv_to_dashboard.py` lives at `dashboard/embed_csv_to_dashboard.py`. The above runs `python embed_csv_to_dashboard.py` which dies with `FileNotFoundError` because the file isn't at the cwd. Replace with a `python -m` invocation:
+
+```python
+# -- Embed results into dashboard and open it --
+import subprocess
+dashboard = "dashboard/bitmor-dashboard.html"
+logging.info("Embedding CSV data into %s ...", dashboard)
+subprocess.run(
+    [sys.executable, "-m", "dashboard.embed_csv_to_dashboard",
+     "--date", today,
+     "--dashboard", dashboard],
+    check=True,
+)
+```
+
+Two changes: (1) the `dashboard` literal is updated to the new path, (2) the script reference becomes the module path `dashboard.embed_csv_to_dashboard` invoked via `-m`. The `webbrowser.open(...)` block immediately below also uses `dashboard`, so updating the literal once propagates correctly.
 
 - [ ] **Step 5: `sim/ivsurface/btc_iv.py`**
 
@@ -794,9 +818,16 @@ The `sys.path.insert` adds the repo root (parent of `tests/`) so `from sim.X.Y i
 
 Replace every occurrence:
 - `from bitmor_rolldown_mc import` → `from sim.rolldown.bitmor_rolldown_mc import`
+- `from rolldown_utils import` → `from sim.rolldown.rolldown_utils import`
 - `from liquidation_utils import` → `from sim.liquidation.liquidation_utils import`
 
-(There are 6 lines in `test_rolldown_mc.py` doing in-test imports — lines 4, 105, 137, 176, 218, 250 plus the line 328 `liquidation_utils` import.)
+This file has **13 import lines** to rewrite — 7 at module level and 6 indented inside test methods (`from rolldown_utils import RegimeIndex` is repeated inside several tests, plus a `from bitmor_rolldown_mc import simulate_single_loan` inside one test). Use `Edit` with `replace_all=true` per substring; that catches both top-level and indented occurrences in a single edit. After editing, verify with:
+
+```bash
+grep -nE "from (bitmor_rolldown_mc|rolldown_utils|liquidation_utils) " tests/rolldown/test_rolldown_mc.py
+```
+
+Expected: no matches (every flat import has been rewritten).
 
 - [ ] **Step 2: `tests/rolldown/test_rolldown_utils.py`**
 
@@ -1035,10 +1066,11 @@ EOF
 
 - [ ] **Step 1: Generate `requirements.txt`**
 
-The simplest reliable approach is to enumerate the third-party imports already in the codebase. Run:
+Enumerate the third-party imports already in the codebase. Default bash does NOT recurse into subdirectories with `**/*.py` unless `shopt -s globstar` is set, so use `find` to be safe:
 
 ```bash
-grep -hE "^(import|from) " sim/**/*.py dashboard/*.py tests/**/*.py 2>/dev/null \
+find sim dashboard tests -name '*.py' -print0 \
+  | xargs -0 grep -hE "^(import|from) " \
   | grep -vE "from (sim|tests|dashboard|__future__|typing|pathlib|argparse|logging|re|sys|os|datetime|dataclasses|csv|math|time|subprocess|unittest)" \
   | grep -vE "^import (sys|os|re|argparse|logging|pathlib|datetime|csv|math|time|subprocess|unittest|json|typing|dataclasses)" \
   | sort -u
@@ -1062,9 +1094,10 @@ pytest>=7.4
 
 - [ ] **Step 2: Write `README.md` at repo root**
 
-Write `README.md` exactly as below. The architecture diagram and run table are concrete; no placeholder content.
+Use a quoted heredoc so nothing inside (including backticks and `$`) gets interpreted by the shell. Run from repo root:
 
-```markdown
+```bash
+cat > README.md <<'README_EOF'
 # Bitmor — BTC-Collateralised Lending Simulator & Dashboard
 
 End-to-end simulation stack for Bitmor's BTC-collateralised lending product:
@@ -1074,7 +1107,7 @@ interactive dashboard deployed to Vercel.
 
 ## Architecture
 
-\`\`\`
+```
                    ┌──────────────────────┐
                    │ sim/ivsurface/       │  raw IV options + spot prices →
                    │ btc_iv, iv_surface_  │  per-day SVI parameters →
@@ -1099,11 +1132,11 @@ interactive dashboard deployed to Vercel.
               │ bitmor-        │  HTML with embedded CSVs
               │ dashboard.html │
               └────────────────┘
-\`\`\`
+```
 
 ## Folder Layout
 
-\`\`\`
+```
 .
 ├── dashboard/      # Vercel-deployed HTML + embed pipeline
 ├── sim/
@@ -1120,17 +1153,17 @@ interactive dashboard deployed to Vercel.
 │   └── superpowers/specs/   # Cross-cutting design specs
 ├── vercel.json
 └── requirements.txt
-\`\`\`
+```
 
 ## Setup
 
 Requires Python 3.11+.
 
-\`\`\`bash
+```bash
 python -m venv venv
-source venv/bin/activate    # Windows: venv\\Scripts\\activate
+source venv/bin/activate    # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-\`\`\`
+```
 
 The simulators expect input CSVs under `data/`. Required files:
 
@@ -1154,26 +1187,26 @@ All commands run from the repo root.
 
 After running simulators, embed their outputs into the dashboard HTML:
 
-\`\`\`bash
-python -m dashboard.embed_csv_to_dashboard --date YYYYMMDD \\
+```bash
+python -m dashboard.embed_csv_to_dashboard --date YYYYMMDD \
        --backtest results/backtest/backtest_tab_fragment.html
-\`\`\`
+```
 
 Then preview locally: open `dashboard/bitmor-dashboard.html` in a browser.
 
 ## Deploying
 
-\`\`\`bash
+```bash
 npx vercel --yes --prod
-\`\`\`
+```
 
 Vercel deploys `dashboard/bitmor-dashboard.html` and rewrites `/` to it. Everything outside `dashboard/` is excluded by `.vercelignore`.
 
 ## Running Tests
 
-\`\`\`bash
+```bash
 pytest tests/
-\`\`\`
+```
 
 `tests/conftest.py` handles path setup; no extra configuration needed.
 
@@ -1183,10 +1216,17 @@ pytest tests/
 - **Inputs in `data/`, outputs in `results/`** — both gitignored.
 - **One package per subsystem.** Empty `__init__.py` files mark them; no `pyproject.toml`.
 - **Design docs in `docs/plans/`** — dated `YYYY-MM-DD-<topic>-design.md` and `-impl.md`.
-\`\`\`
+README_EOF
 ```
 
-(The `\`\`\`` escapes are because this Markdown is inside a Markdown code block. Strip the backslashes when actually writing the file — i.e. the README's own code fences are unescaped.)
+The `'README_EOF'` (single-quoted) heredoc preserves every character literally — no shell expansion, no escaping needed for backticks or `$`. After running the command, verify:
+
+```bash
+head -20 README.md
+wc -l README.md
+```
+
+Expected: 20-line header looks correct, total file length ~95 lines.
 
 - [ ] **Step 3: Verify `docs/plans/` is intact**
 
@@ -1281,19 +1321,27 @@ EOF
 git log --oneline -10
 ```
 
-- [ ] **Step 7: Deploy preview to Vercel (optional, recommended)**
+- [ ] **Step 7: Deploy preview to Vercel (REQUIRED before any prod ship)**
+
+Local rendering can pass while the deployed build fails — Vercel's static serving has subtly different path resolution than `file://`. A preview deploy is the only true validation.
 
 ```bash
 npx vercel --yes
 ```
 
-Open the preview URL. Walk through every tab. Confirm parity with the local render. Only after that:
+Open the preview URL Vercel prints. Walk through every tab from your baseline screenshots. Confirm parity with the local render. Open the browser console — there should be no 404s or new errors.
+
+If anything is broken on the preview but works locally: the most likely cause is a relative path inside `bitmor-dashboard.html` that resolved against the old root location. Investigate, fix, push a follow-up commit on `consolidation`, redeploy preview, re-verify.
+
+- [ ] **Step 8: Production deploy (your call, do not run autonomously)**
+
+After the preview is verified, the user runs production deploy at their discretion:
 
 ```bash
 npx vercel --yes --prod
 ```
 
-- [ ] **Step 8: Delete the other repo (only after preview deploy succeeds)**
+- [ ] **Step 9: Delete the other repo (only after production deploy verified)**
 
 The user owns this step — don't run it autonomously. Suggest:
 
