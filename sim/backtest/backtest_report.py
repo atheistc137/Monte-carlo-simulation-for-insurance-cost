@@ -12,8 +12,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-import config
-from liquidation_utils import load_price
+from sim.shared import config
+from sim.liquidation.liquidation_utils import load_price
 
 log = logging.getLogger("backtest_report")
 

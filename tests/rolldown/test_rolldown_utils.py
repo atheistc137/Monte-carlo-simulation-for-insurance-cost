@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from rolldown_utils import map_tenor_bucket
+from sim.rolldown.rolldown_utils import map_tenor_bucket
 
 
 class TestMapTenorBucket:
@@ -31,7 +31,7 @@ class TestMapTenorBucket:
         assert map_tenor_bucket(15) == 365
 
 
-from rolldown_utils import lookup_iv
+from sim.rolldown.rolldown_utils import lookup_iv
 
 
 class TestLookupIV:
@@ -71,7 +71,7 @@ class TestLookupIV:
         assert iv == iv_grid
 
 
-from rolldown_utils import nearest_price, generate_gbm_path, compute_rv_from_prices, build_iv_tables
+from sim.rolldown.rolldown_utils import nearest_price, generate_gbm_path, compute_rv_from_prices, build_iv_tables
 
 
 class TestNearestPrice:
@@ -148,7 +148,7 @@ class TestBuildIVTables:
         assert 120 in tables  # keyed by requested tenor, built from nearest
 
 
-from rolldown_utils import evaluate_roll
+from sim.rolldown.rolldown_utils import evaluate_roll
 
 
 class TestEvaluateRoll:
@@ -182,7 +182,7 @@ class TestEvaluateRoll:
         assert should is False
 
 
-from rolldown_utils import RegimeIndex
+from sim.rolldown.rolldown_utils import RegimeIndex
 
 
 class TestRegimeIndex:
@@ -244,7 +244,7 @@ class TestRegimeIndex:
 
 
 import datetime as _dt
-from btc_iv import quarterly_expiries
+from sim.ivsurface.btc_iv import quarterly_expiries
 
 
 class TestQuarterlyExpiries:
@@ -268,7 +268,7 @@ class TestQuarterlyExpiries:
             assert exp.weekday() == 4  # Friday
 
 
-from rolldown_utils import map_tenor_bucket_days
+from sim.rolldown.rolldown_utils import map_tenor_bucket_days
 
 
 class TestMapTenorBucketDays:

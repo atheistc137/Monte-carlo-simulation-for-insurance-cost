@@ -43,7 +43,7 @@ def main():
     p = argparse.ArgumentParser(description="Embed CSV data into dashboard HTML")
     p.add_argument("--date", default=None, help="Date suffix for CSV files (YYYYMMDD)")
     p.add_argument("--backtest", default=None, help="Path to backtest_tab_fragment.html")
-    p.add_argument("--dashboard", default="bitmor-dashboard.html")
+    p.add_argument("--dashboard", default="dashboard/bitmor-dashboard.html")
     args = p.parse_args()
 
     html = Path(args.dashboard).read_text()
@@ -51,7 +51,7 @@ def main():
     # Embed tier CSVs (if --date provided)
     if args.date:
         d = args.date
-        result_dir = Path("result")
+        result_dir = Path("results")
 
         for tier in [1, 2, 3]:
             csv_path = result_dir / f"rolldown_tier{tier}_{d}.csv"

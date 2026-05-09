@@ -1,6 +1,6 @@
 """Tests for the liquidation waterfall."""
 import pytest
-from liquidation_waterfall import compute_waterfall, WaterfallResult
+from sim.liquidation.liquidation_waterfall import compute_waterfall, WaterfallResult
 
 
 class TestWaterfall:

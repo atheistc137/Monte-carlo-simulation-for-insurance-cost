@@ -16,14 +16,14 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 
-from liquidation_utils import (
+from sim.liquidation.liquidation_utils import (
     bs_price,
     build_amortisation_schedule,
     calibrate_hist_mu_sigma,
     load_price,
     load_surface,
 )
-from rolldown_utils import (
+from sim.rolldown.rolldown_utils import (
     RegimeIndex,
     apply_slippage,
     generate_gbm_path,
@@ -508,9 +508,9 @@ def save_detail_csv(results: list[LoanResult], filepath: str) -> None:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description="Bitmor PUT Roll-Down Cost Reduction Simulator")
-    p.add_argument("--surface", default="btc_iv_surface_svi.csv",
+    p.add_argument("--surface", default="data/btc_iv_surface_svi.csv",
                    help="Path to SVI IV surface CSV")
-    p.add_argument("--price", default="BTCUSDT_1h.csv",
+    p.add_argument("--price", default="data/BTCUSDT_1h.csv",
                    help="Path to hourly BTC price CSV")
     p.add_argument("--ltv", type=float, default=0.70)
     p.add_argument("--loan_tenor_months", type=int, default=12)
@@ -560,21 +560,23 @@ def main() -> None:
     )
 
     today = dt.date.today().strftime("%Y%m%d")
+    import os
+    os.makedirs("results", exist_ok=True)
 
     # -- Tier 1 (all historical) --
     tier1 = run_tier1(daily_prices, surface, args.backtest_years,
                       args.start_freq, **loan_kwargs)
     print(format_tier_report(tier1, "Tier 1: Pure Historical"))
-    save_tier_csv(tier1, f"result/rolldown_tier1_{today}.csv")
-    save_detail_csv(tier1, f"result/rolldown_tier1_detail_{today}.csv")
+    save_tier_csv(tier1, f"results/rolldown_tier1_{today}.csv")
+    save_detail_csv(tier1, f"results/rolldown_tier1_detail_{today}.csv")
 
     # -- Tier 2 (real data up to today, GBM tails) --
     tier2 = run_tier2(daily_prices, surface, args.n_mc_paths, args.start_freq,
                       mu, sigma, args.seed, regime_index=regime_index,
                       **loan_kwargs)
     print(format_tier_report(tier2, "Tier 2: Recent + Simulated"))
-    save_tier_csv(tier2, f"result/rolldown_tier2_{today}.csv")
-    save_detail_csv(tier2, f"result/rolldown_tier2_detail_{today}.csv")
+    save_tier_csv(tier2, f"results/rolldown_tier2_{today}.csv")
+    save_detail_csv(tier2, f"results/rolldown_tier2_detail_{today}.csv")
 
     # -- Tier 3 (full GBM) --
     spot_today = float(daily_prices.iloc[-1])
@@ -582,15 +584,16 @@ def main() -> None:
                       mu, sigma, args.seed, regime_index=regime_index,
                       **loan_kwargs)
     print(format_tier3_report(tier3, spot_today))
-    save_tier_csv(tier3, f"result/rolldown_tier3_{today}.csv")
-    save_detail_csv(tier3, f"result/rolldown_tier3_detail_{today}.csv")
+    save_tier_csv(tier3, f"results/rolldown_tier3_{today}.csv")
+    save_detail_csv(tier3, f"results/rolldown_tier3_detail_{today}.csv")
 
     # -- Embed results into dashboard and open it --
     import subprocess
-    dashboard = "bitmor-dashboard.html"
+    dashboard = "dashboard/bitmor-dashboard.html"
     logging.info("Embedding CSV data into %s ...", dashboard)
     subprocess.run(
-        [sys.executable, "embed_csv_to_dashboard.py", "--date", today,
+        [sys.executable, "-m", "dashboard.embed_csv_to_dashboard",
+         "--date", today,
          "--dashboard", dashboard],
         check=True,
     )

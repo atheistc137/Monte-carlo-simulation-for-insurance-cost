@@ -31,13 +31,13 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 # ───────────────────── USER SETTINGS ──────────────────────
 LOOKBACK_DAYS    = 365*5
 CURRENCY         = "BTC"
-CSV_FILE         = "btc_iv_surface2.csv"
-PNG_DIR          = pathlib.Path("surfaces")
+CSV_FILE         = "data/btc_iv_surface2.csv"
+PNG_DIR          = pathlib.Path("results/surfaces")
 RATE_LIMIT_SLEEP = 0.20                    # ≤10 req/s
 
 API_ROOT = "https://history.deribit.com/api/v2/public"
 
-PNG_DIR.mkdir(exist_ok=True)
+PNG_DIR.mkdir(parents=True, exist_ok=True)
 session = requests.Session()
 
 
@@ -252,6 +252,7 @@ def collect_surface_bulk(day: dt.date, expiry_dates: list[dt.date]) -> pd.DataFr
 
 
 def append_csv(df: pd.DataFrame) -> None:
+    pathlib.Path(CSV_FILE).parent.mkdir(parents=True, exist_ok=True)
     mode   = "a" if pathlib.Path(CSV_FILE).exists() else "w"
     header = mode == "w"
     df.to_csv(CSV_FILE, mode=mode, header=header, index=False, float_format="%.6f")

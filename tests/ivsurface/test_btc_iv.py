@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 import pandas as pd
 import pytest
 
-from btc_iv import (
+from sim.ivsurface.btc_iv import (
     parse_expiry_from_instrument,
     collect_surface_bulk,
     quarterly_expiries,
@@ -27,7 +27,7 @@ class TestParseExpiryFromInstrument:
 
 
 class TestCollectSurfaceBulk:
-    @patch("btc_iv.call_api")
+    @patch("sim.ivsurface.btc_iv.call_api")
     def test_filters_to_target_expiry(self, mock_api):
         """Only trades matching target expiry dates are kept."""
         mock_api.return_value = {
@@ -55,13 +55,13 @@ class TestCollectSurfaceBulk:
         assert len(df) == 1
         assert df.iloc[0]["instrument"] == "BTC-27JUN25-100000-C"
 
-    @patch("btc_iv.call_api")
+    @patch("sim.ivsurface.btc_iv.call_api")
     def test_empty_day_returns_empty(self, mock_api):
         mock_api.return_value = {"trades": [], "has_more": False}
         df = collect_surface_bulk(dt.date(2025, 1, 1), [dt.date(2025, 1, 31)])
         assert df.empty
 
-    @patch("btc_iv.call_api")
+    @patch("sim.ivsurface.btc_iv.call_api")
     def test_deduplicates_to_last_trade(self, mock_api):
         """Multiple trades for same instrument -> keep last by timestamp."""
         mock_api.return_value = {

@@ -235,10 +235,10 @@ def enforce_tv_monotonicity(surf_df: pd.DataFrame) -> pd.DataFrame:
 # ────────────────────────── CLI ───────────────────────────────────────────
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--opt", default="btc_iv_surface2.csv",  help="Input: options CSV file")
-    p.add_argument("--px", default="BTCUSDT_1h.csv",  help="Input: spot CSV file")
-    p.add_argument("--out_param", default="btc_svi_params.csv",   help="Output: SVI parameters per day")
-    p.add_argument("--out_surf",  default="btc_iv_surface_svi.csv", help="Output: synthetic IV surface grid")
+    p.add_argument("--opt", default="data/btc_iv_surface2.csv",  help="Input: options CSV file")
+    p.add_argument("--px", default="data/BTCUSDT_1h.csv",  help="Input: spot CSV file")
+    p.add_argument("--out_param", default="data/btc_svi_params.csv",   help="Output: SVI parameters per day")
+    p.add_argument("--out_surf",  default="data/btc_iv_surface_svi.csv", help="Output: synthetic IV surface grid")
     p.add_argument("--min_quotes", type=int, default=DEFAULT_MIN_QUOTES, help="Minimum quotes per day (short tenors)")
     p.add_argument("--min_quotes_long", type=int, default=DEFAULT_MIN_QUOTES_LONG,
                    help="Minimum quotes for 180d/270d/365d tenors")
@@ -310,6 +310,7 @@ def main():
             filled_parts.append(grp.reset_index())
         params = pd.concat(filled_parts, ignore_index=True)
 
+    Path(cfg.out_param).parent.mkdir(parents=True, exist_ok=True)
     params.to_csv(cfg.out_param, index=False)
     logging.info("Saved SVI parameters → %s (%d rows)", cfg.out_param, len(params))
 
@@ -347,6 +348,7 @@ def main():
     if not surf_df.empty:
         surf_df = enforce_tv_monotonicity(surf_df)
 
+    Path(cfg.out_surf).parent.mkdir(parents=True, exist_ok=True)
     surf_df.to_csv(cfg.out_surf, index=False, float_format="%.6f")
     logging.info("Saved synthetic IV grid → %s (%d rows)", cfg.out_surf, len(surf_df))
 

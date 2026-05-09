@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from bitmor_rolldown_mc import LoanResult, simulate_single_loan
+from sim.rolldown.bitmor_rolldown_mc import LoanResult, simulate_single_loan
 
 
 class TestSimulateSingleLoan:
@@ -77,7 +77,7 @@ class TestSimulateSingleLoan:
 
     def test_regime_index_produces_valid_results(self, synthetic_prices, synthetic_surface):
         """simulate_single_loan with regime_index produces valid results."""
-        from rolldown_utils import RegimeIndex
+        from sim.rolldown.rolldown_utils import RegimeIndex
         ri = RegimeIndex(synthetic_prices, synthetic_surface)
         result = simulate_single_loan(
             synthetic_prices, synthetic_surface,
@@ -102,7 +102,7 @@ class TestSimulateSingleLoan:
         assert abs(r_none.net_savings - r_plain.net_savings) < 0.01
 
 
-from bitmor_rolldown_mc import run_tier1
+from sim.rolldown.bitmor_rolldown_mc import run_tier1
 
 
 class TestTier1:
@@ -134,7 +134,7 @@ class TestTier1:
         assert len(weekly) < len(daily)
 
 
-from bitmor_rolldown_mc import run_tier2, average_results
+from sim.rolldown.bitmor_rolldown_mc import run_tier2, average_results
 
 
 class TestAverageResults:
@@ -150,7 +150,7 @@ class TestAverageResults:
 
 class TestTier2:
     def test_returns_results(self, synthetic_prices, synthetic_surface):
-        from rolldown_utils import RegimeIndex
+        from sim.rolldown.rolldown_utils import RegimeIndex
         ri = RegimeIndex(synthetic_prices, synthetic_surface)
         results = run_tier2(
             synthetic_prices, synthetic_surface,
@@ -161,7 +161,7 @@ class TestTier2:
         assert all(isinstance(r, LoanResult) for r in results)
 
     def test_reproducible_with_seed(self, synthetic_prices, synthetic_surface):
-        from rolldown_utils import RegimeIndex
+        from sim.rolldown.rolldown_utils import RegimeIndex
         ri = RegimeIndex(synthetic_prices, synthetic_surface)
         r1 = run_tier2(synthetic_prices, synthetic_surface,
                        n_mc_paths=5, start_freq="monthly", seed=99,
@@ -173,13 +173,13 @@ class TestTier2:
             assert abs(a.net_savings - b.net_savings) < 0.01
 
 
-from bitmor_rolldown_mc import run_tier3
+from sim.rolldown.bitmor_rolldown_mc import run_tier3
 
 
 class TestTier3:
     @pytest.fixture(autouse=True)
     def _build_regime_index(self, synthetic_prices, synthetic_surface):
-        from rolldown_utils import RegimeIndex
+        from sim.rolldown.rolldown_utils import RegimeIndex
         self.regime_index = RegimeIndex(synthetic_prices, synthetic_surface)
 
     def test_correct_count(self, synthetic_prices, synthetic_surface):
@@ -215,7 +215,7 @@ class TestTier3:
             assert abs(a.net_savings - b.net_savings) < 0.01
 
 
-from bitmor_rolldown_mc import format_tier_report, save_tier_csv
+from sim.rolldown.bitmor_rolldown_mc import format_tier_report, save_tier_csv
 
 
 class TestFormatReport:
@@ -247,7 +247,7 @@ class TestSaveTierCSV:
         assert "full_economic_delta" in df.columns
 
 
-from bitmor_rolldown_mc import save_detail_csv
+from sim.rolldown.bitmor_rolldown_mc import save_detail_csv
 
 
 class TestSaveDetailCSV:
@@ -310,8 +310,8 @@ class TestHeldPutTenorLookup:
         """At month 10, held PUT has ~60 days left (should use 90d bucket),
         while replacement uses 90d bucket. Both should resolve, and the
         held PUT should NOT use a 180d or 365d bucket."""
-        from bitmor_rolldown_mc import simulate_single_loan
-        from rolldown_utils import RegimeIndex
+        from sim.rolldown.bitmor_rolldown_mc import simulate_single_loan
+        from sim.rolldown.rolldown_utils import RegimeIndex
 
         ri = RegimeIndex(synthetic_prices, synthetic_surface)
         result = simulate_single_loan(
@@ -326,7 +326,7 @@ class TestHeldPutTenorLookup:
         assert result.savings_pct < 500.0
 
 
-from liquidation_utils import build_amortisation_schedule
+from sim.liquidation.liquidation_utils import build_amortisation_schedule
 
 
 class TestDualRateAmortisation:

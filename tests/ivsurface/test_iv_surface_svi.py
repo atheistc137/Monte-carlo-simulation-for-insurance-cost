@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from iv_surface_svi import assign_tenor_bucket, calibrate_svi, TENOR_BUCKETS
+from sim.ivsurface.iv_surface_svi import assign_tenor_bucket, calibrate_svi, TENOR_BUCKETS
 
 
 class TestAssignTenorBucket:

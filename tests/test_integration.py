@@ -21,12 +21,12 @@ pytestmark = pytest.mark.skipif(
 class TestIntegration:
     @pytest.fixture(autouse=True)
     def setup(self):
-        from liquidation_utils import load_price, load_surface
+        from sim.liquidation.liquidation_utils import load_price, load_surface
         self.surface = load_surface(SURFACE)
         self.daily_prices = load_price(PRICE).resample("1D").last().dropna()
 
     def test_single_loan_real_data(self):
-        from bitmor_rolldown_mc import simulate_single_loan
+        from sim.rolldown.bitmor_rolldown_mc import simulate_single_loan
         result = simulate_single_loan(
             self.daily_prices, self.surface,
             start_date=pd.Timestamp("2023-06-01"),
@@ -36,7 +36,7 @@ class TestIntegration:
         assert len(result.month_details) == 11
 
     def test_tier1_monthly_real_data(self):
-        from bitmor_rolldown_mc import run_tier1
+        from sim.rolldown.bitmor_rolldown_mc import run_tier1
         results = run_tier1(
             self.daily_prices, self.surface,
             backtest_years=1, start_freq="monthly",
@@ -44,8 +44,8 @@ class TestIntegration:
         assert len(results) > 0
 
     def test_tier3_small_real_data(self):
-        from bitmor_rolldown_mc import run_tier3
-        from liquidation_utils import calibrate_hist_mu_sigma, load_price
+        from sim.rolldown.bitmor_rolldown_mc import run_tier3
+        from sim.liquidation.liquidation_utils import calibrate_hist_mu_sigma, load_price
         price_hourly = load_price(PRICE)
         mu, sigma = calibrate_hist_mu_sigma(price_hourly)
         results = run_tier3(
@@ -92,8 +92,8 @@ class TestPerTenorSurface:
 
     def test_rv_annualization_consistent(self):
         """compute_rv_from_prices output should fall within RV table range."""
-        from rolldown_utils import compute_rv_from_prices
-        from liquidation_utils import load_price
+        from sim.rolldown.rolldown_utils import compute_rv_from_prices
+        from sim.liquidation.liquidation_utils import load_price
         price = load_price(Path("BTCUSDT_1h.csv"))
         daily = price.resample("1D").last().dropna()
         rv = compute_rv_from_prices(daily, daily.index[-10])
