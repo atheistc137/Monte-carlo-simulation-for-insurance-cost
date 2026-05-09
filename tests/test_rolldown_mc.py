@@ -291,7 +291,8 @@ class TestSaveDetailCSV:
         df = pd.read_csv(filepath)
         assert df["rolled"].isin([0, 1]).all()
 
-    def test_detail_csv_empty_for_averaged(self, tmp_path, synthetic_prices, synthetic_surface):
+    def test_detail_csv_includes_averaged_month_details(self, tmp_path, synthetic_prices, synthetic_surface):
+        """Averaged results carry averaged per-month details (months 1-11)."""
         r1 = simulate_single_loan(synthetic_prices, synthetic_surface, pd.Timestamp("2024-03-01"))
         r2 = simulate_single_loan(synthetic_prices, synthetic_surface, pd.Timestamp("2024-03-01"),
                                   min_roll_profit=1_000_000)
@@ -299,7 +300,7 @@ class TestSaveDetailCSV:
         filepath = tmp_path / "detail.csv"
         save_detail_csv([avg], str(filepath))
         df = pd.read_csv(filepath)
-        assert len(df) == 0
+        assert len(df) == 11
 
 
 class TestHeldPutTenorLookup:
