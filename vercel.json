@@ -2,6 +2,6 @@
   "buildCommand": "",
   "outputDirectory": ".",
   "rewrites": [
-    { "source": "/", "destination": "/bitmor-dashboard.html" }
+    { "source": "/", "destination": "/dashboard/bitmor-dashboard.html" }
   ]
 }
