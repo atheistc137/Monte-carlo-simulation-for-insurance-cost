@@ -35,13 +35,17 @@ def main():
     # Embed into Bitmor dashboard
     if not args.no_embed:
         fragment_path = config.RESULTS_DIR / "backtest" / "backtest_tab_fragment.html"
-        subprocess.run(
-            [sys.executable, "-m", "dashboard.embed_csv_to_dashboard",
-             "--backtest", str(fragment_path),
-             "--dashboard", str(config.DASHBOARD_HTML)],
-            check=True,
-            cwd=str(config.REPO_ROOT),
-        )
+        if fragment_path.exists() and config.DASHBOARD_HTML.exists():
+            log.info("Embedding backtest into dashboard: %s", config.DASHBOARD_HTML)
+            subprocess.run(
+                [sys.executable, "-m", "dashboard.embed_csv_to_dashboard",
+                 "--backtest", str(fragment_path),
+                 "--dashboard", str(config.DASHBOARD_HTML)],
+                check=True,
+                cwd=str(config.REPO_ROOT),
+            )
+        else:
+            log.warning("Skipping dashboard embed — missing files")
 
 
 if __name__ == "__main__":

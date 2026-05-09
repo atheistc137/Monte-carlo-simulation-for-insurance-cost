@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 
+from sim.shared import config
 from sim.liquidation.liquidation_utils import (
     bs_price,
     build_amortisation_schedule,
@@ -560,23 +561,22 @@ def main() -> None:
     )
 
     today = dt.date.today().strftime("%Y%m%d")
-    import os
-    os.makedirs("results", exist_ok=True)
+    config.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     # -- Tier 1 (all historical) --
     tier1 = run_tier1(daily_prices, surface, args.backtest_years,
                       args.start_freq, **loan_kwargs)
     print(format_tier_report(tier1, "Tier 1: Pure Historical"))
-    save_tier_csv(tier1, f"results/rolldown_tier1_{today}.csv")
-    save_detail_csv(tier1, f"results/rolldown_tier1_detail_{today}.csv")
+    save_tier_csv(tier1, str(config.RESULTS_DIR / f"rolldown_tier1_{today}.csv"))
+    save_detail_csv(tier1, str(config.RESULTS_DIR / f"rolldown_tier1_detail_{today}.csv"))
 
     # -- Tier 2 (real data up to today, GBM tails) --
     tier2 = run_tier2(daily_prices, surface, args.n_mc_paths, args.start_freq,
                       mu, sigma, args.seed, regime_index=regime_index,
                       **loan_kwargs)
     print(format_tier_report(tier2, "Tier 2: Recent + Simulated"))
-    save_tier_csv(tier2, f"results/rolldown_tier2_{today}.csv")
-    save_detail_csv(tier2, f"results/rolldown_tier2_detail_{today}.csv")
+    save_tier_csv(tier2, str(config.RESULTS_DIR / f"rolldown_tier2_{today}.csv"))
+    save_detail_csv(tier2, str(config.RESULTS_DIR / f"rolldown_tier2_detail_{today}.csv"))
 
     # -- Tier 3 (full GBM) --
     spot_today = float(daily_prices.iloc[-1])
@@ -584,8 +584,8 @@ def main() -> None:
                       mu, sigma, args.seed, regime_index=regime_index,
                       **loan_kwargs)
     print(format_tier3_report(tier3, spot_today))
-    save_tier_csv(tier3, f"results/rolldown_tier3_{today}.csv")
-    save_detail_csv(tier3, f"results/rolldown_tier3_detail_{today}.csv")
+    save_tier_csv(tier3, str(config.RESULTS_DIR / f"rolldown_tier3_{today}.csv"))
+    save_detail_csv(tier3, str(config.RESULTS_DIR / f"rolldown_tier3_detail_{today}.csv"))
 
     # -- Embed results into dashboard and open it --
     import subprocess
@@ -596,6 +596,7 @@ def main() -> None:
          "--date", today,
          "--dashboard", dashboard],
         check=True,
+        cwd=str(config.REPO_ROOT),
     )
 
     import webbrowser
