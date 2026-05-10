@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Vercel
+.vercel/
+
+# Local data (large, not under version control)
+data/*.csv
+*.csv
+
+# Results (regeneratable)
+results/
+
+# Old name retained for back-compat (defensive)
+result/
+surfaces/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,23 @@
+# Source code (not deployed; only the dashboard HTML is)
+sim/
+tests/
+docs/
+*.py
+__pycache__/
+
+# Data + outputs (large, not needed for static deploy)
+data/
+results/
+*.csv
+*.png
+
+# Python tooling artefacts
+.pytest_cache/
+.gitignore
+*.pdf
+requirements.txt
+
+# Local-only configuration / scratch
+.claude/
+old/
+*.md
