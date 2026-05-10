@@ -15,3 +15,9 @@ results/
 .pytest_cache/
 .gitignore
 *.pdf
+requirements.txt
+
+# Local-only configuration / scratch
+.claude/
+old/
+*.md
